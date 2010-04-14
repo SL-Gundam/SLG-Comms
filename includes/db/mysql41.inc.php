@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: mysql41.inc.php,v 1.13 2005/10/03 10:55:55 SC Kruiper Exp $
+ *   $Id: mysql41.inc.php,v 1.14 2005/10/21 14:29:27 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -32,13 +32,21 @@ class db {
 	var $sqltime = NULL;
 	var $sqlconnectid = NULL;
    
-	function connect($serverid, $db_server, $db_user, $db_passwd, $db_name){
-		if (!isset($this->sqltime)){
-			$this->sqltime = new timecount;
+	function __construct(){
+		$this->sqltime = new timecount;
+
+		if (!extension_loaded('mysqli')){
+			early_error('{TEXT_MYSQLIEXTNOTLOAD}');
 		}
+	}
 
+	function db(){
+		$this->__construct();
+	}
+
+	function connect($serverid, $db_server, $db_user, $db_passwd, $db_name){
 		$this->sqltime->starttimecount();
-
+		
 		$this->sqlconnectid = @mysqli_connect($db_server, $db_user, $db_passwd, $db_name) OR early_error('{TEXT_DB_CONNECT_ERROR;'.$serverid.';}', '{TEXT_DB_CONNECT_FAILED}', $this->getconnecterror());
 
 		$this->sqltime->endtimecount();
@@ -79,7 +87,7 @@ class db {
 			$this->queries[$queryid] = '[{TEXT_FREE}?]-';
 		}
 
-		if ($result == true && (strncasecmp($sql, "create", 6) == 0 || strncasecmp($sql, "insert", 6) == 0 || strncasecmp($sql, "delete", 6) == 0 || strncasecmp($sql, "update", 6) == 0 || strncasecmp($sql, "drop", 4) == 0 || strncasecmp($sql, "alter", 5) == 0)){
+		if ($result === true && (strncasecmp($sql, "create", 6) === 0 || strncasecmp($sql, "insert", 6) === 0 || strncasecmp($sql, "delete", 6) === 0 || strncasecmp($sql, "update", 6) === 0 || strncasecmp($sql, "drop", 4) === 0 || strncasecmp($sql, "alter", 5) === 0)){
 			$this->num_nofreequeries++;
 			$this->queries[$queryid] .= '[{TEXT_NONEED}]';
 		}
@@ -94,12 +102,13 @@ class db {
 
 		@mysqli_free_result($resultid);// OR early_error('{TEXT_DB_FREEQUERY_FAILED;'.$queryid.';}'); it seems that mysqli doesn't give a return code anymore.
 
-		if ($this->numrows($resultid) == false){
+		$this->sqltime->endtimecount();
+
+		if (is_null($this->numrows($resultid))){
 			$this->num_freequeries++;
 			$this->queries[$queryid] .= '[{TEXT_FREE}.]';
 		}
 
-		$this->sqltime->endtimecount();
 	}
 
 	function getrow($resultset){

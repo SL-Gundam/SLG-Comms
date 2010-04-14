@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.ts.inc.php,v 1.4 2005/10/03 10:55:55 SC Kruiper Exp $
+ *   $Id: functions.ts.inc.php,v 1.6 2005/10/24 14:08:13 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,66 +24,48 @@ if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
-//rights breakdown
-function breakdown_rights($priv)
-{
-	$rightset_array = array(64,32,16,8,4,2,1,0);
-	if (in_array($priv, $rightset_array)){
-		$br_priv[0] = $priv;
-	}
-	else{
-		foreach ($rightset_array as $right){
-			if ($right <= $priv && $priv != 0){
-				$br_priv[] = $right;
-				$priv -= $right;
-			}
-		}
-	}
-	return($br_priv);
-}
-
 //Player Flags
 function prepare_sort_name($name){
 	return(preg_replace('/[^a-z0-9]/i', '', $name));
 }
 
 function SORT_PLAYERS(&$a, &$b){
-	$a_nick = prepare_sort_name($a['nick']);
-	$b_nick = prepare_sort_name($b['nick']);
-
-	if (in_array(1, $a['pprivs']) && in_array(1, $b['pprivs'])){
-		if (strcasecmp($a_nick, $b_nick) == 0){
+	if ( (($a['pprivs'] & 1) == 1) && (($b['pprivs'] & 1) == 1) ){
+		$comp_result = strcasecmp($a['slg_sortname'], $b['slg_sortname']);
+		if ($comp_result === 0){
 			return(0);
 		}
 		else{
-			return((strcasecmp($a_nick, $b_nick) < 0) ? -1 : 1);
+			return(($comp_result < 0) ? -1 : 1);
 		}
 	}
-	elseif (!in_array(1, $a['pprivs']) && !in_array(1, $b['pprivs'])){
-		if ((in_array(1, $a['cprivs']) && in_array(1, $b['cprivs'])) || (!in_array(1, $a['cprivs']) && !in_array(1, $b['cprivs']))){
-			if (strcasecmp($a_nick, $b_nick) == 0){
+	elseif ( !(($a['pprivs'] & 1) == 1) && !(($b['pprivs'] & 1) == 1) ){
+		if ( ( (($a['cprivs'] & 1) == 1) && (($b['cprivs'] & 1) == 1) ) || ( !(($a['cprivs'] & 1) == 1) && !(($b['cprivs'] & 1) == 1) ) ){
+			$comp_result = strcasecmp($a['slg_sortname'], $b['slg_sortname']);
+			if ($comp_result === 0){
 				return(0);
 			}
 			else{
-				return((strcasecmp($a_nick, $b_nick) < 0) ? -1 : 1);
+				return(($comp_result < 0) ? -1 : 1);
 			}
 		}
 		else{
-			return((in_array(1, $a['cprivs'])) ? -1 : 1);
+			return( (($a['cprivs'] & 1) == 1) ? -1 : 1);
 		}
 	}
 	else{
-		return((in_array(1, $a['pprivs'])) ? -1 : 1);
+		return( (($a['pprivs'] & 1) == 1) ? -1 : 1);
 	}
 }
 
 function SORT_CHANNELS(&$a, &$b){
-	if ($a['order'] == $b['order']){
-		if (strcasecmp($a['name'], $b['name']) == 0){
+	if ($a['order'] === $b['order']){
+		$comp_result = strcasecmp($a['slg_sortname'], $b['slg_sortname']);
+		if ($comp_result === 0){
 			return(0);
 		}
 		else{
-			return((strcasecmp($a['name'], $b['name']) < 0) ? -1 : 1);
+			return(($comp_result < 0) ? -1 : 1);
 		}
 	}
 	else{
@@ -91,43 +73,43 @@ function SORT_CHANNELS(&$a, &$b){
 	}
 }
 
-function pl_flags(&$pl_flags, &$ch_flags)
+function pl_flags($pl_flags, $ch_flags)
 {
-	if(in_array(4, $pl_flags)){
+	if(($pl_flags & 4) == 4){
 		$output = 'R';
 	}
 	else{
 		$output = 'U';
 	}
 
-	if(in_array(1, $pl_flags)){
+	if(($pl_flags & 1) == 1){
 		$output .= ' SA';
 	}
 
-	if(in_array(1, $ch_flags)){
+	if(($ch_flags & 1) == 1){
 		$output .= ' CA';
 	}
 
-	if(in_array(16, $ch_flags)){
+	if(($ch_flags & 8) == 8){
 		$output .= ' AO';
 	}
 
-	if(in_array(8, $ch_flags)){
+	if(($ch_flags & 16) == 16){
 		$output .= ' AV';
 	}
 
-	if(in_array(2, $ch_flags)){
+	if(($ch_flags & 2) == 2){
 		$output .= ' O';
 	}
 
-	if(in_array(4, $ch_flags)){
+	if(($ch_flags & 4) == 4){
 		$output .= ' V';
 	}
 
 	return($output);
 }
 
-function pl_img(&$pflags)
+function pl_img($pflags)
 {
 /*
 IGNORED LIST - No special picture used by TeamSpeak
@@ -135,28 +117,32 @@ IGNORED LIST - No special picture used by TeamSpeak
 4 - Doesnt Accept Whispers
 64 - Recording
 */
-	$tmparr = array(8,32,16,1);
-	foreach ($tmparr as $flag){
-		if(in_array($flag, $pflags)){
-			return($flag);
+	static $tmparr = array(8,32,16,1);
+	if ($pflags == 0){
+		return(0);
+	}
+	else{
+		foreach ($tmparr as $flag){
+			if(($pflags & $flag) == $flag){
+				return($flag);
+			}
 		}
 	}
 
 	return(0); // incase no return was executed above
 }
 
-function pl_status(&$pflags)
+function pl_status($pflags)
 {
-	$output = NULL;
-	
-	$tmparr = array(8,1,4,16,64,32,2);
-	if (in_array(0, $pflags)){
+	static $tmparr = array(8,1,4,16,64,32,2);
+	if ($pflags == 0){
 		$output = '{TEXT_PL_STATUS_0}';
 	}
 	else{
+		$output = NULL;
 		foreach ($tmparr as $flag){
-			if(in_array($flag, $pflags)){
-				if (!empty($output) && $flag != 8){
+			if(($pflags & $flag) == $flag){
+				if (!empty($output)){
 					$output .= '<br />';
 				}
 				$output .= '{TEXT_PL_STATUS_'.$flag.'}';
@@ -168,46 +154,54 @@ function pl_status(&$pflags)
 }
  
 //Channel Flags
-function ch_flags(&$chflags)
+function ch_flags($chflags)
 {
-	if(in_array(1, $chflags)){
+	if(($chflags & 1) == 1){
 		$output = 'U';
 	}
 	else{
 		$output = 'R';
 	}
 
-	if(in_array(2, $chflags)){
+	if(($chflags & 2) == 2){
 		$output .= 'M';
 	}
-	if(in_array(4, $chflags)){
+	if(($chflags & 4) == 4){
 		$output .= 'P';
 	}
-	if(in_array(8, $chflags)){
+	if(($chflags & 8) == 8){
 		$output .= 'S';
 	}
-	if(in_array(16, $chflags)){
+	if(($chflags & 16) == 16){
 		$output .= 'D';
 	}
 
 	return($output);
 }
 
+function formatbytes($bytes){
+	static $units = array(' {TEXT_BYTES}', ' {TEXT_KB}', ' {TEXT_MB}', ' {TEXT_GB}', ' {TEXT_TB}');
+	for ($i = 0; $bytes > 1024; $i++){
+		$bytes /= 1024;
+	}
+	return(round($bytes, 2).$units[$i]);
+}
+
 function formatcodec($codec){
 	switch ($codec){
-		case 0: return('CELP 5.2');
-		case 1: return('CELP 6.3');
-		case 2: return('GSM 14.8');
-		case 3: return('GSM 16.4');
-		case 4: return('Windows CELP 5.2');
-		case 5: return('Speex 3.4');
-		case 6: return('Speex 5.2');
-		case 7: return('Speex 7.2');
-		case 8: return('Speex 9.3');
-		case 9: return('Speex 12.3');
-		case 10: return('Speex 16.3');
-		case 11: return('Speex 19.5');
-		case 12: return('Speex 25.9');
+		case 0: return('CELP 5.2 Kbit');
+		case 1: return('CELP 6.3 Kbit');
+		case 2: return('GSM 14.8 Kbit');
+		case 3: return('GSM 16.4 Kbit');
+		case 4: return('Windows CELP 5.2 Kbit');
+		case 5: return('Speex 3.4 Kbit');
+		case 6: return('Speex 5.2 Kbit');
+		case 7: return('Speex 7.2 Kbit');
+		case 8: return('Speex 9.3 Kbit');
+		case 9: return('Speex 12.3 Kbit');
+		case 10: return('Speex 16.3 Kbit');
+		case 11: return('Speex 19.5 Kbit');
+		case 12: return('Speex 25.9 Kbit');
 		default: return('{TEXT_UNKNOWN_CODEC}');
 	}
 }
@@ -237,5 +231,18 @@ function prepare_http_link($url, $text=NULL, $hyperlink=true){
 		return( (($hyperlink) ? '<a href="'.$url.'" target="_blank">' : NULL ) . ((empty($text)) ? $url : $text ) . (($hyperlink) ? '</a>' : NULL ) );
 	}
 	return(NULL);
+}
+
+if (!function_exists('array_combine')){
+	function array_combine(&$keys, &$values){
+		$key_count = count($keys);
+	
+		$combined = array();
+		for ($i = 0; $i < $key_count; $i++) {
+			$combined[$keys[$i]] = $values[$i];
+		}
+	
+		return $combined;
+	}
 }
 ?>

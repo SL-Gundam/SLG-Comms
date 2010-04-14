@@ -13,3 +13,5 @@ Since v2.2.0 the way Ventrilo server data is saved has changed a bit which makes
 I noticed that step 3 in the installation is kinda useless when you're just updating SLG Comms from an earlier version. This has been fixed in v2.2.0
 
 In earlier versions (Earlier then v2.2.0) there was a bug in the updating procedure from earlier versions when using a database with SLG Comms. I'm sorry i didn't find this bug earlier. It couldn't have caused any problems besides you worrying about whats gone wrong because in all earlier versions the updating scripts only purpose and goal was to update the version number.
+
+It seems SLG Comms drastically loses performance when there are a lot of channels and clients (together 400 or more). This i because the template has grown to a very large size at that point. This causes the replacement of language placeholders by text to be very time consuming. If you have a good idea about how to fix this issue, let me know by filling in a bug on the projects homepage ( http://sourceforge.net/tracker/?func=add&group_id=142081&atid=751417 ).

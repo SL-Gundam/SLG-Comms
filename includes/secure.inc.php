@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.13 2005/06/30 19:04:42 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.14 2005/10/21 14:29:27 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,24 +24,23 @@ if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
-session_name("tsstatssessid");
+session_name("slgstatssessid");
 session_start();
 
 if (checkfilelock('admin.php')){
 	include('includes/functions.secure.inc.php');
 
-	if ($_SERVER['REQUEST_METHOD'] == 'GET' && !isset($_SESSION['prerecorded_ip'])){
+	if ($_SERVER['REQUEST_METHOD'] === 'GET' && !isset($_SESSION['prerecorded_ip'])){
 		$_SESSION['prerecorded_ip'] = encode_ip($_SERVER['REMOTE_ADDR']);
 	}
 
-	if (isset($_POST['login']) && isset($_POST['fusername']) && isset($_POST['fpasswd'])){
+	if (isset($_POST['login'], $_POST['fusername'], $_POST['fpasswd'])){
 		$forumsettings = retrieve_forumsettings($tssettings, true);
 
 		if ($forumsettings['otherdatabase']){
 			$forumdatabase = 'dbforum';
 			$$forumdatabase = new db;
 			$$forumdatabase->connect('pzforumserverconnect', $forumsettings['alt_db_host'], $forumsettings['alt_db_user'], $forumsettings['alt_db_passwd'], $forumsettings['alt_db_name']);
-			if ($tssettings['db_type'] == 'mysql') $$forumdatabase->selectdb('pzforumdatabaseconnect', $forumsettings['alt_db_name']);
 		}
 		else{
 			$forumdatabase = 'db';
@@ -51,34 +50,34 @@ if (checkfilelock('admin.php')){
 
 		if ($$forumdatabase->numrows($authresult) > 0){
 			while ($authrow = $$forumdatabase->getrow($authresult)){
-				if ($tssettings['Forum type'] != 'phpbb2015' || ($tssettings['Forum type'] == 'phpbb2015' && $authrow['groupid'] == $tssettings['Forum group'])){
+				if ($tssettings['Forum type'] !== 'phpbb2015' || ($tssettings['Forum type'] === 'phpbb2015' && $authrow['groupid'] == $tssettings['Forum group'])){
 					$sql = 'DELETE FROM '.$table['sessions'].' WHERE `session_user_id` = '.$authrow['userid'];
 					$logincleanquery = $db->execquery('logincleanquery',$sql);
 
 					$sql = 'INSERT INTO `'.$table['sessions'].'` ( `session_id` , `session_user_id` , `session_ip` ) VALUES ( MD5("'.session_id().'") , "'.$authrow['userid'].'", "'.encode_ip($_SERVER['REMOTE_ADDR']).'" );'; 
 					$loginquery = $db->execquery('loginquery',$sql);
-					if ($loginquery == true){
+					if ($loginquery === true){
 						$$template->displaymessage('{TEXT_LOGIN_SUCCESS}');
 					}
 
 					$_SESSION['user_id'] = $authrow['userid'];
 					$_SESSION['username'] = $authrow['username'];
 					$_SESSION['realname'] = $authrow['realname'];
-					if ($tssettings['Forum type'] == 'smf103' || $tssettings['Forum type'] == 'ipb204' || $tssettings['Forum type'] == 'vb307' || $tssettings['Forum type'] == 'smf110'){
-						$group_id = $authrow['groupid'];
-						if (!empty($authrow['additionalgroups'])) $group_id .= ','.$authrow['additionalgroups'];
+					if ($tssettings['Forum type'] === 'smf103' || $tssettings['Forum type'] === 'ipb204' || $tssettings['Forum type'] === 'vb307' || $tssettings['Forum type'] === 'smf110'){
+						$group_id = trim($authrow['groupid'], ',');
+						if (!empty($authrow['additionalgroups'])){
+							$group_id .= ','.trim($authrow['additionalgroups'], ',');
+						}
 						$_SESSION['group_id'] = explode(',',$group_id);
 					}
-					elseif ($tssettings['Forum type'] == 'ipb131'){
+					elseif ($tssettings['Forum type'] === 'ipb131'){
 						$_SESSION['group_id'] = array($authrow['groupid']);
 					}
 				}
-				if ($tssettings['Forum type'] == 'phpbb2015'){
-					if (isset($group_id)) $group_id .= ','.$authrow['groupid'];
-					else $group_id = $authrow['groupid'];
+				if ($tssettings['Forum type'] === 'phpbb2015'){
+					$_SESSION['group_id'][] = $authrow['groupid'];
 				}
 			}
-			if (isset($loginquery) && $tssettings['Forum type'] == 'phpbb2015') $_SESSION['group_id'] = explode(',',$group_id);
 		}
 
 		if (!isset($loginquery)){
@@ -126,10 +125,10 @@ if (checkfilelock('admin.php')){
 		$secure = true;
 	}
 
-	if (isset($_SESSION['username'], $_GET['page']) && $_GET['page'] == 'logout') {
+	if (isset($_SESSION['username'], $_GET['page']) && $_GET['page'] === 'logout') {
 		$sql = 'DELETE FROM `'.$table['sessions'].'` where `session_id` = MD5("'.session_id().'") limit 1';
 		$logoutquery = $db->execquery('logoutquery',$sql);
-		if ($logoutquery == true){
+		if ($logoutquery === true){
 			$$template->displaymessage('{TEXT_LOGOUT_SUCCESS}');
 		}
 

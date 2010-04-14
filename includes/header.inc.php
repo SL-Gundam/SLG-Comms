@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: header.inc.php,v 1.14 2005/10/03 10:55:55 SC Kruiper Exp $
+ *   $Id: header.inc.php,v 1.15 2005/10/21 14:29:27 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,10 +24,6 @@ if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
-if (!empty($_POST)){
-	processincomingdata($_POST, true);
-}
-
 $header = new template;
 $template = 'header';
 
@@ -40,6 +36,10 @@ else{
 	$header_link = NULL;
 }
 $header->insert_content('{LINK_ADMIN_INDEX}', $header_link);
+
+if (!isset($tssettings['Page refresh timer'])){
+	$tssettings['Page refresh timer'] = false;
+}
 
 $curfile = checkfilelock('index.php') && (!isset($_REQUEST['ipbyname']) || $_REQUEST['ipbyname'] != 0) && $tssettings['Page refresh timer'] != 0;
 $header->insert_display('{REFRESHSCRIPT}', $curfile);

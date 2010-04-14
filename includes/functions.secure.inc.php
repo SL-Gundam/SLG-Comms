@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.6 2005/10/03 10:55:55 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.7 2005/10/21 14:29:27 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -47,9 +47,13 @@ function md5_hmac($data, $key)
 	return(md5(($key ^ str_repeat(chr(0x5c), 64)) . pack('H*', md5(($key ^ str_repeat(chr(0x36), 64)). $data))));
 }
 
+function forum_existence_check($forumtype, $forumpath){
+	return((($forumtype === 'ipb131' || $forumtype === 'ipb204') && file_exists($forumpath.'conf_global.php')) || ($forumtype === 'phpbb2015' && file_exists($forumpath.'config.php')) || (($forumtype === 'smf103' || $forumtype === 'smf110') && file_exists($forumpath.'Settings.php')) || ($forumtype === 'vb307' && file_exists($forumpath.'includes/config.php')));
+}
+
 function retrieve_forumsettings(&$tssettings, $action_login=false){
 	global $db;
-	if ((($tssettings['Forum type'] == 'ipb131' || $tssettings['Forum type'] == 'ipb204') && file_exists($tssettings['Forum relative path'].'conf_global.php')) || ($tssettings['Forum type'] == 'phpbb2015' && file_exists($tssettings['Forum relative path'].'config.php')) || (($tssettings['Forum type'] == 'smf103' || $tssettings['Forum type'] == 'smf110') && file_exists($tssettings['Forum relative path'].'Settings.php')) || ($tssettings['Forum type'] == 'vb307' && file_exists($tssettings['Forum relative path'].'includes/config.php'))){
+	if (forum_existence_check($tssettings['Forum type'], $tssettings['Forum relative path'])){
 		switch ($tssettings['Forum type']){
 /* START - IPB131 */
 			case 'ipb131':
@@ -351,6 +355,7 @@ limit 0,1';
 if (!function_exists('scandir')){
 	function scandir($dir, $order=0){
 		$dh  = opendir($dir);
+		$files = array();
 		while (false !== ($filename = readdir($dh))) {
 		   $files[] = $filename;
 		}

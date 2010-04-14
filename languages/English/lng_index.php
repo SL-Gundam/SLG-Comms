@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index.php,v 1.7 2005/09/10 14:39:31 SC Kruiper Exp $
+ *   $Id: lng_index.php,v 1.8 2005/10/21 14:29:28 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -38,13 +38,13 @@ $this->text += array(
 $this->tooltips += array(
 '{TEXT_HELPTEXT}' => 'The format for the TeamSpeak and Ventrilo servers is quite simple.
 
-First you type in the ip number followed by ":" (without the quotes), followed by the port number.
+First you type in the ip address followed by ":" (without the quotes), followed by the port number.
 
 The third value is optional but sometimes required to make sure the data is retrieved correctly or retrieved at all for that matter. If the value is required you should ofcourse first type ":" (without the quotes).
 
 In case of an Teamspeak connection we need the TCP queryport. The default is 51234 so this value is only required when it\'s different from the default value.
 
-For Ventrilo, if the status protocol is password protected you need to fill it in here. Keep in mind that this is not neccasarily the same password used to join the server.
+For Ventrilo, if the status protocol is password protected you need to fill it in here. Keep in mind that this is not necessarily the same password used to join the server. The information entered in this field is not stored anywhere in the original unmodified version of SLG Comms, ofcourse the user who\'s using this script might have changed the behaviour in question.
 
 So basically we get this format for Ventrilo:
 With password: "192.168.120.250:3784:1g2a34d5"

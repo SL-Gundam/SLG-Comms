@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.49 2005/10/03 10:55:53 SC Kruiper Exp $
+ *   $Id: install.php,v 1.51 2005/10/24 14:08:13 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,18 +21,17 @@
  ***************************************************************************/
 
 define("IN_SLG", 10);
-define("NO_DATABASE", 10);
-$new_version = 'v2.2.0';
+$new_version = 'v2.2.1';
 include('includes/config.inc.php');
 
 // if step doesn't exist step will be 1
-if (!isset($_GET['step']) || !isset($_POST['variable']['Database']) || ($_POST['variable']['Database'] == 0 && $_POST['variable']['install_type'] == 'rescue')){
+if (!isset($_GET['step']) || !is_numeric($_GET['step']) || !isset($_POST['variable']['Database']) || (!$_POST['variable']['Database'] && $_POST['variable']['install_type'] === 'rescue')){
 	$_GET['step'] = 1;
 	$_POST = array();
 }
 
 // download the dbsetings.inc.php file incase in couldn't be auto saved
-if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
+elseif ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 	header("Content-type: text/x-plain");
 	header("Pragma: public");
 	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
@@ -47,11 +46,17 @@ if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 }
 
 // lets fill some default values which will be used as default values
-if (isset($tssettings['SLG version']) && isset($_POST['variable']['install_type']) && $_POST['variable']['install_type'] == 'upgrade'){
+if (isset($tssettings['SLG version']) && isset($_POST['variable']['install_type']) && $_POST['variable']['install_type'] === 'upgrade'){
 	$old_version = $tssettings['SLG version'];
-	if ($old_version == $new_version){
+	if (version_compare($old_version, $new_version, '>=')){
 		early_error('{TEXT_SAMEVERSIONUPDATE}');
 	}
+	elseif (!defined("NO_DATABASE")){
+		$_POST['variable']['Database'] = 1;
+	}
+}
+elseif (isset($tssettings['SLG version'])){
+	$old_version = $tssettings['SLG version'];
 }
 $tssettings['SLG version'] = $new_version;
 $tssettings['Page title'] = 'SLG Comms '.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
@@ -75,55 +80,58 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	// with different $_GET['step'] values we get different variables in $configlist
 	if ($_GET['step'] == 1){
 		$configlist = array(
-        array(
-            'variable' => 'install_type',
-            'value' => 'new'
-        ),
-        array(
-            'variable' => 'Database',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'Language',
-            'value' => 'English'
-        ),
-        array(
-            'variable' => 'Template',
-            'value' => 'Default'
-        )
-    );
+			array(
+				'variable' => 'install_type',
+				'value' => 'new'
+			),
+			array(
+				'variable' => 'Database',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Language',
+				'value' => 'English'
+			),
+			array(
+				'variable' => 'Template',
+				'value' => 'Default'
+			)
+		);
 	}
-	elseif ($_GET['step'] == 2 && $_POST['variable']['Database'] == 1){
+	elseif ($_GET['step'] == 2 && $_POST['variable']['Database']){
+		if ($_POST['variable']['install_type'] === 'upgrade'){
+			$_GET['step'] = 5;
+		}
 		$configlist = array(
-        array(
-            'variable' => 'db_type',
-            'value' => 'mysql41'
-        ),
-        array(
-            'variable' => 'db_host',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'db_name',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'db_user',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'db_passwd',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'table_prefix',
-            'value' => 'slg_'
-        )
-	);
+			array(
+				'variable' => 'db_type',
+				'value' => 'mysql41'
+			),
+			array(
+				'variable' => 'db_host',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'db_name',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'db_user',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'db_passwd',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'table_prefix',
+				'value' => 'slg_'
+			)
+		);
 	}
-	elseif ($_GET['step'] == 3 || ($_GET['step'] == 2 && $_POST['variable']['Database'] == 0)){
+	elseif ($_GET['step'] == 3 || ($_GET['step'] == 2 && !$_POST['variable']['Database'])){
 		if ($_GET['step'] == 2){
-			if ($_POST['variable']['install_type'] == 'upgrade'){
+			if ($_POST['variable']['install_type'] === 'upgrade'){
 				$_GET['step'] = 6;
 			}
 			else{
@@ -131,10 +139,10 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			}
 		}
 	  	// lets fill the requirements list
-		$required_version = (($_POST['variable']['Database'] == 1 && $_POST['variable']['db_type'] == 'mysql') ? '4.2.0' : '4.1.0');
+		$required_version = (($_POST['variable']['Database'] && $_POST['variable']['db_type'] === 'mysql') ? '4.2.0' : '4.1.0');
 		$requirements = '{TEXT_PHPVERSION} >= '.$required_version.': <span class="'.((version_compare(phpversion(), $required_version, '>=')) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}, {TEXT_UPDATEPHP}' ).'</span>.<br />
 {TEXT_PCREEXT}: <span class="'.((extension_loaded('pcre')) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}' ).'</span>.<br />';
-		if ($_POST['variable']['Database'] == 1){
+		if ($_POST['variable']['Database']){
 			// lets get our db class
 			require('includes/db/'.$_POST['variable']['db_type'].'.inc.php');
 			$requirements .= '{TEXT_MYSQLDATABASE}: ';
@@ -142,16 +150,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			/* Connect to mysql and database and test given information */
 			$db = new db;
 			$db->connect('pzinstallserverconnect', $_POST['variable']['db_host'], $_POST['variable']['db_user'], $_POST['variable']['db_passwd'], $_POST['variable']['db_name']);
-			if ($_POST['variable']['db_type'] == 'mysql'){
-				$selectdb = $db->selectdb('pzinstalldatabaseconnect', $_POST['variable']['db_name']);
-			}
-			if ($selectdb == true || ($_POST['variable']['db_type'] == 'mysql41')){
-				$requirements .= '<span class="greentext">{TEXT_YES}</span>';
-			}
-			else{
-				early_error('{TEXT_DBTESTERROR}');
-			}
-			$requirements .= '.<br />
+			$requirements .= '<span class="greentext">{TEXT_YES}</span>.<br />
 {TEXT_WORKINGFORUM}: <span class="orangetext">{TEXT_SELECTFORUM}</span>.';
 		}
 		else{
@@ -162,66 +161,66 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 		$install->insert_content('{SHOW_REQUIREMENTS}', $requirements);
 
 		$configlist = array(
-        array(
-            'variable' => 'Cache hits',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'Custom servers',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'Default queryport',
-            'value' => 51234
-        ),
-        array(
-            'variable' => 'Forum relative path',
-            'value' => NULL
-        ),
-        array(
-            'variable' => 'Forum type',
-            'value' => NULL
-        ),
-		array(
-			'variable' => 'GZIP Compression',
-			'value' => NULL
-		),
-		array(
-			'variable' => 'Page refresh timer',
-			'value' => 0
-		),
-	    array(
-            'variable' => 'Page title',
-            'value' => 'SLG '.$tssettings['SLG version']
-        ),
-	    array(
-            'variable' => 'Retrieved data status',
-            'value' => NULL
-        ),
-	    array(
-            'variable' => 'Show server information',
-            'value' => NULL
-        ),
-		array(
-            'variable' => 'TeamSpeak support',
-            'value' => NULL
-		),
-        array(
-            'variable' => 'Ventrilo status program',
-            'value' => NULL
-        ),
-		array(
-            'variable' => 'Ventrilo support',
-            'value' => NULL
-		)
-	);
+			array(
+				'variable' => 'Cache hits',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Custom servers',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Default queryport',
+				'value' => 51234
+			),
+			array(
+				'variable' => 'Forum relative path',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Forum type',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'GZIP Compression',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Page refresh timer',
+				'value' => 0
+			),
+			array(
+				'variable' => 'Page title',
+				'value' => 'SLG Comms '.$tssettings['SLG version']
+			),
+			array(
+				'variable' => 'Retrieved data status',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Show server information',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'TeamSpeak support',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Ventrilo status program',
+				'value' => NULL
+			),
+			array(
+				'variable' => 'Ventrilo support',
+				'value' => NULL
+			)
+		);
 	}
 	elseif($_GET['step'] == 4){
 		// lets get our db class
 		require('includes/db/'.$_POST['variable']['db_type'].'.inc.php');
 
 		// check whether the selected forum is correct
-		if ((($_POST['variable']['Forum type'] == 'ipb131' || $_POST['variable']['Forum type'] == 'ipb204') && file_exists($_POST['variable']['Forum relative path'].'conf_global.php')) || ($_POST['variable']['Forum type'] == 'phpbb2015' && file_exists($_POST['variable']['Forum relative path'].'config.php')) || (($_POST['variable']['Forum type'] == 'smf103' || $_POST['variable']['Forum type'] == 'smf110') && file_exists($_POST['variable']['Forum relative path'].'Settings.php')) || ($_POST['variable']['Forum type'] == 'vb307' && file_exists($_POST['variable']['Forum relative path'].'includes/config.php'))){
+		if (forum_existence_check($_POST['variable']['Forum type'], $_POST['variable']['Forum relative path'])){
 			// retrieve needed forum information
 			$forumsettings = retrieve_forumsettings($_POST['variable']);
 		}
@@ -235,15 +234,9 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			$$forumdatabase = new db;
 			if ($forumsettings['otherdatabase']){
 				$$forumdatabase->connect('pzforumserverconnect', $forumsettings['alt_db_host'], $forumsettings['alt_db_user'], $forumsettings['alt_db_passwd'], $forumsettings['alt_db_name']);
-				if ($_POST['variable']['db_type'] == 'mysql'){
-					$$forumdatabase->selectdb('pzforumdatabaseconnect', $forumsettings['alt_db_name']);
-				}
 			}
 			else{
 				$$forumdatabase->connect('pzforumserverconnect', $_POST['variable']['db_host'], $_POST['variable']['db_user'], $_POST['variable']['db_passwd'], $_POST['variable']['db_name']);
-				if ($_POST['variable']['db_type'] == 'mysql'){
-					$$forumdatabase->selectdb('pzforumdatabaseconnect', $_POST['variable']['db_name']);
-				}
 			}
 			// lets retrieve the forums groups
 			$groupsquery = $$forumdatabase->execquery('getforumgroups',$forumsettings['groups_sql']);
@@ -253,23 +246,23 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 		}
 
 		$configlist = array(
-        array(
-            'variable' => 'Forum group',
-            'value' => NULL
-        )
-	);
+			array(
+				'variable' => 'Forum group',
+				'value' => NULL
+			)
+		);
 	}
 	// whether or not display the requirements table
 	$install->insert_display('{REQUIREMENTS}', $_GET['step'] == 3);
 
-	$install->insert_content('{TEXT_INSTALLATIONSTEP}', '{TEXT_INSTALLATIONSTEP;'.$_GET['step'].';}');
+	$install->insert_text('{INSTALLATIONSTEP}', $_GET['step']);
 
 	// decide on the next step to take
 	if ($_GET['step'] == 1){
 		$nextstep = '2';
 	}
 	elseif ($_GET['step'] == 2){
-		if ($_POST['variable']['install_type'] == 'upgrade'){
+		if ($_POST['variable']['install_type'] === 'upgrade'){
 			$nextstep = '5';
 		}
 		else{
@@ -283,6 +276,9 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 		$nextstep = '6';
 	}
 	elseif ($_GET['step'] == 4){
+		$nextstep = '5';
+	}
+	elseif ($_GET['step'] == 5){
 		$nextstep = '5';
 	}
 	elseif ($_GET['step'] == 6){
@@ -306,7 +302,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 		switch ($row['variable']){
 			case 'install_type':
 				$configrows .= '<select name="variable['.$row['variable'].']" class="textline">
-<option value="new">{TEXT_NEW_INSTALL}</option>
+'.((!isset($old_version)) ? '<option value="new">{TEXT_NEW_INSTALL}</option>' : NULL ).'
 <option value="upgrade">{TEXT_UPGRADE_INSTALL}</option>
 <option value="rescue">{TEXT_RESCUE_INSTALL}</option>
 </select>';
@@ -337,11 +333,16 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 				break;
 			case 'Forum group':
 				if (isset($forumsettings['groups_sql'])){
-					$configrows .= '<select name="variable['.$row['variable'].']" class="textline">';
-					while($rowgroup = $$forumdatabase->getrow($groupsquery)){
-						$configrows .= '<option value="'.$rowgroup['groupid'].'">'.$rowgroup['groupname'].'</option>';
+					if ($$forumdatabase->numrows($groupsquery) > 0){
+						$configrows .= '<select name="variable['.$row['variable'].']" class="textline">';
+						while($rowgroup = $$forumdatabase->getrow($groupsquery)){
+							$configrows .= '<option value="'.$rowgroup['groupid'].'">'.$rowgroup['groupname'].'</option>';
+						}
+						$configrows .= '</select>';
 					}
-					$configrows .= '</select>';
+					else{
+						early_error('{TEXT_NOGROUP}');
+					}
 					$$forumdatabase->freeresult('getforumgroups',$groupsquery);
 					if ($forumsettings['otherdatabase']){
 						$$forumdatabase->disconnect();
@@ -426,30 +427,25 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	}
 	$install->insert_content('{SETTINGS}', $configrows);
 }
-elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
+
+if ($_GET['step'] == 5 && isset($_POST['updsetting'])){
 	// lets insert everything into the database
-	require('includes/db/'.$_POST['variable']['db_type'].'.inc.php');
-
-	$table['cache'] = $_POST['variable']['table_prefix'].'cache';
-	$table['resources'] = $_POST['variable']['table_prefix'].'resources';
-	$table['sessions'] = $_POST['variable']['table_prefix'].'sessions';
-	$table['settings'] = $_POST['variable']['table_prefix'].'settings';
-
-	/* Connect to mysql and database */
-	$db = new db;
-	$db->connect('pzinstallserverconnect', $_POST['variable']['db_host'], $_POST['variable']['db_user'], $_POST['variable']['db_passwd'], $_POST['variable']['db_name']);
-	if ($_POST['variable']['db_type'] == 'mysql'){
-		$selectdb = $db->selectdb('pzinstalldatabaseconnect', $_POST['variable']['db_name']);
-		if ($selectdb == true){
-			$install->displaymessage('{TEXT_SELECTDB_SUCCESS}');
-		}
-	}
-	else{
+	if (isset($_POST['variable']['db_type'])){
+		require('includes/db/'.$_POST['variable']['db_type'].'.inc.php');
+	
+		$table['cache'] = $_POST['variable']['table_prefix'].'cache';
+		$table['resources'] = $_POST['variable']['table_prefix'].'resources';
+		$table['sessions'] = $_POST['variable']['table_prefix'].'sessions';
+		$table['settings'] = $_POST['variable']['table_prefix'].'settings';
+	
+		/* Connect to mysql and database */
+		$db = new db;
+		$db->connect('pzinstallserverconnect', $_POST['variable']['db_host'], $_POST['variable']['db_user'], $_POST['variable']['db_passwd'], $_POST['variable']['db_name']);
 		$install->displaymessage('{TEXT_SELECTDB_SUCCESS}');
 	}
 
 //---------------------------
-	if ($_POST['variable']['install_type'] == 'new'){
+	if ($_POST['variable']['install_type'] === 'new'){
 	//resources table
 		$sql = 'CREATE TABLE `'.$table['resources'].'` (
   `res_id` tinyint(3) unsigned NOT NULL auto_increment,
@@ -461,14 +457,14 @@ elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
   KEY `res_type` (`res_type`)
 )'; 
 		$createrestable = $db->execquery('createrestable',$sql);
-		if ($createrestable == true){
+		if ($createrestable === true){
 			$install->displaymessage('{TEXT_TABLE_CREATE_SUCCESS;'.$table['resources'].';}');
 			$sql = 'INSERT INTO `'.$table['resources'].'` VALUES
 ("", "Example TeamSpeak", "12.23.34.45:6464:51234", "TeamSpeak"),
 ("", "Example Ventrilo", "ventrilo.game-host.org:8767:45t8hg4", "Ventrilo")
 ';
 			$insertresdata = $db->execquery('insertresdata',$sql);
-			if ($insertresdata == true){
+			if ($insertresdata === true){
 				$install->displaymessage('{TEXT_INSERT_DATA_SUCCESS;'.$table['resources'].';}');
 			}
 		}
@@ -482,7 +478,7 @@ elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
   KEY `session_user_id` (`session_user_id`)
 )'; 
 		$createsestable = $db->execquery('createsestable',$sql);
-		if ($createsestable == true){
+		if ($createsestable === true){
 			$install->displaymessage('{TEXT_TABLE_CREATE_SUCCESS;'.$table['sessions'].';}');
 		}
 
@@ -497,28 +493,28 @@ elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
   KEY `refreshcache` (`refreshcache`)
 )'; 
 		$createsertable = $db->execquery('createsertable',$sql);
-		if ($createsertable == true){
+		if ($createsertable === true){
 			$install->displaymessage('{TEXT_TABLE_CREATE_SUCCESS;'.$table['cache'].';}');
 		}
 	}
 
-	if ($_POST['variable']['install_type'] == 'rescue'){
+	if ($_POST['variable']['install_type'] === 'rescue'){
 	//settings table
 		$sql = 'DROP TABLE IF EXISTS `'.$table['settings'].'`';
 		$dropsettable = $db->execquery('dropsettable',$sql);
-		if ($dropsettable == true){
+		if ($dropsettable === true){
 			$install->displaymessage('{TEXT_TABLE_DROP_SUCCESS;'.$table['cache'].';}');
 		}
 	}
 
-	if ($_POST['variable']['install_type'] == 'rescue' || $_POST['variable']['install_type'] == 'new'){
+	if ($_POST['variable']['install_type'] === 'rescue' || $_POST['variable']['install_type'] === 'new'){
 		$sql = 'CREATE TABLE `'.$table['settings'].'` (
   `variable` enum( "Cache hits", "Custom servers", "Default queryport", "Default server", "Forum group", "Forum relative path", "Forum type", "GZIP Compression", "Language", "Page generation time", "Page refresh timer", "Page title", "Retrieved data status", "Show server information", "SLG version", "TeamSpeak support", "Template", "Ventrilo status program", "Ventrilo support" ) NOT NULL default "Cache hits",
   `value` varchar(100) NOT NULL,
   PRIMARY KEY  (`variable`)
 )'; 
 		$createsettable = $db->execquery('createsettable',$sql);
-		if ($createsettable == true){
+		if ($createsettable === true){
 			$install->displaymessage('{TEXT_TABLE_CREATE_SUCCESS;'.$table['settings'].';}');
 			$sql = 'INSERT INTO `'.$table['settings'].'` VALUES
 ("Cache hits", "'.((!empty($_POST['variable']['Cache hits'])) ? $db->escape_string($_POST['variable']['Cache hits']) : '0').'"),
@@ -541,24 +537,30 @@ elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
 ("Ventrilo status program", "'.$db->escape_string($_POST['variable']['Ventrilo status program']).'"),
 ("Ventrilo support", "'.((!empty($_POST['variable']['Ventrilo support'])) ? $db->escape_string($_POST['variable']['Ventrilo support']) : '0').'")';
 			$insertsetdata = $db->execquery('insertsetdata',$sql);
-			if ($insertsetdata == true){
+			if ($insertsetdata === true){
 				$install->displaymessage('{TEXT_INSERT_DATA_SUCCESS;'.$table['settings'].';}');
 			}
 		}
 	}
 	
-	if ($_POST['variable']['install_type'] == 'upgrade'){
-		$sql = 'ALTER TABLE `slg_settings` CHANGE `variable` `variable` ENUM( "Cache hits", "Custom servers", "Default queryport", "Default server", "Forum group", "Forum relative path", "Forum type", "GZIP Compression", "Language", "Page generation time", "Page refresh timer", "Page title", "Retrieved data status", "Show server information", "SLG version", "TeamSpeak support", "Template", "Ventrilo status program", "Ventrilo support" ) NOT NULL DEFAULT "Cache hits"';
-		$addvarsettings = $db->execquery('addvarsettings',$sql);
-		if ($addvarsettings == true){
-			$install->displaymessage('{TEXT_ADDVARSETTINGS_SUCCESS}');
-			$sql = 'INSERT INTO `'.$table['settings'].'` VALUES
+	if ($_POST['variable']['install_type'] === 'upgrade'){
+		if (!isset($old_version)){
+			early_error('{TEXT_OLDVERSION_UNAVAILABLE}');
+		}
+		/* SLG Comms versions before v2.2.0 */
+		if (version_compare($old_version, 'v2.2.0', '<')){
+			$sql = 'ALTER TABLE `slg_settings` CHANGE `variable` `variable` ENUM( "Cache hits", "Custom servers", "Default queryport", "Default server", "Forum group", "Forum relative path", "Forum type", "GZIP Compression", "Language", "Page generation time", "Page refresh timer", "Page title", "Retrieved data status", "Show server information", "SLG version", "TeamSpeak support", "Template", "Ventrilo status program", "Ventrilo support" ) NOT NULL DEFAULT "Cache hits"';
+			$addvarsettings = $db->execquery('addvarsettings',$sql);
+			if ($addvarsettings === true){
+				$install->displaymessage('{TEXT_ADDVARSETTINGS_SUCCESS}');
+				$sql = 'INSERT INTO `'.$table['settings'].'` VALUES
 ("Page generation time", "1"),
 ("TeamSpeak support", "1"),
 ("Ventrilo support", "1")';
-			$addsettings = $db->execquery('addsettings',$sql);
-			if ($addsettings == true){
-				$install->displaymessage('{TEXT_ADDSETTINGS_SUCCESS}');
+				$addsettings = $db->execquery('addsettings',$sql);
+				if ($addsettings === true){
+					$install->displaymessage('{TEXT_ADDSETTINGS_SUCCESS}');
+				}
 			}
 		}
 
@@ -569,7 +571,7 @@ WHERE
   `variable` = "SLG version"
 LIMIT 1';
 		$modifysettings = $db->execquery('modifysettings',$sql);
-		if ($modifysettings == true){
+		if ($modifysettings === true){
 			$install->displaymessage('{TEXT_UPGRADE_SUCCESS}');
 		}
 	}
@@ -601,7 +603,7 @@ elseif ($_GET['step'] == 7 and isset($_POST['updsetting'])){
 	// lets save dbsettings.inc.php
 	$filename = 'dbsettings.inc.php';
 	
-	if ($_POST['variable']['Database'] == 1){
+	if ($_POST['variable']['Database']){
 		$content = '<?php
 //security through the use of define != defined
 if (!defined("IN_SLG")){ 
@@ -618,19 +620,21 @@ $tssettings[\'table_prefix\'] = \''.((isset($_POST['variable']['table_prefix']))
 ?>
 ';
 	}
-	elseif ($_POST['variable']['install_type'] == 'upgrade'){
+	elseif ($_POST['variable']['install_type'] === 'upgrade'){
 		if (!isset($old_version)){
 			early_error('{TEXT_OLDVERSION_UNAVAILABLE}');
 		}
 		processincomingdata($_POST);
 		$content = file_get_contents($filename);
 		$content = str_replace($old_version, $tssettings['SLG version'], $content);
-		$content .= '
+		if (version_compare($old_version, 'v2.2.0', '<')){
+			$content .= '
 <?php
 $tssettings[\'Page generation time\'] = true;			/* Show or hide the Page generation times at the bottom of the pages. Default is allways enabled */
 $tssettings[\'TeamSpeak support\'] = true;		/* Do you want support for TeamSpeak (true or false)*/
 $tssettings[\'Ventrilo support\'] = true;		/* Do you want support for Ventrilo (true or false)*/
 ?>';
+		}
 	}
 	else{
 		processincomingdata($_POST);
@@ -673,9 +677,7 @@ $servers = array(
 );
 /* Don\'t change anything below this line unless you know what youre doing. */
 
-if (!defined("NO_DATABASE")){
-	define("NO_DATABASE", 10);						/*Disable the use of the database.*/
-}
+define("NO_DATABASE", 10);						/*Disable the use of the database.*/
 $cache[\'refreshcache\'] = 0;						/*This line disables caching of retrieved server data. As this data normally is stored in a database we must disable it in this situation. Don\'t change this as it will never work the way it should as there is no database available.*/
 $tssettings[\'SLG version\'] = \''.$tssettings['SLG version'].'\';			/*The current version of this script. Please don\'t change it unless you have a good reason for it.*/
 ?>
@@ -708,7 +710,7 @@ $tssettings[\'SLG version\'] = \''.$tssettings['SLG version'].'\';			/*The curre
 	}
 
 	if (!$file_save){
-		// auto save failed to lets download the file and let the user upload it himself
+		// auto save failed so lets download the file and let the user upload it himself
 		reset($_POST['variable']);
 		$hidden_vars = '
 <input name="content" type="hidden" id="oldset_value" value="'.htmlspecialchars($content).'">
@@ -719,7 +721,7 @@ $tssettings[\'SLG version\'] = \''.$tssettings['SLG version'].'\';			/*The curre
 		$install->insert_content('{TEXT_FINISH}', '{TEXT_DOWNLOAD_FILE}');
 		$install->insert_content('{NEXTSTEP}', '8');
 	}
-	if ($_POST['variable']['Database'] == 0){
+	if (!$_POST['variable']['Database']){
 		$install->displaymessage('{TEXT_NO_DATABASE_SERVERLIST;'.$filename.';}');
 	}
 }

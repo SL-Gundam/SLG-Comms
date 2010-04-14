@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_earlyerrors.php,v 1.13 2005/10/03 10:55:56 SC Kruiper Exp $
+ *   $Id: lng_earlyerrors.php,v 1.15 2005/10/24 14:08:13 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -38,8 +38,6 @@ Please inform the webmaster.',
 All the settings at your disposal are in the file "dbsettings.inc.php"',
 '{TEXT_CLASS_TIMECOUNT_ERROR}' => 'Bug encountered in class "timecount". Please notify the webmaster as soon as possible.',
 '{TEXT_DATA_TYPE_ERROR}' => 'Error encountered. Something went wrong with the types of data that were defined. Inform the webmaster please.',
-'{TEXT_DBTESTERROR}' => 'As you can see the database couldn\'t be selected.
-Check whether you filled in the correct information, whether the database exist and whether we have the rights to access it with the currently used username and password.',
 '{TEXT_FORUM_NOT_FOUND_ERROR}' => 'SLG couldn\'t find the forum in the directory specified.
 Please go back and fill in the correct information.',
 '{TEXT_SETTINGFORM_ERROR}' => 'There is a bug in the settings form. Please inform the webmaster.',
@@ -48,9 +46,14 @@ Please go back and fill in the correct information.',
 '{TEXT_DB_SELECT_FAILED}' => 'Database selection failed.',
 '{TEXT_SUPPORT_VENT_DISABLED}' => 'Support for Ventrilo has been disabled.',
 '{TEXT_SUPPORT_TS_DISABLED}' => 'Support for TeamSpeak has been disabled.',
-'{TEXT_SAMEVERSIONUPDATE}' => 'Update cancelled because SLG Comms has allready been updated with this version.',
+'{TEXT_SAMEVERSIONUPDATE}' => 'Update cancelled because SLG Comms has allready been updated with this version or a newer one.',
 '{TEXT_NOVENTRILO}' => 'You havn\'t defined a Ventrilo status program yet. Because of that support for ventrilo is not yet available.',
-'{TEXT_OLDVERSION_UNAVAILABLE}' => 'SLG Comms tried to perform a update of an earlier version of SLG Comms but couldn\'t find the old version number. It\'s highly probable that you do not have a earlier version installed yet.'
+'{TEXT_OLDVERSION_UNAVAILABLE}' => 'SLG Comms tried to perform a update of an earlier version of SLG Comms but couldn\'t find the old version number. It\'s highly probable that you do not have a earlier version installed yet.',
+'{TEXT_NOTTEAMSPEAK}' => 'Corrupt and / or invalid TeamSpeak server data encountered.',
+'{TEXT_MYSQLIEXTNOTLOAD}' => 'MySQLi extension not loaded. Please make sure your PHP has the MySQLi extension loaded.',
+'{TEXT_NOGROUP}' => 'It seems the forum you selected doesn\'t have any groups. Please create one containing the user accounts which are allowed to access the administrator section of SLG Comms.',
+'{TEXT_TSINVALIDID_ERROR}' => 'This error means that you entered a port number which doesn\'t exist for this TeamSpeak server.',
+'{TEXT_RETURNED_ERROR}' => 'RETURNED ERROR'
 );
 
 $this->text_adv += array(
@@ -61,7 +64,6 @@ $this->text_adv += array(
 '{TEXT_DB_SELECT_ERROR}' => 'Could not select the database ($1). Please contact your webmaster.',
 '{TEXT_DB_QUERY_FAILED}' => 'Query "$1" Failed.',
 '{TEXT_DB_FREEQUERY_FAILED}' => 'Failed to free the following result identifer: "$1"',
-'{TEXT_DB_DATASEEK_FAILED}' => 'Failed to perform a dataseek with the following result identifer: "$1"',
-'{TEXT_RETURNED_EXEC_ERROR}' => 'RETURNED ERROR: $1'
+'{TEXT_DB_DATASEEK_FAILED}' => 'Failed to perform a dataseek with the following result identifer: "$1"'
 );
 ?>

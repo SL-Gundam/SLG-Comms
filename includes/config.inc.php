@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: config.inc.php,v 1.8 2005/06/30 19:40:04 SC Kruiper Exp $
+ *   $Id: config.inc.php,v 1.9 2005/10/21 14:29:26 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -35,6 +35,10 @@ include('includes/classes.inc.php');
 
 include('dbsettings.inc.php');
 
+if (!empty($_POST)){
+	processincomingdata($_POST, true);
+}
+
 if ( !defined('NO_DATABASE') ){
 	$table['cache'] = $tssettings['table_prefix'].'cache';
 	$table['resources'] = $tssettings['table_prefix'].'resources';
@@ -46,9 +50,6 @@ if ( !defined('NO_DATABASE') ){
 	/* Connect to mysql and database */
 	$db = new db;
 	$db->connect('pzserverconnect', $tssettings['db_host'], $tssettings['db_user'], $tssettings['db_passwd'], $tssettings['db_name']);
-	if ($tssettings['db_type'] == 'mysql'){
-		$db->selectdb('pzdatabaseconnect', $tssettings['db_name']);
-	}
 
 	// retrieve settings from the database
 	$getconfig = $db->execquery('getconfig','SELECT
@@ -66,9 +67,7 @@ FROM
 // do we enable gzip compression or not?
 $useragent = (isset($HTTP_SERVER_VARS['HTTP_USER_AGENT'])) ? $HTTP_SERVER_VARS['HTTP_USER_AGENT'] : getenv('HTTP_USER_AGENT');
 
-$zlib_status = ini_get('zlib.output_compression');
-
-if (isset($tssettings['GZIP Compression']) && $tssettings['GZIP Compression'] && (strstr($useragent,'compatible') || strstr($useragent,'Gecko')) && extension_loaded('zlib') && (empty($zlib_status))){
+if (isset($tssettings['GZIP Compression']) && $tssettings['GZIP Compression'] && (strstr($useragent,'compatible') || strstr($useragent,'Gecko')) && extension_loaded('zlib')){
 	ob_start('ob_gzhandler');
 }
 ?>

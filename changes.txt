@@ -1,3 +1,35 @@
+v2.2.1
+- Improved the displaymessage function when it's supposed to stop script execution.
+- Overhauled the complete TeamSpeak server data parser code to improve performance.
+- Checked and, when possible, adjusted all condition statements to be stricter.
+- Updated install.php to support updates after v2.2.0 as the old version number wasn't retrieved if you installed SLG Comms with database support enabled.
+- Enhanced install.php in upgrade mode where possible to be less confusing.
+- Improved the template process a tiny bit. Though it's still problematic when viewing TeamSpeak and / or Ventrilo servers which have unusually large amount of channels and clients (Large meaning more then 400 channels).
+- Rearranged some language items to possibly speed up the template process for the TeamSpeak and Ventrilo templates.
+- Fixed a small bug which concerns the caching of data. This was specifically causing problems for the TeamSpeak server data parser.
+- Fixed a bug where TeamSpeak command errors weren't detected correctly.
+- DEBUG mode now also displays the processing time for the template engine.
+- DEBUG mode now also displays the time it took to retrieve the live server data.
+- Added some validity checks on the custom ip:port field.
+- Fixed the displayal of the "Retrieved data status" which sometimes displayed incorrect values.
+- Changed the moment where live server data is saved for caching.
+- Fixed a glitch in the TeamSpeak server parser concerning clients nickname and loginname.
+- Updated the TeamSpeak and Ventrilo server data parser to be more secure against tampering.
+- Improved the DB classes.
+- Fixed a notice level error with the "Page refresh timer" variable in header.inc.php
+- Fixed a bug in the MySQLi DB class (mysql41.inc.php) concerning the timecount class calls.
+- Added "Recording" and "Voice Request" status to the info behind the name of the clients.
+- Removed the "breakdown_rights" function as i've implemented a faster way for calculating the rights of clients and channels.
+- Fixed a bug in the TeamSpeak function which detenmines the flags that should be displayed. It sometimes displayed the Auto-Voice flag while it should display the Auto-Op and vice versa.
+- Finetuned the channel and client sorting functions a bit.
+- Improved the TeamSpeak error managing a bit.
+
+v2.2.1 template changes
+- Small Internet Explorer fix to prevent problems if stylesheet is missing in "tpl_header.html".
+- {TEXT_INSTALLATIONSTEP} has changed in the way its used in tpl_install_settings.html.
+- Added new language item called: "{INSTALLATIONSTEP}" in tpl_install_settings.html
+- Changed the alignment in the CSS class "table.tooltip".
+
 v2.2.0
 - Fixed a problem with html characters in the dropdown box "Default server" in the admin settings page and install page.
 - Merged 2 savecache functions, one for teamspeak (functions.ts.inc.php) and one for ventrilo (functions.vent.inc.php), to one function within functions.inc.php.
@@ -5,7 +37,7 @@ v2.2.0
 - Added a new function to the MySQL and MySQLi classes called "escape_string".
 - Added extra protection to the exec function used by ventrilo.inc.php.
 - Added a check whether the Ventrilo status program file you selected exists (only applicable for the admin settings page, this has not been implemented in the install page). It doesn't check whether its the right file though.
-- Removed the str_split() function as it was only used by teamspeak.inc.php ones and nowhere else. I found a better supported and faster way to perform the task that was needed.
+- Removed the str_split() function as it was only used by teamspeak.inc.php once and nowhere else. I found a better supported and faster way to perform the task that was needed.
 - Fixed a comment glitch for clients within ventrilo channels with html special characters.
 - Small update to the db classes for a before unused query type.
 - Changed the Ventrilo server cached data separator. This will cause the old cached data to be invalid. Please wait untill the amount of seconds have passed so that new data will be retrieved from the servers.

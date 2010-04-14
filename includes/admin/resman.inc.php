@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resman.inc.php,v 1.10 2005/10/03 10:55:54 SC Kruiper Exp $
+ *   $Id: resman.inc.php,v 1.11 2005/10/21 14:29:26 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -32,7 +32,7 @@ FROM
   '.$table['resources'].'
 WHERE
   res_id = "'.$db->escape_string($_GET['delete']).'"');
-	if ($querydeleteres == true){
+	if ($querydeleteres === true){
 		$admin->displaymessage('{TEXT_RESOURCE_DELETE}');
 
 		$querydeletecache = $db->execquery('querydeletecache','DELETE
@@ -40,7 +40,7 @@ FROM
   '.$table['cache'].'
 WHERE
   cache_id = "'.$db->escape_string($_GET['delete']).'"');
-		if ($querydeletecache == true){
+		if ($querydeletecache === true){
 			$admin->displaymessage('{TEXT_RESOURCECACHE_DELETE}');
 		}
 	}

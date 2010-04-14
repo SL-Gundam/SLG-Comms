@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.17 2005/10/03 10:55:54 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.18 2005/10/21 14:29:26 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -33,9 +33,9 @@ if (isset($db)){
 	$db->disconnect();
 }
 
-//it seems php 5.0.0 or higher has a bug with windows versions of apache 1.3 and the function apache_get_modules()
+//it seems php 5.0.0 or higher has a bug with windows versions of apache 1.3 and the function apache_get_modules(). It says the function exists but hangs the connection when the function is called. This behaviour has only been tested with Apache for windows. It probably works fine for Linux / Unix but i'm not sure.
 $gzipheaders = apache_response_headers();
-if (function_exists('apache_get_modules') && (version_compare(phpversion(),'5.0.0')) < 0){
+if (function_exists('apache_get_modules') && (version_compare(phpversion(), '5.0.0', '<'))){
 	$gzipmod = apache_get_modules();
 }
 else{
@@ -48,7 +48,6 @@ $debug_text = (defined("DEBUG")) ? '{TEXT_DEBUG_ON}' : '{TEXT_DEBUG_OFF}';
 $executed_queries = (isset($db)) ? $db->num_queries : 0;
 $free_queries = (isset($db)) ? $db->num_freequeries : 0;
 $nofree_queries = (isset($db)) ? $db->num_nofreequeries : 0;
-
 $sql_time = round((isset($db)) ? $db->sqltime->tottime : 0, 4 );
 
 if (isset($otherdatabase, $forumdatabase, $$forumdatabase) && $otherdatabase){

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.21 2005/10/03 10:55:54 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.23 2005/10/24 14:08:13 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -29,13 +29,14 @@ class timecount{
 	var $tottime = 0;
 	
 	function starttimecount(){
-		$mtime = explode(" ",microtime());
-		$this->starttime = $mtime[1] + $mtime[0];
+		if ($this->starttime === 0){
+			$mtime = explode(" ",microtime());
+			$this->starttime = $mtime[1] + $mtime[0];
+		}
 	}
 
 	function endtimecount(){
-		if ($this->starttime == 0){
-			global $template, $$template;
+		if ($this->starttime === 0){
 			early_error('{TEXT_CLASS_TIMECOUNT_ERROR}');
 		}
 		$mtime = explode(" ",microtime());
@@ -51,16 +52,21 @@ class template{
 	var $tooltips = array();
 	var $text_search = array('{ERROR}' => NULL);
 	var $display = array();
-	
+	var $tpl_time = NULL;
+
+	function __construct(){
+		$this->tpl_time = new timecount;
+	}
+
+	function template(){
+		$this->__construct();
+	}
+
 	function load_template($filename){
 		if (!isset($this->template)){
 			global $tssettings;
 
 			$this->template = file_get_contents('templates/'.((isset($tssettings['Template'])) ? $tssettings['Template'] : 'Default' ).'/'.$filename.'.html');
-
-/*			if (!isset($_GET['nicesource']) || $_GET['nicesource'] != true){
-				$this->template = str_replace(array("\n", "\t"), '', $this->template); //compress template
-			}*/ // might see about some more possibilities into this later
 		}
 		else{
 			early_error('{TEXT_LOADTEMPLATE_ERROR}');
@@ -79,23 +85,24 @@ class template{
 			$error .= '<pre class="error2">';
 			if (defined("DEBUG")){
 				$error .= '
-Query: '.wordwrap($sql, 100).'
+Query: '.wordwrap(htmlentities($sql), 100).'
 
 ';
 			}
-			$error .= 'Error: '.wordwrap($sqlerror, 100).'
+			$error .= 'Error: '.wordwrap(htmlentities($sqlerror), 100).'
 </pre>';
 		}
 		$error .= '</td></tr></table><p></p>';
 		if ($dead){
-			global $tssettings, $starttime;
+			global $tssettings, $starttime, $db, $otherdatabase, $forumdatabase, $$forumdatabase;
 
 			include_once('includes/header.inc.php');
 
-			$this->template = $error;
+			$this->template = '{ERROR}';
+			$this->insert_content('{ERROR}', $error);
 			$this->process();
 			$this->output();
-			die(include('includes/footer.inc.php'));
+			include('includes/footer.inc.php');
 		}
 		else{
 			$this->text_search['{ERROR}'] .= $error;
@@ -171,24 +178,27 @@ Query: '.wordwrap($sql, 100).'
 	}
 
 	function process(){
+		$this->tpl_time->starttimecount();
+
 		if (!empty($this->display)){
 			$this->template = preg_replace(array_keys($this->display), $this->display, $this->template);
 			$this->display = array();
 		}
 
-		if (!empty($this->text_search)){
-			$this->template = str_replace(array_keys($this->text_search), $this->text_search, $this->template);
-			$this->text_search = array('{ERROR}' => NULL);
-		}
-
+		/* text_adv is only applicable to content type insertable data */
 		if (!empty($this->text_adv)){
 			foreach ($this->text_adv as $key => $value){
 				$key = rtrim($key, '}');
 				$text_adv_keys[] = '@'.$key.';(.*?);}@';
 				$text_adv[] = nl2br($value);
 			}
-			$this->template = preg_replace($text_adv_keys, $text_adv, $this->template);
+			$this->text_search = preg_replace($text_adv_keys, $text_adv, $this->text_search);
 			$this->text_adv = array();
+		}
+
+		foreach ($this->text as $key => $value){
+			$text_keys[] = $key;
+			$text[] = nl2br($value);
 		}
 
 		if (!empty($this->tooltips)){
@@ -196,20 +206,38 @@ Query: '.wordwrap($sql, 100).'
 				$tooltip_keys[] = $key;
 				$tooltips[] = prep_tooltip($value);
 			}
-			$this->template = str_replace($tooltip_keys, $tooltips, $this->template);
+//			$this->template = str_replace($tooltip_keys, $tooltips, $this->template);
+			$text_keys = array_merge(array_keys($this->text_search), $tooltip_keys, $text_keys);
+			$text = array_merge($this->text_search, $tooltips, $text);
 			$this->tooltips = array();
 		}
-
-		foreach ($this->text as $key => $value){
-			$text_keys[] = $key;
-			$text[] = nl2br($value);
+		else{
+			$text_keys = array_merge(array_keys($this->text_search), $text_keys);
+			$text = array_merge($this->text_search, $text);
 		}
-		$this->template = str_replace($text_keys, $text, $this->template);
 		$this->text = array();
+
+//		$this->template = str_replace(array_keys($this->text_search), $this->text_search, $this->template);
+		$this->text_search = array('{ERROR}' => NULL);
+
+		$this->template = str_replace($text_keys, $text, $this->template);
+
+		$this->tpl_time->endtimecount();
+	}
+
+	function echobig(&$string, $bufferSize=8192){
+		for ($i = 0, $chars = strlen($string), $current = 0; $current < $chars; $current += $bufferSize) {
+			echo substr($string, $current, $bufferSize);
+			$i++;
+		}
+		if (defined("DEBUG")){
+			// Because this is the function that actually outputs the template, it can not be integrated into one. This means no multi language support. Not really necassary anyway since the echo below is only executed in DEBUG mode which should never be used in public sites.
+			echo '<table border="0" align="center"><tr><td><p class="error">DEBUG: echobig() required '.$i.' loop(s) to output the data.</p></td></tr><tr><td><p class="error">DEBUG: Processing time required for this part of the template was: '.round($this->tpl_time->tottime, 4).'s</p></td></tr></table><p></p>';
+		}
 	}
 
 	function output(){
-		echobig($this->template);
+		$this->echobig($this->template);
 		$this->template = NULL;
 	}
 }

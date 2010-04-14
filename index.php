@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.20 2005/10/03 10:55:53 SC Kruiper Exp $
+ *   $Id: index.php,v 1.21 2005/10/21 14:29:25 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -74,11 +74,11 @@ if ($servertable){
 	}
 	reset($servers);
 	foreach($servers as $server){
-		if (($server['res_type'] == 'TeamSpeak' && $tssettings['TeamSpeak support']) || ($server['res_type'] == 'Ventrilo' && $tssettings['Ventrilo support'])){
+		if (($server['res_type'] === 'TeamSpeak' && $tssettings['TeamSpeak support']) || ($server['res_type'] === 'Ventrilo' && $tssettings['Ventrilo support'])){
 			$ipbyname .= '<option value="'.$server['res_id'].'"';
-			if ((isset($_REQUEST['ipbyname']) && $_REQUEST['ipbyname'] == $server['res_id']) || (!isset($_REQUEST['ipbyname']) && $tssettings['Default server'] == $server['res_id'] && !isset($_REQUEST['ipbyname']))){
+			if ((isset($_REQUEST['ipbyname']) && $_REQUEST['ipbyname'] == $server['res_id']) || (!isset($_REQUEST['ipbyname']) && $tssettings['Default server'] == $server['res_id'])){
 				$ipbyname .= ' selected';
-				$pice = explode(':',$server['res_data']);
+				$pice = explode(':',$server['res_data'], 3);
 				if (isset($pice[2])){
 					$ts['queryport'] = $pice[2];
 				}
@@ -96,10 +96,10 @@ if ($servertable){
 	if ($tssettings['Custom servers']){
 		$typeopt = NULL;
 		if ($tssettings['TeamSpeak support']){
-			$typeopt .= '<option value="TeamSpeak"'.((isset($_POST['type']) && $_POST['type'] == 'TeamSpeak') ? ' selected' : NULL ).'>TeamSpeak</option>';
+			$typeopt .= '<option value="TeamSpeak"'.((isset($_POST['type']) && $_POST['type'] === 'TeamSpeak') ? ' selected' : NULL ).'>TeamSpeak</option>';
 	  	}
 		if ($tssettings['Ventrilo support']){
-			$typeopt .= '<option value="Ventrilo"'.((isset($_POST['type']) && $_POST['type'] == 'Ventrilo') ? ' selected' : NULL ).'>Ventrilo</option>';
+			$typeopt .= '<option value="Ventrilo"'.((isset($_POST['type']) && $_POST['type'] === 'Ventrilo') ? ' selected' : NULL ).'>Ventrilo</option>';
 		}
 		$index->insert_text('{TYPE_OPTIONS}', $typeopt);
 		$index->insert_text('{IPPORT_VALUE}', ((isset($_POST['ipport'])) ? $_POST['ipport'] : NULL));
@@ -109,7 +109,7 @@ else{
 	//incase the server list table was disabled we still need to fill the variables below
 	reset($servers);
 	$server = current($servers);
-	$pice = explode(':',$server['res_data']);
+	$pice = explode(':',$server['res_data'], 3);
 	if (isset($pice[2])){
 		$ts['queryport'] = $pice[2];
 	}
@@ -118,15 +118,17 @@ else{
 }
 unset($servers);
 
-// incase of the custom server we need to check whether the format is acceptable
+// incase of the custom server we need to check whether the format is acceptable.
 if(isset($_POST['ipport']) && $_POST['ipbyname'] == 0 && $tssettings['Custom servers']){
-	$pice = explode(':',$_POST['ipport']);
-	if (empty($pice[0]) || empty($pice[1])){
-		$index->displaymessage('{TEXT_IP_PORT_COMB_ERROR}');
-		unset($_POST);
-		unset($res_type);
-	}
+	$pice = explode(':',$_POST['ipport'], 3);
 }
+
+if (empty($pice[0]) || empty($pice[1]) || check_ip_port($pice[0], $pice[1])){
+	$index->displaymessage('{TEXT_IP_PORT_COMB_ERROR}');
+	unset($_POST);
+	unset($res_type);
+}
+
 $ts['ip'] = (isset($pice[0])) ? $pice[0] : NULL;
 $ts['port'] = (isset($pice[1])) ? $pice[1] : NULL;
 $ts['queryport'] = (isset($pice[2])) ? $pice[2] : NULL;
@@ -153,7 +155,9 @@ LIMIT 0,1');
 		$ptime = explode(" ",microtime());
 		$refreshtime = $ptime[1] - $cache['refreshcache'];
 	
-		if ($cache['timestamp'] < $refreshtime) $usecached = false;
+		if ($cache['timestamp'] < $refreshtime){
+			$usecached = false;
+		}
 		else{
 			$usecached = true;
 			// register a cache hit if the cache hits setting is enabled
@@ -174,7 +178,9 @@ LIMIT 1');
 	}
 	$db->freeresult('getcached',$cached);
 }
-else $usecached = false;
+else{
+	$usecached = false;
+}
 
 //process the template
 $index->load_language('lng_index');
@@ -184,11 +190,11 @@ $index->output();
 unset($index);
 
 // start the process of retrieving server data for either TeamSpeak or Ventrilo
-if ((isset($res_type) && $res_type == 'TeamSpeak') || (isset($_POST['type']) && $_POST['type'] == 'TeamSpeak' && $_POST['ipbyname'] == 0) && $tssettings['TeamSpeak support']){
+if ((isset($res_type) && $res_type === 'TeamSpeak') || (isset($_POST['type']) && $_POST['type'] === 'TeamSpeak' && $_POST['ipbyname'] == 0) && $tssettings['TeamSpeak support']){
 	if (!isset($ts['queryport'])) $ts['queryport'] = $tssettings['Default queryport'];
 	include('includes/teamspeak.inc.php');
 }
-elseif ((isset($res_type) && $res_type == 'Ventrilo') || (isset($_POST['type']) && $_POST['type'] == 'Ventrilo' && $_POST['ipbyname'] == 0) && $tssettings['Ventrilo support']){
+elseif ((isset($res_type) && $res_type === 'Ventrilo') || (isset($_POST['type']) && $_POST['type'] === 'Ventrilo' && $_POST['ipbyname'] == 0) && $tssettings['Ventrilo support']){
 	include('includes/ventrilo.inc.php');
 }
 

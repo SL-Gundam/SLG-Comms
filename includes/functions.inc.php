@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.23 2005/10/03 10:55:54 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.24 2005/10/21 14:29:26 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,29 +24,25 @@ if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
+function processaddslashes(&$value, $key=NULL){
+	if(is_array($value)){
+		array_walk($value, 'processaddslashes');
+	}
+	else{
+		$value = addslashes($value);
+	}
+}
+
+function processstripslashes(&$value, $key=NULL){
+	if(is_array($value)){
+		array_walk($value, 'processstripslashes');
+	}
+	else{
+		$value = stripslashes($value);
+	}
+}
+
 function processincomingdata(&$data, $strip=false){
-	if (!function_exists('processaddslashes')){
-		function processaddslashes(&$value, $key=NULL){
-			if(is_array($value)){
-				array_walk($value, 'processaddslashes');
-			}
-			else{
-				$value = addslashes($value);
-			}
-		}
-	}
-
-	if (!function_exists('processstripslashes')){
-		function processstripslashes(&$value, $key=NULL){
-			if(is_array($value)){
-				array_walk($value, 'processstripslashes');
-			}
-			else{
-				$value = stripslashes($value);
-			}
-		}
-	}
-
 	$magicgpc = get_magic_quotes_gpc();
 	if (!$magicgpc && !$strip){
 		processaddslashes($data);
@@ -57,11 +53,12 @@ function processincomingdata(&$data, $strip=false){
 }
 
 function SORT_SERVERS($a, $b){
-	if (strcasecmp($a['res_name'], $b['res_name']) == 0){
+	$comp_result = strcasecmp($a['res_name'], $b['res_name']);
+	if ($comp_result == 0){
 		return(0);
 	}
 	else{
-		return((strcasecmp($a['res_name'], $b['res_name']) < 0) ? -1 : 1);
+		return(($comp_result < 0) ? -1 : 1);
 	}
 }
 
@@ -79,17 +76,9 @@ function early_error($message, $sql=NULL, $sqlerror=NULL){
 //	$error->output();
 }
 
-function formatbytes($bytes){
-	$units = array(' {TEXT_BYTES}', ' {TEXT_KB}', ' {TEXT_MB}', ' {TEXT_GB}', ' {TEXT_TB}');
-	for ($i = 0; $bytes > 1024; $i++){
-		$bytes /= 1024;
-	}
-	return(round($bytes, 2).$units[$i]);
-}
-
 function formattime($seconds){
-	$divider_units = array(86400, 3600, 60, 1);
-	$divider_var = array('DAYS', 'HOURS', 'MINUTES', 'SECONDS');
+	static $divider_units = array(86400, 3600, 60, 1);
+	static $divider_var = array('DAYS', 'HOURS', 'MINUTES', 'SECONDS');
 	for ($i = 0, $k = (count($divider_units) - 1); $i <= $k; $i++){
 		$time[$divider_var[$i]] = floor($seconds / $divider_units[$i]);
 		$seconds -= $time[$divider_var[$i]] * $divider_units[$i];
@@ -107,17 +96,17 @@ function formattime($seconds){
 
 	$tcount = array_sum($count);
 	if ($tcount > 1){
-		if ($count['SECONDS'] == 1){
+		if ($count['SECONDS'] === 1){
 			$time['SECONDS'] = '{TEXT_AND} '.$time['SECONDS'];
 		}
-		elseif ($count['MINUTES'] == 1){
+		elseif ($count['MINUTES'] === 1){
 			$time['MINUTES'] = '{TEXT_AND} '.$time['MINUTES'];
 		}
-		elseif ($count['HOURS'] == 1){
+		elseif ($count['HOURS'] === 1){
 			$time['HOURS'] = '{TEXT_AND} '.$time['HOURS'];
 		}
 	}
-	elseif ($tcount == 0){
+	elseif ($tcount === 0){
 		$time['SECONDS'] = '0 {TEXT_SECONDS}';
 	}
 
@@ -135,16 +124,14 @@ function prep_tooltip($msg){
 	return(str_replace("\n", '<br />', addslashes(str_replace('&', '&amp;', (htmlentities($msg))))));
 }
 
-function print_check_cache_lifetime(){
-	global $usecached, $cache, $tuntilrefresh;
-
+function print_check_cache_lifetime($usecached, &$cache, $tuntilrefresh, $errors){
 	if ($usecached){
 		$cachelive = '{TEXT_CACHEDDATA}<br />';
-		if ($tuntilrefresh >= $cache['refreshcache']){
-			$cachelive .= '{TEXT_CACHEOLD;'.formattime($tuntilrefresh).';}';
+		if ($errors){
+			$cachelive .= '{TEXT_CACHEOLD}: '.formattime($tuntilrefresh);
 		}
 		else{
-				$cachelive .= '{TEXT_DATAREFRESHIN;'.formattime($tuntilrefresh).';}';
+			$cachelive .= '{TEXT_DATAREFRESHIN}: '.formattime($tuntilrefresh);
 		}
 	}
 	else{
@@ -153,24 +140,13 @@ function print_check_cache_lifetime(){
 			$cachelive .= '{TEXT_NOCUSTOMCACHE}';
 		}
 		elseif ($cache['refreshcache'] != 0){
-			$cachelive .= '{TEXT_DATAREFRESHED;'.formattime($cache['refreshcache']).';}';
+			$cachelive .= '{TEXT_DATAREFRESHED}: '.formattime($cache['refreshcache']);
 		}
 		else{
 			$cachelive .= '{TEXT_CACHEDISABLED}';
 		}
 	}
 	return($cachelive);
-}
-
-function echobig($string, $bufferSize=4096){
-	for ($i = 0, $chars = strlen($string), $current = 0; $current < $chars; $current += $bufferSize) {
-		echo substr($string, $current, $bufferSize);
-		$i++;
-	}
-	if (defined("DEBUG")){
-		// Because this is the function that actually outputs the template, it can not be integrated into one. This means no multi language support. Not really necassary anyway since the echo below is only executed in DEBUG mode which should never be used in public sites.
-		echo '<table border="0" align="center"><tr><td><p class="error">DEBUG: echobig() required '.$i.' loop(s) to output the data.</p></td></tr></table><p></p>';
-	}
 }
 
 function checkfilelock($files){
@@ -185,13 +161,22 @@ function savecache(&$cacheddata){
 	$rtime = explode(" ",microtime());
 	$sql = 'UPDATE '.$table['cache'].'
 SET
-  data = "'.$db->escape_string($cacheddata).'",
+  data = "'.$db->escape_string(implode("\r\n", $cacheddata)).'",
   timestamp = "'.$rtime[1].'"
 WHERE
   cache_id = "'.$ts['id'].'"
 LIMIT 1';
 
 	return($sql);
+}
+
+function check_ip_port($ip, $port){
+	$testip = ip2long($ip);
+	if ($testip === -1 || $testip === FALSE){
+		$ip = gethostbyname($ip);
+		$testip = ip2long($ip);
+	}
+	return((int)$port < 0 || (int)$port > 65535 || !is_numeric($port) || $testip === -1 || $testip === FALSE || count(explode('.', $ip)) !== 4);
 }
 
 if(!function_exists('file_get_contents')){

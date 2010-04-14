@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_install.php,v 1.11 2005/10/03 10:55:56 SC Kruiper Exp $
+ *   $Id: lng_install.php,v 1.12 2005/10/21 14:29:28 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -56,11 +56,11 @@ $this->text += array(
 '{TEXT_UPGRADE_SUCCESS}' => 'Successfully upgraded SLG.
 <a href="index.php">Please continue to the main page</a>.',
 '{TEXT_ADDVARSETTINGS_SUCCESS}' => 'Succesfully added variables for the new settings.',
-'{TEXT_ADDSETTINGS_SUCCESS}' => 'Succesfully added the new settings.'
+'{TEXT_ADDSETTINGS_SUCCESS}' => 'Succesfully added the new settings.',
+'{TEXT_INSTALLATIONSTEP}' => 'Installation step',
 );
 
 $this->text_adv += array(
-'{TEXT_INSTALLATIONSTEP}' => 'Installation step $1',
 '{TEXT_TABLE_CREATE_SUCCESS}' => 'Successfully created table "$1".',
 '{TEXT_INSERT_DATA_SUCCESS}' => 'Successfully inserted default data in table "$1".',
 '{TEXT_TABLE_DROP_SUCCESS}' => 'Successfully removed the table "$1".',
@@ -70,12 +70,12 @@ $this->text_adv += array(
 You can now start using SLG by opening <a href="index.php">index.php</a> or <a href="admin.php">admin.php</a>.',
 '{TEXT_CANTWRITE_FILE}' => 'The file "$1" is not writable.',
 '{TEXT_FILE_DOESNTEXIST}' => 'The file "$1" doesn\'t exist.',
-'{TEXT_DOWNLOAD_FILE_LARGE}' => 'It seems SLG couldn\'t save the file automatically. You are gonna have the click on the button "Download file". Download that file and upload it to the server in the same directory as SLG under the file name "$1".
+'{TEXT_DOWNLOAD_FILE_LARGE}' => 'It seems SLG couldn\'t save the file automatically. Please click on the button "Download file". Download that file and upload it to the server in the same directory as SLG under the file name "$1".
 
 Everything should work after that.
 
 Don\'t forget to remove install.php after you\'re done.',
-'{TEXT_NO_DATABASE_SERVERLIST}' => 'Because you don\'t want to use a database you\'re gonna have to manually alter "$1" to setup the server list.'
+'{TEXT_NO_DATABASE_SERVERLIST}' => 'Because you don\'t want to use a database you will have to manually alter "$1" to setup the server list.'
 );
 
 $this->tooltips += array(

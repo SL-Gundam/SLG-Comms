@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.vent.inc.php,v 1.7 2005/10/03 10:55:55 SC Kruiper Exp $
+ *   $Id: functions.vent.inc.php,v 1.8 2005/10/21 14:29:27 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -25,11 +25,12 @@ if (!defined("IN_SLG")){
 }
 
 function SORT_VENTCHANNELS(&$a, &$b){
-	if (strcasecmp($a['NAME'], $b['NAME']) == 0){
+	$comp_result = strcasecmp($a['NAME'], $b['NAME']);
+	if ($comp_result === 0){
 		return(0);
 	}
 	else{
-		return((strcasecmp($a['NAME'], $b['NAME']) < 0) ? -1 : 1);
+		return(($comp_result < 0) ? -1 : 1);
 	}
 }
 

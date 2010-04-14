@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.34 2005/10/03 10:55:55 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.36 2005/10/24 14:08:13 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -45,31 +45,49 @@ if (!$usecached){
 	if (empty($tssettings['Ventrilo status program'])){
 		early_error('{TEXT_NOVENTRILO}');
 	}
-	$ipstring = $tssettings['Ventrilo status program'].' -a2 -c2 -t'. escapeshellcmd($ts['ip'].':'.$ts['port'].((isset($ts['queryport'])) ? ':'.$ts['queryport'] : NULL)) .' 2>&1';
-	exec(escapeshellarg($ipstring), $routput, $execcmd);
+	$ipstring = escapeshellarg($tssettings['Ventrilo status program']).' -a2 -c2 -t'. escapeshellcmd($ts['ip'].':'.$ts['port'].((isset($ts['queryport'])) ? ':'.$ts['queryport'] : NULL)) .' 2>&1';
+
+	if (defined("DEBUG")){
+		$cnt_time = new timecount;
+		$cnt_time->starttimecount();
+	}
+
+	exec($ipstring, $routput, $execcmd);
+
+	if (defined("DEBUG")){
+		$cnt_time->endtimecount();
+		// Because this is DEBUG only output it will be outputted outside of the template class.
+		echo '<table border="0" align="center"><tr><td><p class="error">DEBUG: Processing time required for retrieving the live server data: '.round($cnt_time->tottime, 4).'s</p></td></tr></table><p></p>';
+	}
 }
 else{
-	$routput = explode("\n", $cache['data']);
-	unset($cache['data']);
+	$routput = explode("\r\n", $cache['data']);
 }
 
 //print_r($execcmd);
 //print_r($routput);
 
-if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went ok OR no response from server. 3 = unable to resolve hostname error.
-	if (isset($routput[0]) && strncasecmp($routput[0], "ERROR", 5) == 0){
+if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything went ok OR no response from server. 3 = unable to resolve hostname error.
+	$venterror = false;
+	if (isset($routput[0]) && strncasecmp($routput[0], "ERROR", 5) === 0){
 		$pre_error = implode(" ", $routput).' ('.$execcmd.')';
 		$venterror = true;
 		if (!empty($cache['data'])){
 			$usecached = true;
-			$routput = explode("\n", $cache['data']);
-			unset($cache['data']);
+			$routput = explode("\r\n", $cache['data']);
 			$ventrilo->displaymessage($pre_error.'<br /><br />{TEXT_CACHED_LOADED}');
 			$tuntilrefresh = ($refreshtime + $cache['refreshcache']) - $cache['timestamp'];
 		}
 		else{
 			early_error($pre_error);
 		}
+	}
+	elseif (!$usecached && isset($ts['id']) && $cache['refreshcache'] != 0){
+		$db->execquery('updatecachedata',savecache($routput));
+	}
+	
+	if (isset($cache['data'])){
+		unset($cache['data']);
 	}
 
 	/*if ($usecached || !isset($venterror))*/{
@@ -79,43 +97,34 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 			$ext_line1[0] = trim($ext_line1[0]);
 			$ext_line1[1] = trim($ext_line1[1]);
 
-			if (trim($ext_line1[0]) == 'CHANNELFIELDS'){
-				$ext_line1[1] = rawurldecode($ext_line1[1]);
-				$ventchannelindex = explode(",",$ext_line1[1]);
-			}
-
-			elseif (trim($ext_line1[0]) == 'CHANNEL' || trim($ext_line1[0]) == 'CLIENT'){
+			if (trim($ext_line1[0]) === 'CHANNEL' || trim($ext_line1[0]) === 'CLIENT'){
 				$loutput = explode(",",$ext_line1[1]);
 				foreach($loutput as $line2){
 					$ext_line2 = explode('=', $line2, 2);
-					$ext_line2[0] = trim($ext_line2[0]);
+					$ext_line2[0] = rawurldecode(trim($ext_line2[0]));
 					$ext_line2[1] = rawurldecode(trim($ext_line2[1]));
 					$ventdata[$ext_line2[0]] = $ext_line2[1];
 				}
-				if (trim($ext_line1[0]) == 'CLIENT'){
+				if (trim($ext_line1[0]) === 'CLIENT'){
 					if ($ventdata['ADMIN']){
-						$calc_values['ADMIN'] += 1;
+						$calc_values['ADMIN']++;
 					}
-					$ventclients[$ventdata['CID']][] = $ventdata;
+					$ventclients[$ventdata['CID']][$ventdata['UID']] = $ventdata;
 				}
-				elseif (trim($ext_line1[0]) == 'CHANNEL'){
+				elseif (trim($ext_line1[0]) === 'CHANNEL'){
 					$ventchannels[$ventdata['PID']][$ventdata['CID']] = $ventdata;
 				}
 			}
 
-			elseif (trim($ext_line1[0]) == 'CLIENTFIELDS'){
-				$ext_line1[1] = rawurldecode($ext_line1[1]);
-				$ventclientindex = explode(",",$ext_line1[1]);
+			elseif (trim($ext_line1[0]) === 'CHANNELFIELDS'){
+//				$ventchannelindex = explode(",",$ext_line1[1]);
+			}
+
+			elseif (trim($ext_line1[0]) === 'CLIENTFIELDS'){
+//				$ventclientindex = explode(",",$ext_line1[1]);
 			}
 			else{
-				$ext_line1[1] = rawurldecode($ext_line1[1]);
-				$ventserver[$ext_line1[0]] = $ext_line1[1];
-			}
-		}
-
-		if (!$usecached){
-			if (isset($ts['id']) && $cache['refreshcache'] != 0){
-				$db->execquery('updatecachedata',savecache(implode("\n", $routput)));
+				$ventserver[rawurldecode($ext_line1[0])] = rawurldecode($ext_line1[1]);
 			}
 		}
 		unset($routput);
@@ -129,7 +138,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 
 		$ventrilo->insert_display('{DATA_STATUS}', $tssettings['Retrieved data status']);
 		if ($tssettings['Retrieved data status']){
-			$cachelive = print_check_cache_lifetime();
+			$cachelive = print_check_cache_lifetime($usecached, $cache, ((isset($tuntilrefresh)) ? $tuntilrefresh : NULL ), $venterror);
 			$ventrilo->insert_content('{DATA_STATUS}', $cachelive);
 		}
 
@@ -225,10 +234,11 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 }
 else{
 	early_error('{TEXT_VENTRILO_EXEC_ERROR;'.$tssettings['Ventrilo status program'].';}<br /><br />
-{TEXT_RETURNED_EXEC_ERROR;'.implode(" ", $routput).' ('.$execcmd.')'.';}');
+{TEXT_RETURNED_ERROR}: '.implode(" ", $routput).' ('.$execcmd.')');
 }
 
 $ventrilo->load_language('lng_index_sub');
+$ventrilo->load_language('lng_index_vent');
 $ventrilo->load_template('tpl_ventrilo');
 $ventrilo->process();
 $ventrilo->output();

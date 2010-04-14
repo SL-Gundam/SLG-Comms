@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: rescache.inc.php,v 1.6 2005/10/03 10:55:53 SC Kruiper Exp $
+ *   $Id: rescache.inc.php,v 1.7 2005/10/21 14:29:26 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -42,7 +42,7 @@ SET
 WHERE `cache_id` = "'.$db->escape_string($variable).'" LIMIT 1;';
 			}
 			$updatecache = $db->execquery('updatecachesetting', $sql);
-			if ($updatecache == true && (!isset($updatecacheall) || $updatecacheall == true)){
+			if ($updatecache === true && (!isset($updatecacheall) || $updatecacheall === true)){
 				$updatecacheall = true;
 			}
 			else{
@@ -50,7 +50,7 @@ WHERE `cache_id` = "'.$db->escape_string($variable).'" LIMIT 1;';
 			}
 		}
 	}
-	if (isset($updatecacheall) && $updatecacheall == true){
+	if (isset($updatecacheall) && $updatecacheall === true){
 		$admin->displaymessage('{TEXT_CACHESETTINGS_UPDATE_SUCCESS}');
 	}
 }

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_settings.php,v 1.4 2005/10/03 10:55:56 SC Kruiper Exp $
+ *   $Id: lng_admin_settings.php,v 1.5 2005/10/21 14:29:27 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -34,7 +34,8 @@ $this->text += array(
 '{TEXT_SETTINGS_NOTE_P2}' => 'Note: Make sure you do this in one login session (Meaning don\'t logout under any surcumstance except for the last step.). You might not be able to login again if you do logout. The only way to correct the situation if you can\'t login again is to do the following.',
 '{TEXT_SETTINGS_NOTE_P3}' => 'Start install.php. It\'s possible you have to upload install.php again if you deleted it.  Select the following as "Installation type": "Rescue attempt". Fill everything with the correct information when asked for it. You should be back up and running soon enough.',
 '{TEXT_UPDATE_SETTINGS}' => 'Update settings',
-'{TEXT_VENTRILO_STAT_PROG_CHECK}' => 'The new file used for the execution of the ventrilo Status program, doesn\'t exist. The setting has been saved but please correct it when necassary.'
+'{TEXT_VENTRILO_STAT_PROG_CHECK}' => 'The new file used for the execution of the ventrilo Status program, doesn\'t exist. The setting has been saved but please correct it when necassary.',
+'{TEXT_NOGROUP}' => 'No suitable groups found.'
 );
 
 $this->text_adv += array(

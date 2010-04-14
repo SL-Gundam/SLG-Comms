@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resadd.inc.php,v 1.5 2005/10/03 10:55:53 SC Kruiper Exp $
+ *   $Id: resadd.inc.php,v 1.6 2005/10/21 14:29:26 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -40,7 +40,7 @@ VALUES (
 		}
 		$sql .= ', "'.$_POST['restype'].'")';
 		$queryinsertres = $db->execquery('queryinsertres',$sql);
-		if ($queryinsertres == true){
+		if ($queryinsertres === true){
 			$admin->displaymessage('{TEXT_RESOURCE_ADD_SUCCESS}');
 		}
 	}
@@ -62,7 +62,7 @@ elseif (isset($_POST['beditres'])) {
 WHERE
   (res_id = '.$_GET['edit'].')';
 		$queryupdateres = $db->execquery('queryupdateres',$sql);
-		if ($queryupdateres == true){
+		if ($queryupdateres === true){
 			$admin->displaymessage('{TEXT_RESOURCE_UPDATE_SUCCESS}');
 		}
 	}
@@ -71,7 +71,7 @@ WHERE
 	}
 }
 
-if ($_GET['resources'] == 'resman' && isset($_GET['edit'])) {
+if ($_GET['resources'] === 'resman' && isset($_GET['edit'])) {
 	$queryeditres = $db->execquery('queryeditres','
 SELECT res_name, res_data, res_type 
 FROM `'.$table['resources'].'`
@@ -87,7 +87,7 @@ FROM
 LIKE
   "res_type"');
 
-if ($_GET['resources'] == 'resman' && isset($_GET['edit'])){
+if ($_GET['resources'] === 'resman' && isset($_GET['edit'])){
 	$form_action_type = 'resman&edit='.$_GET['edit'];
 	$actiontype = '{TEXT_RESOURCE_EDIT}';
 	$resname = htmlspecialchars($roweditres['res_name']);
@@ -120,7 +120,7 @@ reset($fieldtype);
 $type_options = NULL;
 foreach ($fieldtype as $field){
 	$type_options .= '<option value="'.$field.'"';
-	if ($_GET['resources'] == 'resman' && isset($_GET['edit']) && $roweditres['res_type'] == $field){
+	if ($_GET['resources'] === 'resman' && isset($_GET['edit']) && $roweditres['res_type'] == $field){
 		$type_options .= ' selected';
 	}
 	$type_options .= '>'.$field.'</option>';

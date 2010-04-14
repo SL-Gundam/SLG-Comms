@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: admin.php,v 1.22 2005/10/03 10:55:53 SC Kruiper Exp $
+ *   $Id: admin.php,v 1.23 2005/10/21 14:29:25 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -28,7 +28,7 @@ $template = 'admin';
 
 include('includes/secure.inc.php');
 
-$page_title = $tssettings['Page title']; // backup of name before modification by header.inc.php.
+$page_title = $tssettings['Page title']; // backup of name before modification for header.inc.php.
 $tssettings['Page title'] .= ' - {TEXT_ADMIN}';
 include_once('includes/header.inc.php');
 $template = 'admin'; //the include_once for header.inc.php resetted this variable to another value so we set it back to the correct one for further use in this script. this can not be any other order because secure.inc.php requires to be within a template but before any output to the client. So it should be before header.inc.php but after the start of the template of the main working file.
@@ -92,17 +92,17 @@ if (isset($_SESSION['username'])){
 			case 'resources':
 //--------------------------
 				if (isset($_GET['resources'])){
-					if ($_GET['resources'] == 'resadd' || ($_GET['resources'] == 'resman' && isset($_GET['edit']))) {
+					if ($_GET['resources'] === 'resadd' || ($_GET['resources'] === 'resman' && isset($_GET['edit']))) {
 						include('includes/admin/resadd.inc.php');
 						$admin->load_template('admin/tpl_admin_resadd');
 						$admin->load_language('admin/lng_admin_resadd');
 					}
-					elseif ($_GET['resources'] == 'resman') {
+					elseif ($_GET['resources'] === 'resman') {
 						include('includes/admin/resman.inc.php');
 						$admin->load_template('admin/tpl_admin_resman');
 						$admin->load_language('admin/lng_admin_resman');
 					}
-					elseif ($_GET['resources'] == 'rescache'){
+					elseif ($_GET['resources'] === 'rescache'){
 						include('includes/admin/rescache.inc.php');
 						$admin->load_template('admin/tpl_admin_rescache');
 						$admin->load_language('admin/lng_admin_rescache');
