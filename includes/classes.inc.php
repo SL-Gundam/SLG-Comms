@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.17 2005/06/30 19:40:04 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.18 2005/07/30 00:10:43 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -92,11 +92,11 @@ class template{
 			$error .= '<pre class="error2">';
 			if (defined("DEBUG")){
 				$error .= '
-Query: '.wordwrap($sql, 125).'
+Query: '.wordwrap($sql, 100).'
 
 ';
 			}
-			$error .= 'Error: '.wordwrap($sqlerror, 125).'
+			$error .= 'Error: '.wordwrap($sqlerror, 100).'
 </pre>';
 		}
 		$error .= '</td></tr></table><p></p>';

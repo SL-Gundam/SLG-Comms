@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.28 2005/07/01 18:35:38 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.30 2005/07/30 00:35:49 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -50,7 +50,7 @@ else{
 
 if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went ok OR no response from server. 3 = unable to resolve hostname error.
 	if (isset($routput[0]) && strncasecmp($routput[0], "ERROR", 5) == 0){
-		$pre_error = $routput[0];
+		$pre_error = implode("<br />", $routput);
 		$venterror = true;
 		if (!empty($cache['data'])){
 			$usecached = true;
@@ -72,6 +72,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 			if (trim($start1) == 'CHANNELFIELDS'){
 				$ventchannelindex = explode(",",$end1);
 			}
+
 			elseif (trim($start1) == 'CHANNEL'){
 				$loutput = explode(",",$end1);
 				foreach($loutput as $line2){
@@ -80,13 +81,9 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 					$end2 = substr($line2, $diffisor2+1);
 					$ventchannel[$start2] = $end2;
 				}
-				if ($ventchannel['PID'] != 0){
-					$ventsubchannels[$ventchannel['PID']][] = $ventchannel;
-				}
-				else{
-					$ventchannels[] = $ventchannel;
-				}
+				$ventchannels[$ventchannel['PID']][$ventchannel['CID']] = $ventchannel;
 			}
+
 			elseif (trim($start1) == 'CLIENTFIELDS'){
 				$ventclientindex = explode(",",$end1);
 			}
@@ -114,7 +111,6 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 
 //		print_r($ventserver);
 //		print_r($ventchannels);
-//		print_r($ventsubchannels);
 //		print_r($ventclients);
 //		print_r($ventchannelindex);
 //		print_r($ventclientindex);
@@ -147,8 +143,6 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 ## DISPLAY ##
 #############
 
-		uasort($ventchannels, "SORT_VENTCHANNELS");
-		reset($ventchannels);
 		$alt_title_content = '{TEXT_SERVER_NAME}: {SERVER_NAME}
 {TEXT_SERVER_PHONETIC}: {SERVER_PHONETIC}
 {TEXT_PLATFORM}: {PLATFORM}
@@ -197,99 +191,14 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 			}
 		} 
 
-		foreach($ventchannels as $channel){
-			//Information echo'en...
-			$alt_title_content = '{TEXT_CHANNEL}: '. $channel['NAME'].'
-{TEXT_PASSWORD_PROT}: '.(($channel['PROT']) ? '{TEXT_YES}' : '{TEXT_NO}' );
+		$server_content .= vent_channels($ventchannels, $ventclients);
 
-			$alt_title_content = htmlentities($alt_title_content);
-
-			$server_content .= '    <tr class="channel_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="channel_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_CH}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="16" height="16" src="images/vent/'. (($channel['PROT']) ? 'p' : 'n' ) .'channel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($channel['NAME']).'</a>
-      </p></td>
-	  <td nowrap><p>&nbsp;</p></td>
-	</tr>
-';
- 
-			//Playerdata...
-			if (isset($ventclients[$channel['CID']])){
-				uasort($ventclients[$channel['CID']], "SORT_VENTCHANNELS");
-				reset($ventclients[$channel['CID']]);
-
-				foreach($ventclients[$channel['CID']] as $player){ 
-					//Informatie echo'en...
-					$alt_title_content = '{TEXT_NAME}: '.$player['NAME'].'
-{TEXT_ADMIN}: '.(($player['ADMIN']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
-{TEXT_LOGGEDINFOR}: '.formattime($player['SEC']).'
-
-'.wordwrap('{TEXT_COMMENT}: '.$player['COMM'], 50, "\n");
-
-					$alt_title_content = htmlentities($alt_title_content);
-
-					$server_content .= '    <tr class="client_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'</a>
-      </p></td>
-	  <td nowrap><p>'.$player['PING'].'ms</p></td>
-	</tr>
-';
-				}
-			} 
-
-			//Sub-Channel Data
-			if (isset($ventsubchannels[$channel['CID']])){
-				uasort($ventsubchannels[$channel['CID']], "SORT_VENTCHANNELS");
-				reset($ventsubchannels[$channel['CID']]);
-
-				foreach($ventsubchannels[$channel['CID']] as $subchannel){
-					//Sub-Channel Informatie echo'en...
-					$alt_title_content = '{TEXT_SUBCHANNEL}: '. $subchannel['NAME'].'
-{TEXT_PASSWORD_PROT}: '.(($subchannel['PROT']) ? '{TEXT_YES}' : '{TEXT_NO}' );
-
-					$alt_title_content = htmlentities($alt_title_content);
-
-					$server_content .= '    <tr class="channel_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="channel_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_CH}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/'. (($channel['PROT']) ? 'p' : 'n' ) .'channel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($subchannel['NAME']) .'</a>
-      </p></td>
-	  <td nowrap><p>&nbsp;</p></td>
-	</tr>
-';
-
-					//Playerdata in subchannel...
-					if (isset($ventclients[$subchannel['CID']])){
-						uasort($ventclients[$subchannel['CID']], "SORT_VENTCHANNELS");
-						reset($ventclients[$subchannel['CID']]);
-
-						foreach($ventclients[$subchannel['CID']] as $player){
-							//Informatie echo'en...
-							$alt_title_content = '{TEXT_NAME}: '.$player['NAME'].'
-{TEXT_ADMIN}: '.(($player['ADMIN']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
-{TEXT_LOGGEDINFOR}: '.formattime($player['SEC']).'
-
-'.wordwrap('{TEXT_COMMENT}: '.$player['COMM'], 50, "\n");
-
-							$alt_title_content = htmlentities($alt_title_content);
-
-							$server_content .= '    <tr class="client_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'</a>
-      </p></td>
-	  <td nowrap><p>'.$player['PING'].'ms</p></td>
-	</tr>
-';
-						}
-					}
-				}
-			}
-		}
 		$ventrilo->insert_content('{CHANNEL_INFO_CONTENT}', $server_content);
 	}
 }
 else{
 	early_error('{TEXT_VENTRILO_EXEC_ERROR;'.$tssettings['Ventrilo status program'].';}<br /><br />
-{TEXT_RETURNED_EXEC_ERROR;'.implode("", $routput).' ('.$execcmd.')'.';}');
+{TEXT_RETURNED_EXEC_ERROR;'.implode("<br />", $routput).' ('.$execcmd.')'.';}');
 }
 
 $ventrilo->load_language('lng_index_sub');

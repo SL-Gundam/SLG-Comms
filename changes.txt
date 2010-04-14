@@ -1,3 +1,12 @@
+v2.1.5
+- Improved error reporting for ventrilo servers a tiny bit.
+- Fixed Subchannels problem with subchannels within subchannels
+- Added support for PhpBB 2.0.17
+
+v2.1.5 template changes
+- Added the copyright html head tag.
+- Added css body tag for custom style scroll bar and set defaults for the page.
+
 v2.1.4
 - improved version updater for NO-DATABASE mode updates
 - decreased number of required images in Channel information pane
