@@ -1,3 +1,44 @@
+v3.2.0
+- New language placeholder in lng_earlyerrrors.php called: {TEXT_UNKNOWN_EXEC_ERROR}
+- Added proper error message incase safe mode is activated and if thats causing problems for SLG Comms.
+- Added TSViewer.com support (permission and help from TSViewer.com, Ginger)
+- UTF8 support disabled since all TeamSpeak and Ventrilo servers utilize Latin1 charsets which caused some abnormalities
+- Fixed some small typos in the english language files.
+- Large amount of changes to the security scripts to support PhpBB3
+- Small improvements to the template processing class
+- Fixed a small glitch for new installations where proper fixing of "Forum_relative_path" was not done properly. This required the user to allways enter a slash at the end.
+- Fixed the ability to download dbsettings.inc.php if SLG Comms could not save it automatically, It seems this was broken in all the v3.x.x versions of SLG Comms
+- Changed the name for the phpnuke forums profile from "PHP-Nuke 7.8-8.0 + PhpBB 2.0.7" to "PHP-Nuke 7.8-8.0 + PhpBB port 2.0.7"
+- Changed MB, GB and others to MiB, GiB and other equivalents in lng_index_ts.php
+- Added support for Burning Board 3.0.0-3.0.7
+- Added support for Burning Board Lite 2.0.0
+- Added support for Invision Power Board 2.3.5
+- Added support for PhpBB 2.0.23
+- Added support for PhpBB 3.0.2
+- Added support for SMF (Simple Machines Forum) 1.0.13
+- Added support for SMF (Simple Machines Forum) 1.1.5
+- Added support for vBulletin 3.7.2
+
+v3.2.0 - Template changes
+- Template: "Default compact" - The stylesheet main.css has "margin: 0" on the body tag now.
+- Changed copyright notice to include 2008
+- Template: "Default 2" - The admin pages have been improved a tiny bit. Its still not as it should but its getting a bit closer
+
+v3.1.1 - NOT PUBLICLY RELEASED
+- New language placeholder in lng_index_vent.php called: {TEXT_USERAUTH}
+- Removed language placeholder in lng_header.php called: {CHARSET}
+- Added a extra trim to the error handling of connecting to servers
+- Fixed a missing GLOBALS variable during error handling operations in footer.inc.php (NOTICE level error)
+- Added a new language: French (Provided by Peloo)
+- Fixed some small typos in the english language files.
+- Support for Ventrilo v3.0.0 is now available.
+- UTF8 support added
+- Added support for SimpleMachinesForum (SMF) 1.1.4
+
+v3.1.1 - Template changes - NOT PUBLICLY RELEASED
+- Changed copyright notice to include 2007
+- New pictures in /templates/[TEMPLATE HERE]/images/ventrilo/ for ventrilo channels: achannel.gif and achannel-ext.gif
+
 v3.1.0
 - Removed language item from lng_index.php: "{TEXT_IP_PORT_COMB_ERROR}" (still present in lng_earlyerrors.php)
 - Renamed the language item "{TEXT_NOGROUP}" in lng_earlyerrors.php to "{TEXT_NOGROUP_INSTALL}"
@@ -11,7 +52,7 @@ v3.1.0
 - Fixed some problems which backslashes and forward slashes in server variables.
 - Fixed a problem during installation with the dirname function.
 - Modified a english language line in lng_index.php
-- Adjusted name of Xoops forum support from Xoops 2.2.3 -> Xoops 2.2.3a because it's a unstable alpha release
+- Adjusted name of Xoops forum support from Xoops 2.2.3 -> Xoops 2.2.3a because it's an unstable alpha release
 - TeamSpeak server data retrieval timeout set from 15 to 20 secs
 - Changed required php version to 4.2.3 due to changes in the code which required this version or higher.
 - Fixed a bug where SLG Comms didn't display a proper error in some situations when selecting a forum group during installation of SLG Comms

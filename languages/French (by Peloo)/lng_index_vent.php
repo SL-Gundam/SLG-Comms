@@ -1,12 +1,12 @@
 <?php
 /***************************************************************************
- *                              lng_header.php
+ *                             lng_index_vent.php
  *                            -------------------
  *   begin                : Saturday, March 13, 2005
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_header.php,v 1.14 2007/11/17 00:18:18 SC Kruiper Exp $
+ *   $Id: lng_index_vent.php,v 1.2 2007/11/17 00:18:18 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -27,13 +27,16 @@ if ( !defined("IN_SLG") )
 }
 
 $this->text += array(
-'{TEXT_ADMIN}'                => 'Administration',
-'{TEXT_INDEX}'                => 'Frontpage',
-'{TEXT_INSTALLATION}'         => 'Installation',
-'{TEXT_UNKNOWN_TITLE}'        => 'SLG Comms - No page title present',
-);
-
-$this->tooltips += array(
-'{TEXT_SHOW_HELPTEXT_TIMER}'  => 'Click to enable or disable the automatic page refresh timer.',
+'{TEXT_ADMIN}'                  => 'Administrateur?',
+'{TEXT_ADMINS_CON}'             => 'Administrateurs en ligne',
+'{TEXT_CHANNELDATA_DISABLED}'   => 'L\'information du canal invalidée par l\'administrateur du serveur Ventrilo.',
+'{TEXT_CLIENTDATA_DISABLED}'    => 'L\'information sur le client invalidée par l\'administrateur du serveur Ventrilo .',
+'{TEXT_COMMENT}'                => 'Commentaire',
+'{TEXT_PHANTOM}'                => 'Fantôme?',
+'{TEXT_SERVER_PHONETIC}'        => 'Serveur phonétique',
+'{TEXT_UNKNOWN}'                => 'Inconnu',
+'{TEXT_VOICECODEC}'             => 'Codec de voix',
+'{TEXT_VOICEFORMAT}'            => 'Format du codec de voix',
+'{TEXT_USERAUTH}'               => 'Authentification d\'utilisateur'
 );
 ?>

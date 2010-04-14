@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: header.inc.php,v 1.31 2007/01/30 16:16:47 SC Kruiper Exp $
+ *   $Id: header.inc.php,v 1.32 2007/11/17 00:18:18 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -28,6 +28,7 @@ if ( !defined("IN_SLG") )
 $header = new template;
 $template = 'header';
 
+$header->apply_utf8_charset();
 
 $header->insert_content( '{PAGE_TITLE}', ( ( isset($GLOBALS['tssettings']['Page_title']) ) ? $GLOBALS['tssettings']['Page_title'] : '{TEXT_UNKNOWN_TITLE}' ) );
 

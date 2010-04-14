@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resman.inc.php,v 1.22 2006/06/04 15:43:47 SC Kruiper Exp $
+ *   $Id: resman.inc.php,v 1.23 2008/03/24 16:07:50 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -66,7 +66,7 @@ while ( $rowres = $db->getrow($querygetres) )
 {
 	$resman_content .= '
 	<tr>
-		<td nowrap><p class="para" title="' . htmlentities( $rowres['res_name'] ) . '">' . ( ( $rowres['res_type'] === 'TeamSpeak' || $rowres['res_type'] === 'Ventrilo' ) ? '<a href="index.php?ipbyname=' . $rowres['res_id'] . '" target="_blank">' : NULL ) . htmlentities( linewrap( $rowres['res_name'], 20 ) ) . ( ( $rowres['res_type'] === 'TeamSpeak' || $rowres['res_type'] === 'Ventrilo' ) ? '</a>' : NULL ) . '</p></td>
+		<td nowrap><p class="para" title="' . htmlentities( $rowres['res_name'] ) . '">' . ( ( $rowres['res_type'] === 'TeamSpeak' || $rowres['res_type'] === 'TSViewer.com' || $rowres['res_type'] === 'Ventrilo' ) ? '<a href="index.php?ipbyname=' . $rowres['res_id'] . '" target="_blank">' : NULL ) . htmlentities( linewrap( $rowres['res_name'], 20 ) ) . ( ( $rowres['res_type'] === 'TeamSpeak' || $rowres['res_type'] === 'Ventrilo' ) ? '</a>' : NULL ) . '</p></td>
 		<td nowrap><p class="para" title="' . htmlentities( $rowres['res_data'] ) . '">' . htmlentities( linewrap( $rowres['res_data'], 30 ) ) . '</p></td>
 		<td nowrap><p class="para">' . $rowres['res_type'] . '</p></td>
 		<td nowrap><p class="para"><a href="admin.php?page=resources&resources=resedit&edit=' . $rowres['res_id'] . '">{TEXT_EDIT}</a></p></td>

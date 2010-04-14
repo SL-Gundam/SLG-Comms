@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.48 2007/01/29 22:49:17 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.51 2008/08/12 22:59:41 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -53,6 +53,10 @@ function forum_existence_check( $forumtype, $forumpath )
 		case 'bboardlite102':
 		case 'bboardfull234':
 			$conf_file .= 'acp/lib/config.inc.php';
+			break;
+
+		case 'bboardlite200':
+			$conf_file .= 'config.inc.php';
 			break;
 
 		case 'ipb131':
@@ -145,20 +149,17 @@ SELECT
   `userid` AS userid,
   `username` AS username,
   `username` AS realname,
+  `password` AS password1,
   `groupid` AS groupid
 FROM
   `%1$s`
 WHERE
-  `username` = "%2$s" AND
-  `password` = "%3$s" AND
-  `groupid` = %4$u
+  `username` = "%2$s"
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -204,25 +205,79 @@ SELECT
   MEM.`userid` AS userid,
   MEM.`username` AS username,
   MEM.`username` AS realname,
+  MEM.`password` AS password1,
+  MEM.`sha1_password` AS password2,
   GRM.`groupids` AS groupid
 FROM
   `%1$s` AS MEM,
   `%2$s` AS GRM
 WHERE
   MEM.`groupcombinationid` = GRM.`groupcombinationid` AND
-  MEM.`username` = "%3$s" AND
-  MEM.`password` = "%4$s" AND
-  MEM.`sha1_password` = "%5$s" AND
-  %6$u IN (GRM.`groupids`)
+  MEM.`username` = "%3$s"
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] ),
-						sha1( $action_login['fpasswd'] ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
+					);
+				}
+				break;
+
+/* START - BBOARDLITE200 */
+			case 'bboardlite200':
+				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'config.inc.php' );
+				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . RELATIVE_WCF_DIR . 'config.inc.php' );
+
+				if ( !defined('WCF_N') || !isset( $dbName, $dbHost, $dbUser, $dbPassword) )
+				{
+					early_error( '{TEXT_INVALID_CONF_FILE}' );
+				}
+
+				$forumsettings['alt_db_host'] = $dbHost;
+				$forumsettings['alt_db_name'] = $dbName;
+				$forumsettings['alt_db_user'] = $dbUser;
+				$forumsettings['alt_db_passwd'] = $dbPassword;
+
+				if ( $action_login === false )
+				{
+					$table['groups'] = 'wcf' . WCF_N . '_group';
+
+					$forumsettings['groups_sql'] = '
+SELECT
+  `groupID` AS groupid,
+  `groupName` AS groupname
+FROM
+  `%1$s`
+ORDER BY
+  `groupName`';
+
+					$forumsettings['groups_sql_params'] = $table['groups'];
+				}
+				else
+				{
+					$table['members'] = 'wcf' . WCF_N . '_user';
+					$table['groupmembers'] = 'wcf' . WCF_N . '_user_to_groups';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  MEM.`userID` AS userid,
+  MEM.`username` AS username,
+  MEM.`username` AS realname,
+  MEM.`password` AS password1,
+  MEM.`salt` AS password1_salt,
+  GRP.`groupID` AS groupid
+FROM
+  `%1$s` AS MEM,
+  `%2$s` AS GRP
+WHERE
+  MEM.`userID` = GRP.`userID` AND
+  `username` = "%3$s"';
+
+					$forumsettings['authchecksql_params'] = array(
+						$table['members'],
+						$table['groupmembers'],
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -265,20 +320,17 @@ SELECT
   `id` AS userid,
   `name` AS username,
   `name` AS realname,
+  `password` AS password1,
   `mgroup` AS groupid
 FROM
   `%1$s`
 WHERE
-  `name` = "%2$s" AND
-  `password` = "%3$s" AND
-  `mgroup` = %4$u
+  `name` = "%2$s"
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -322,6 +374,8 @@ SELECT
   MEM.`id` AS userid,
   MEM.`name` AS username,
   MEM.`name` AS realname,
+  CON.`converge_pass_hash` AS password1,
+  CON.`converge_pass_salt` AS password1_salt,
   MEM.`mgroup` AS groupid,
   MEM.`mgroup_others` AS additionalgroups
 FROM
@@ -329,18 +383,13 @@ FROM
   `%2$s` AS CON
 WHERE
   MEM.`id` = CON.`converge_id` AND
-  MEM.`name` = "%3$s" AND
-  CON.`converge_pass_hash` = MD5(CONCAT(MD5(CON.`converge_pass_salt`), "%4$s")) AND
-  ((TRIM(BOTH "," FROM MEM.`mgroup`) = %5$u) OR 
-  (%5$u IN (TRIM(BOTH "," FROM MEM.`mgroup_others`))))
+  MEM.`name` = "%3$s"
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['memconverge'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -386,6 +435,7 @@ SELECT
   MEM.`user_id` AS userid,
   MEM.`username` AS username,
   MEM.`username` AS realname,
+  MEM.`user_password` AS password1,
   GRM.`group_id` AS groupid
 FROM
   `%1$s` AS MEM,
@@ -393,14 +443,12 @@ FROM
 WHERE
   MEM.`user_id` = GRM.`user_id` AND
   MEM.`username` = "%3$s" AND
-  MEM.`user_password` = "%4$s" AND
   MEM.`user_active` = 1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] )
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -444,6 +492,8 @@ SELECT
   MEM.`user_id` AS userid,
   MEM.`username` AS username,
   MEM.`username` AS realname,
+  MEM.`username_clean` AS username_clean,
+  MEM.`user_password` AS password1,
   GRM.`group_id` AS groupid
 FROM
   `%1$s` AS MEM,
@@ -451,14 +501,12 @@ FROM
 WHERE
   MEM.`user_id` = GRM.`user_id` AND
   MEM.`username` = "%3$s" AND
-  MEM.`user_password` = "%4$s" AND
   MEM.`user_type` != 2';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] )
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -504,6 +552,7 @@ SELECT
   MEM.`user_id` AS userid,
   MEM.`username` AS username,
   MEM.`name` AS realname,
+  MEM.`user_password` AS password1,
   GRM.`group_id` AS groupid
 FROM
   `%1$s` AS MEM,
@@ -511,14 +560,12 @@ FROM
 WHERE
   MEM.`user_id` = GRM.`user_id` AND
   MEM.`username` = "%3$s" AND
-  MEM.`user_password` = "%4$s" AND
   MEM.`user_active` = 1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] )
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -563,23 +610,19 @@ SELECT
   `ID_MEMBER` AS userid,
   `memberName` AS username,
   `realName` AS realname,
+  `passwd` AS password1,
   `ID_GROUP` AS groupid,
   `additionalGroups` AS additionalgroups
 FROM
   `%1$s` 
 WHERE
   `memberName` = "%2$s" AND
-  `passwd` = "%3$s" AND
-  `is_activated` = 1 AND
-  ((`ID_GROUP` = %4$u) OR 
-  (%4$u IN (`additionalGroups`)))
+  `is_activated` = 1
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5_hmac( $action_login['fpasswd'], strtolower( $action_login['fusername'] ) ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -624,23 +667,19 @@ SELECT
   `ID_MEMBER` AS userid,
   `memberName` AS username,
   `realName` AS realname,
+  `passwd` AS password1,
   `ID_GROUP` AS groupid,
   `additionalGroups` AS additionalgroups
 FROM
   `%1$s` 
 WHERE
   `memberName` = "%2$s" AND
-  `passwd` = "%3$s" AND
-  `is_activated` = 1 AND
-  ((`ID_GROUP` = %4$u) OR 
-  (%4$u IN (`additionalGroups`)))
+  `is_activated` = 1
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						sha1( strtolower( $action_login['fusername'] ) . ( $action_login['fpasswd'] ) ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -685,22 +724,19 @@ SELECT
   `userid` AS userid,
   `username` AS username,
   `username` AS realname,
+  `password` AS password1,
+  `salt` AS password1_salt,
   `usergroupid` AS groupid,
   `membergroupids` AS additionalgroups
 FROM
   `%1$s` 
 WHERE
-  `username` = "%2$s" AND
-  `password` = MD5(CONCAT("%3$s", `salt`)) AND
-  ((`usergroupid` = %4$u) OR 
-  (%4$u IN (`membergroupids`)))
+  `username` = "%2$s"
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -745,27 +781,24 @@ SELECT
   `userid` AS userid,
   `username` AS username,
   `username` AS realname,
+  `password` AS password1,
+  `salt` AS password1_salt,
   `usergroupid` AS groupid,
   `membergroupids` AS additionalgroups
 FROM
   `%1$s` 
 WHERE
-  `username` = "%2$s" AND
-  `password` = MD5(CONCAT("%3$s", `salt`)) AND
-  ((`usergroupid` = %4$u) OR 
-  (%4$u IN (`membergroupids`)))
+  `username` = "%2$s"
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] ),
-						$settings['Forum_group']
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
 
-/* START - xoops_cbb */
+/* START - XOOPS_CBB */
 			case 'xoops_cbb':
 				$xoopsOption['nocommon'] = true;
 				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'mainfile.php' );
@@ -807,20 +840,19 @@ SELECT
   MEM.`uid` AS userid,
   MEM.`loginname` AS username,
   MEM.`uname` AS realname,
+  MEM.`pass` AS password1,
   GRM.`groupid` AS groupid
 FROM
   `%1$s` AS MEM,
   `%2$s` AS GRM
 WHERE
   MEM.`uid` = GRM.`uid` AND
-  MEM.`loginname` = "%3$s" AND
-  MEM.`pass` = "%4$s"';
+  MEM.`loginname` = "%3$s"';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
-						md5( $action_login['fpasswd'] )
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
 					);
 				}
 				break;
@@ -834,6 +866,76 @@ WHERE
 	}
 
 	return( $forumsettings );
+}
+
+function check_password( $login_information, $database_information )
+{
+	$login_result = FALSE;
+	
+	switch ( $GLOBALS['tssettings']['Forum_type'] )
+	{
+		case 'bboardlite102':
+		case 'ipb131':
+		case 'phpbb2015':
+		case 'phpnuke78_phpbb207':
+		case 'xoops_cbb':
+			if ( $database_information['password1'] === md5( $login_information['fpasswd'] ) )
+				$login_result = TRUE;
+
+			break;
+
+		case 'bboardfull234':
+			if ( $database_information['password1'] === md5( $login_information['fpasswd'] ) && $database_information['password2'] === sha1( $login_information['fpasswd'] ) )
+				$login_result = TRUE;
+
+			break;
+
+		case 'bboardlite200':
+			require( $GLOBALS['tssettings']['Root_path'] . $GLOBALS['tssettings']['Forum_relative_path'] . RELATIVE_WBB_DIR . 'options.inc.php' );
+			require( $GLOBALS['tssettings']['Root_path'] . $GLOBALS['tssettings']['Forum_relative_path'] . RELATIVE_WCF_DIR . 'lib/util/StringUtil.class.php' );
+			if ( $database_information['password1'] === StringUtil::getDoubleSaltedHash( $login_information['fpasswd'], $database_information['password1_salt'] ) )
+				$login_result = TRUE;
+
+			break;
+
+		case 'ipb204':
+			if ( $database_information['password1'] === md5( md5( $database_information['password1_salt'] ) . md5( $login_information['fpasswd'] ) ) )
+				$login_result = TRUE;
+
+			break;
+
+		case 'phpbb3':
+			define('IN_PHPBB', 10);
+			require( $GLOBALS['tssettings']['Root_path'] . $GLOBALS['tssettings']['Forum_relative_path'] . 'includes/functions.php' );
+			if ( phpbb_check_hash( $login_information['fpasswd'], $database_information['password1'] ) === TRUE )
+				$login_result = TRUE;
+
+			break;
+
+		case 'smf103':
+			if ( $database_information['password1'] === md5_hmac( $login_information['fpasswd'], strtolower( $login_information['fusername'] ) ) )
+				$login_result = TRUE;
+
+			break;
+
+		case 'smf110':
+			if ( $database_information['password1'] === sha1( strtolower( $login_information['fusername'] ) . $login_information['fpasswd'] ) )
+				$login_result = TRUE;
+
+			break;
+
+		case 'vb307':
+		case 'vb350':
+			if ( $database_information['password1'] === md5( md5( $login_information['fpasswd'] ) . $database_information['password1_salt'] ) )
+				$login_result = TRUE;
+
+			break;
+
+		default:
+			early_error( '{TEXT_UNKNOWN_FORUMTYPE_ERROR}' );
+	}
+
+	return( $login_result );
 }
 
 // this function handles the forum database connection
@@ -1032,7 +1134,7 @@ function create_settingslist( &$settings )
 				$sql = '
 SELECT `res_id`, `res_name`
 FROM `%1$s`
-WHERE `res_type` IN ("TeamSpeak","Ventrilo")
+WHERE `res_type` IN ("TeamSpeak","TSViewer.com","Ventrilo")
 ORDER BY `res_name`';
 				$getservers = $GLOBALS['db']->execquery( 'getservers', $sql, $GLOBALS['table']['resources'] );
 				unset( $sql );
@@ -1050,7 +1152,7 @@ ORDER BY `res_name`';
 				break;
 
 			case 'Forum_group':
-				handle_forum_db_connection();
+				handle_forum_db_connection( false );
 
 				if ( isset($GLOBALS['forumsettings']['groups_sql']) )
 				{
@@ -1095,15 +1197,16 @@ ORDER BY `res_name`';
 				$settingslist .= '<select id="set_value_' . $setting['variable'] . '" name="variable[' . $setting['variable'] . ']" class="textline">
 <option value="bboardlite102"' . ( ( $setting['value'] === 'bboardlite102' ) ? ' selected' : NULL ) . '>Burning Board Lite 1.0.2</option>
 <option value="bboardfull234"' . ( ( $setting['value'] === 'bboardfull234' ) ? ' selected' : NULL ) . '>Burning Board 2.3.4-2.3.6</option>
+<option value="bboardlite200"' . ( ( $setting['value'] === 'bboardlite200' ) ? ' selected' : NULL ) . '>Burning Board 3.0.0-3.0.7 / Lite 2.0.0</option>
 <option value="ipb131"' . ( ( $setting['value'] === 'ipb131' ) ? ' selected' : NULL ) . '>Invision Power Board 1.3.1</option>
-<option value="ipb204"' . ( ( $setting['value'] === 'ipb204' ) ? ' selected' : NULL ) . '>Invision Power Board 2.0.3-2.2.1</option>
-<option value="phpbb2015"' . ( ( $setting['value'] === 'phpbb2015' ) ? ' selected' : NULL ) . '>PhpBB 2.0.9-2.0.22</option>
-<option value="phpbb3"' . ( ( $setting['value'] === 'phpbb3' ) ? ' selected' : NULL ) . '>PhpBB 3 Beta 4-Beta 5</option>
-<option value="phpnuke78_phpbb207"' . ( ( $setting['value'] === 'phpnuke78_phpbb207' ) ? ' selected' : NULL ) . '>PHP-Nuke 7.8-8.0 + PhpBB 2.0.7</option>
-<option value="smf103"' . ( ( $setting['value'] === 'smf103' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.0.3-1.0.10</option>
-<option value="smf110"' . ( ( $setting['value'] === 'smf110' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.1.0-1.1.1</option>
+<option value="ipb204"' . ( ( $setting['value'] === 'ipb204' ) ? ' selected' : NULL ) . '>Invision Power Board 2.0.3-2.3.5</option>
+<option value="phpbb2015"' . ( ( $setting['value'] === 'phpbb2015' ) ? ' selected' : NULL ) . '>PhpBB 2.0.9-2.0.23</option>
+<option value="phpbb3"' . ( ( $setting['value'] === 'phpbb3' ) ? ' selected' : NULL ) . '>PhpBB 3.0.2</option>
+<option value="phpnuke78_phpbb207"' . ( ( $setting['value'] === 'phpnuke78_phpbb207' ) ? ' selected' : NULL ) . '>PHP-Nuke 7.8-8.0 + PhpBB port 2.0.7</option>
+<option value="smf103"' . ( ( $setting['value'] === 'smf103' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.0.3-1.0.13</option>
+<option value="smf110"' . ( ( $setting['value'] === 'smf110' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.1.0-1.1.5</option>
 <option value="vb307"' . ( ( $setting['value'] === 'vb307' ) ? ' selected' : NULL ) . '>vBulletin v3.0.7</option>
-<option value="vb350"' . ( ( $setting['value'] === 'vb350' ) ? ' selected' : NULL ) . '>vBulletin v3.5.0-3.6.4</option>
+<option value="vb350"' . ( ( $setting['value'] === 'vb350' ) ? ' selected' : NULL ) . '>vBulletin v3.5.0-3.7.2</option>
 <option value="xoops_cbb"' . ( ( $setting['value'] === 'xoops_cbb' ) ? ' selected' : NULL ) . '>XOOPS 2.2.3a-2.2.5 RC2 + CBB 2.32-3.07</option>
 </select>';
 				break;

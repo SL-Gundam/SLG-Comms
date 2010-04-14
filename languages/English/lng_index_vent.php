@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index_vent.php,v 1.6 2006/06/11 20:32:45 SC Kruiper Exp $
+ *   $Id: lng_index_vent.php,v 1.7 2007/11/17 00:18:18 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -37,5 +37,6 @@ $this->text += array(
 '{TEXT_UNKNOWN}'                => 'Unknown',
 '{TEXT_VOICECODEC}'             => 'Voice codec',
 '{TEXT_VOICEFORMAT}'            => 'Voice codec format',
+'{TEXT_USERAUTH}'               => 'User Authentication',
 );
 ?>

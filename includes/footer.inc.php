@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.43 2007/01/30 16:16:47 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.45 2007/11/18 00:15:24 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -170,7 +170,7 @@ if ( isset($GLOBALS['starttime']) && ( !isset($GLOBALS['tssettings']['Page_gener
 		ini_get('zlib.output_compression') ||
 		in_array('mod_deflate', $gzipmod) ||
 		in_array('mod_gzip', $gzipmod) ||
-		$tssettings['GZIP_Compression']
+		( isset($GLOBALS['tssettings']['GZIP_Compression']) && $GLOBALS['tssettings']['GZIP_Compression'] == true )
 	) ? 'GZIP enabled' : 'GZIP disabled' );
 
 	unset( $gzipmod, $gzipheaders );

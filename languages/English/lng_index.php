@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index.php,v 1.15 2006/08/24 20:10:19 SC Kruiper Exp $
+ *   $Id: lng_index.php,v 1.17 2008/08/10 20:34:05 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -55,6 +55,8 @@ Without password: "192.168.120.250:3784"
 
 And this format for TeamSpeak:
 With queryport: "192.168.120.250:6464:41234"
-Without queryport: "192.168.120.250:6464"',
+Without queryport: "192.168.120.250:6464"
+
+Incase of TSViewer.com, just fill in the Registration ID of your server. Your TeamSpeak server needs to be in the TSViewer.com database, so it\'s possible you still need to register your TeamSpeak server on www.TSViewer.com. TSViewer.com does not support the "Custom server" feature',
 );
 ?>

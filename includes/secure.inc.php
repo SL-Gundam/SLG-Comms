@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.38 2007/01/29 22:49:17 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.41 2008/08/12 22:59:41 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -49,8 +49,7 @@ if ( checkfilelock('admin.php') )
 	if ( isset($_POST['login'], $_POST['fusername'], $_POST['fpasswd']) )
 	{
 		handle_forum_db_connection( array(
-			'fusername' => $_POST['fusername'],
-			'fpasswd'   => $_POST['fpasswd']
+			'fusername' => $_POST['fusername']
 		) );
 
 		$authresult = $GLOBALS[ $GLOBALS['forumdatabase'] ]->execquery( 'authcheckquery', $forumsettings['authchecksql'], $forumsettings['authchecksql_params'] );
@@ -59,76 +58,78 @@ if ( checkfilelock('admin.php') )
 
 		if ( $GLOBALS[ $GLOBALS['forumdatabase'] ]->numrows($authresult) > 0 )
 		{
-			while ( $authrow = $GLOBALS[ $GLOBALS['forumdatabase'] ]->getrow($authresult) )
+			$authrow = $GLOBALS[ $GLOBALS['forumdatabase'] ]->getrow($authresult);
+			if ( check_password( $_POST, $authrow ) )
 			{
-				if (
-					( $tssettings['Forum_type'] !== 'phpbb2015' && $tssettings['Forum_type'] !== 'phpbb3' && $tssettings['Forum_type'] !== 'xoops_cbb' && $tssettings['Forum_type'] !== 'phpnuke78_phpbb207' ) || 
-					( ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'phpbb3' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' ) && $authrow['groupid'] == $tssettings['Forum_group'] )
-				)
-				{
-					$sql = '
+				$sql = '
 DELETE FROM `%1$s`
 WHERE `session_user_id` = %2$u';
-					$db->execquery( 'logincleanquery', $sql, array(
-						$table['sessions'],
-						$authrow['userid']
-					) );
+				$db->execquery( 'logincleanquery', $sql, array(
+					$table['sessions'],
+					$authrow['userid']
+				) );
 
-					$sql = '
+				$sql = '
 INSERT INTO `%1$s`
 ( `session_id` , `session_user_id` , `session_ip` )
 VALUES 
 ( "%2$s" , %3$u, "%4$s" )'; 
-					$db->execquery( 'loginquery', $sql, array(
-						$table['sessions'],
-						md5( session_id() ),
-						$authrow['userid'],
-						md5( $_SERVER['REMOTE_ADDR'] )
-					) );
-					unset( $sql );
-					$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_LOGIN_SUCCESS}' );
+				$db->execquery( 'loginquery', $sql, array(
+					$table['sessions'],
+					md5( session_id() ),
+					$authrow['userid'],
+					md5( $_SERVER['REMOTE_ADDR'] )
+				) );
+				unset( $sql );
 
-					$_SESSION['user_id'] = $authrow['userid'];
-					$_SESSION['username'] = $authrow['username'];
-					$_SESSION['realname'] = ( ( !empty($authrow['realname']) ) ? $authrow['realname'] : $authrow['username'] );
+				$_SESSION['user_id'] = $authrow['userid'];
+				$_SESSION['username'] = $authrow['username'];
+				$_SESSION['realname'] = ( ( !empty($authrow['realname']) ) ? $authrow['realname'] : $authrow['username'] );
 
-					if (
-						$tssettings['Forum_type'] === 'bboardfull234' || 
-						$tssettings['Forum_type'] === 'ipb204' || 
-						$tssettings['Forum_type'] === 'vb307' || 
-						$tssettings['Forum_type'] === 'smf103' || 
-						$tssettings['Forum_type'] === 'smf110' || 
-						$tssettings['Forum_type'] === 'vb350'
-					)
+				$_SESSION['group_id'] = array();
+				
+				if ( $GLOBALS[ $GLOBALS['forumdatabase'] ]->numrows($authresult) === 1 )
+				{
+					$group_id = trim( $authrow['groupid'], ',' );
+
+					if ( !empty($authrow['additionalgroups']) )
 					{
-						$group_id = trim( $authrow['groupid'], ',' );
-						if ( !empty($authrow['additionalgroups']) )
-						{
-							$group_id .= ',' . trim( $authrow['additionalgroups'], ',' );
-						}
-						$group_id = explode( ',', $group_id );
-						for ( $i=0, $max=count($group_id); $i < $max; $i++ )
-						{
-							$_SESSION['group_id'][] = (int) $group_id[ $i ];
-						}
-						unset( $group_id, $i, $max );
+						$group_id .= ',' . trim( $authrow['additionalgroups'], ',' );
 					}
-					elseif ( $tssettings['Forum_type'] === 'ipb131' || $tssettings['Forum_type'] === 'bboardlite102' )
+
+					$group_id = explode( ',', $group_id );
+
+					for ( $i=0, $max=count($group_id); $i < $max; $i++ )
 					{
-						$_SESSION['group_id'] = array( (int) $authrow['groupid'] );
+						$_SESSION['group_id'][] = (int) $group_id[ $i ];
 					}
+
+					unset( $group_id, $i, $max );
 				}
-				if ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'phpbb3' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' )
+				else
 				{
 					$_SESSION['group_id'][] = (int) $authrow['groupid'];
+					while ( $authrow = $GLOBALS[ $GLOBALS['forumdatabase'] ]->getrow($authresult) )
+					{
+						$_SESSION['group_id'][] = (int) $authrow['groupid'];
+					}
 				}
+
+				if ( checkaccess( $GLOBALS['tssettings']['Forum_group'] ) === TRUE )
+				{
+					$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_LOGIN_SUCCESS}' );
+					$secure = TRUE;
+				}
+				else
+				{
+					$_SESSION = array( 'prerecorded_ip' => $_SESSION['prerecorded_ip'] );
+				}
+
 			}
 			unset( $authrow );
-
-			$secure = true;
 		}
 		
-		if ( !isset($_SESSION['username']) )
+		if ( empty( $_SESSION['username'] ) )
 		{
 			$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_LOGIN_FAILURE}' );
 		}
@@ -162,7 +163,7 @@ WHERE
 			$table['sessions'],
 			md5( session_id() ),
 			$_SESSION['user_id'],
-			( ( $_SESSION['prerecorded_ip'] = $_SERVER['REMOTE_ADDR'] && $_SERVER['REQUEST_METHOD'] = "GET" && isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) ? md5( $_SERVER['HTTP_X_FORWARDED_FOR'] ) : md5( $_SERVER['REMOTE_ADDR'] ) )
+			( ( $_SESSION['prerecorded_ip'] === md5( $_SERVER['REMOTE_ADDR'] ) && $_SERVER['REQUEST_METHOD'] = "GET" && isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) ? md5( $_SERVER['HTTP_X_FORWARDED_FOR'] ) : md5( $_SERVER['REMOTE_ADDR'] ) )
 		) );
 
 		if ( $db->numrows($authtestresult) < 1 )

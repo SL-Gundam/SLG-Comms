@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.50 2007/01/30 16:16:46 SC Kruiper Exp $
+ *   $Id: index.php,v 1.51 2008/03/24 16:07:50 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -35,7 +35,7 @@ if ( !defined('NO_DATABASE') )
 {
 	if ( $tssettings['TeamSpeak_support'] && !$tssettings['Ventrilo_support'] )
 	{
-		$types = '"TeamSpeak"';
+		$types = '"TeamSpeak", "TSViewer.com"';
 	}
 	elseif ( !$tssettings['TeamSpeak_support'] && $tssettings['Ventrilo_support'] )
 	{
@@ -43,7 +43,7 @@ if ( !defined('NO_DATABASE') )
 	}
 	elseif ( $tssettings['TeamSpeak_support'] && $tssettings['Ventrilo_support'] )
 	{
-		$types = '"TeamSpeak", "Ventrilo"';
+		$types = '"TeamSpeak", "TSViewer.com", "Ventrilo"';
 	}
 	else
 	{
@@ -163,6 +163,10 @@ if ( isset($server['res_type']) && $server['res_type'] === 'TeamSpeak' && $tsset
 elseif ( isset($server['res_type']) && $server['res_type'] === 'Ventrilo' && $tssettings['Ventrilo_support'] )
 {
 	require( $tssettings['Root_path'] . 'includes/ventrilo.inc.php' );
+}
+elseif ( isset($server['res_type']) && $server['res_type'] === 'TSViewer.com' && $tssettings['TeamSpeak_support'] )
+{
+	require( $tssettings['Root_path'] . 'includes/tsviewer.inc.php' );
 }
 else
 {

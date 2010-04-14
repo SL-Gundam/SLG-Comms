@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.55 2007/01/29 17:16:24 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.56 2008/08/12 22:59:41 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -26,7 +26,7 @@ if ( !defined("IN_SLG") )
 }
 
 //recursive function that performs addslashes on all items
-function processaddslashes( &$value, $key=NULL, $level=0 )
+function processaddslashes( &$value, $level=0 )
 {
 	if ( $level > 10 )
 	{
@@ -35,7 +35,7 @@ function processaddslashes( &$value, $key=NULL, $level=0 )
 
 	if( is_array($value) )
 	{
-		array_walk( $value, 'processaddslashes', ( $level + 1 ) );
+		array_map( $value, 'processaddslashes', ( $level + 1 ) );
 	}
 	else
 	{
@@ -44,7 +44,7 @@ function processaddslashes( &$value, $key=NULL, $level=0 )
 }
 
 //recursive function that performs stripslashes on all items
-function processstripslashes( &$value, $key=NULL, $level=0 )
+function processstripslashes( &$value, $level=0 )
 {
 	if ( $level > 10 )
 	{
@@ -53,7 +53,7 @@ function processstripslashes( &$value, $key=NULL, $level=0 )
 
 	if( is_array($value) )
 	{
-		array_walk( $value, 'processstripslashes', ( $level + 1 ) );
+		array_map( $value, 'processstripslashes', ( $level + 1 ) );
 	}
 	else
 	{

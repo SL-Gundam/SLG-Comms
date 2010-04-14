@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.104 2007/01/30 17:40:45 SC Kruiper Exp $
+ *   $Id: install.php,v 1.107 2008/08/13 00:48:28 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -19,6 +19,11 @@
  *   (at your option) any later version.
  *
  ***************************************************************************/
+
+define( "IN_SLG", 10 );
+
+// install shouldn't use the root_path variables incase they are incorrect. This is also one of the reasons install.php is a riskier file then all the others. 
+$tssettings['Root_path'] = './';
 
 // download the dbsetings.inc.php file in case it couldn't be auto saved
 if ( isset($_GET['step']) && $_GET['step'] == 8 )
@@ -45,11 +50,6 @@ if ( isset($_GET['step']) && $_GET['step'] == 8 )
 	}
 	exit;
 }
-
-define( "IN_SLG", 10 );
-
-// install shouldn't use the root_path variables incase they are incorrect. This is also one of the reasons install.php is a riskier file then all the others. 
-$tssettings['Root_path'] = './';
 
 require( $tssettings['Root_path'] . 'includes/config.inc.php' );
 
@@ -362,8 +362,10 @@ if (
 			require( $tssettings['Root_path'] . 'includes/db/' . $_POST['variable']['db_type'] . '.inc.php' );
 		}
 
+		$_POST['variable']['Forum_relative_path'] = prep_dir_string( ltrim( $_POST['variable']['Forum_relative_path'], '/' ) );
+
 		// check whether the selected forum is correct
-		if ( isset($_POST['variable']['Forum_type'], $_POST['variable']['Forum_relative_path']) && !test_new_forum($_POST['variable']['Forum_type'], prep_dir_string(ltrim($_POST['variable']['Forum_relative_path'], '/'))) )
+		if ( isset($_POST['variable']['Forum_type'], $_POST['variable']['Forum_relative_path']) && !test_new_forum($_POST['variable']['Forum_type'], $_POST['variable']['Forum_relative_path'], '/') )
 		{
 			early_error( '{TEXT_FORUM_NOT_FOUND_ERROR}' );
 		}
@@ -469,7 +471,7 @@ CREATE TABLE `%1$s` (
   `res_id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
   `res_name` VARCHAR(50) NOT NULL DEFAULT "",
   `res_data` VARCHAR(100) DEFAULT NULL,
-  `res_type` ENUM("TeamSpeak","Ventrilo") NOT NULL DEFAULT "TeamSpeak",
+  `res_type` ENUM("TeamSpeak","TSViewer.com","Ventrilo") NOT NULL DEFAULT "TeamSpeak",
   PRIMARY KEY (`res_id`),
   KEY `res_type` (`res_type`)
 )';
@@ -782,6 +784,20 @@ DROP INDEX `res_name`';
 			$install->displaymessage( '<span class="errorbig">{TEXT_VERSION_SUCCESS;v3.1.0;}</span>' );
 		}
 
+		/* SLG Comms versions before v3.2.0 */
+		if ( version_compare($old_version, 'v3.2.0', '<') )
+		{
+			$sql = '
+ALTER TABLE `%1$s`
+CHANGE `res_type` `res_type` ENUM( "TeamSpeak", "TSViewer.com", "Ventrilo" ) NOT NULL DEFAULT "TeamSpeak"'; 
+
+			$db->execquery( 'modifyresourcetype', $sql, $table['resources'] );
+
+			$install->displaymessage( '{TEXT_CHANGE_SUCCESS;' . $table['resources'] . ';}' );
+
+			$install->displaymessage( '<span class="errorbig">{TEXT_VERSION_SUCCESS;v3.2.0;}</span>' );
+		}
+
 		$sql = '
 UPDATE `%1$s`
 SET
@@ -789,10 +805,12 @@ SET
 WHERE
   `variable` = "SLG_version"
 LIMIT 1';
+
 		$db->execquery( 'modifysettings', $sql, array(
 			$table['settings'],
 			$db->escape_string( $new_version )
 		) );
+
 		$install->displaymessage( '<span class="errorbig">{TEXT_UPGRADE_SUCCESS}</span>' );
 	}
 	unset( $sql );
@@ -951,8 +969,8 @@ $servers = array(
 	array(
 			\'res_id\'   => 1,                                  /*Here you enter a unique id for the server.*/
 			\'res_name\' => \'Example TeamSpeak\',              /*The name you want to be displayed in the drop down list.*/
-			\'res_data\' => \'127.0.0.1:6464:51234\',         /*Here you fill in the ip and port of the servers. For teamspeak servers optionally also the queryport of the server. The default queryport for a teamspeak server is 51234. For Ventrilo the queryport should be replaced with the password to join the server. format is [ip]:[port]:[optional requirements]*/
-			\'res_type\' => \'TeamSpeak\'                       /*This is used for possibly extending this script to encompass support for other voice communication servers other then teamspeak. At the moment the only types are "TeamSpeak" and "Ventrilo".*/
+			\'res_data\' => \'127.0.0.1:6464:51234\',         /*Here you fill in the ip and port of the servers. For teamspeak servers optionally also the queryport of the server. The default queryport for a teamspeak server is 51234. For Ventrilo the queryport should be replaced with the password to join the server. format is [ip]:[port]:[optional requirements]. For TSViewer.com you must fill in the Registration ID of your server*/
+			\'res_type\' => \'TeamSpeak\'                       /*This is used for possibly extending this script to encompass support for other voice communication servers other then teamspeak. At the moment the only types are "TeamSpeak" and "Ventrilo". You can also fill in "TSViewer.com"*/
 	),                                                          /*This comma is needed to imply that there is another server following after this one. The last server doesn\'t need a comma but it wouldn\'t matter one way or the other if there was one.*/
 
 	array(
@@ -1040,7 +1058,7 @@ $tssettings[\'SLG_version\'] = \'%16$s\';			/*The current version of this script
 	{
 		$install->displaymessage( '{TEXT_NO_DATABASE_SERVERLIST;' . $filename . ';}' );
 	}
-	unset( $filename, $content, $file_save );
+	unset( $filename, $content );
 }
 
 // we need to decide on which template is needed
@@ -1056,6 +1074,11 @@ elseif (
 )
 {
 	$install->load_template( 'admin/tpl_install_settings' );
+}
+
+if ( isset( $file_save ) )
+{
+	unset( $file_save );
 }
 
 // process template

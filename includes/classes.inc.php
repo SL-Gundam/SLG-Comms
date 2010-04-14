@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.70 2007/01/29 22:49:16 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.76 2008/08/12 22:59:41 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -98,6 +98,13 @@ class template
 		require( $file );
 	}
 
+	function apply_utf8_charset()
+	{
+		// disabled until i find a way to convert TeamSpeak and Ventrilo Server data to proper utf8 characters
+//		header('Content-type: text/html; charset=UTF-8');
+//		$this->text += array( '{CHARSET}' => 'UTF-8' );
+	}
+
 	// This function adds text to the {ERROR} placeholder. This can be a normal message like "Login succesfull" till errors which are provided by the function early_error().
 	// the $sql and $sqlerror parameter should only be used when outputting a fatal error type ( function early_error() ) because {TEXT_QUERY} and {TEXT_ERROR} are mostly only present in lng_earlyerrors.php
 	function displaymessage( $message, $sql=NULL, $sqlerror=NULL )
@@ -127,7 +134,7 @@ class template
 	function insert_display( $name, $replace )
 	{
 		$name = rtrim( $name, '}' );
-		$this->display[ '@' . $name . '_BEGIN}(.*?)' . $name . '_END}@s' ] = ( ( (bool) $replace ) ? '$1' : NULL );
+		$this->display['@' . $name . '_BEGIN}(.*?)' . $name . '_END}@s'] = ( ( (bool) $replace ) ? '$1' : NULL );
 	}
 
 	// this function allows you to insert content.
@@ -302,7 +309,7 @@ class template
 		{
 			foreach ( $this->text_adv as $key => $value )
 			{
-				$text_adv[ '@' . rtrim( $key, '}' ) . ';(.*?);}@' ] = nl2br( $value );
+				$text_adv['@' . rtrim( $key, '}' ) . ';(.*?);}@'] = nl2br( $value );
 			}
 			$this->text_adv = array();
 			$this->text_content = preg_replace( array_keys( $text_adv ), $text_adv, $this->text_content );
@@ -315,17 +322,12 @@ class template
 			$this->display = array();
 		}
 
-		foreach ( $this->text as $key => $value )
-		{
-			$this->text[ $key ] = nl2br( $value );
-		}
+		$this->text = array_map( 'nl2br', $this->text );
 
 		if ( !empty($this->tooltips) )
 		{
-			foreach ( $this->tooltips as $key => $value )
-			{
-				$this->tooltips[ $key ] = prep_tooltip( htmlentities( $value ) );
-			}
+			$this->tooltips = array_map( 'htmlentities', $this->tooltips );
+			$this->tooltips = array_map( 'prep_tooltip', $this->tooltips );
 		}
 
 		$this->text = $this->text_content + $this->tooltips + $this->text;
@@ -387,7 +389,7 @@ class commsdata
 array(
 	'res_id'   => id of the server. Only applicable for database enabled servers. Leave it to 0 for all others
 	'res_data' => IP:PORT:OPTIONAL (OPTIONAL could be a password (Ventrilo) or queryport (TeamSpeak))
-	'res_type' => ("TeamSpeak" or "Ventrilo")
+	'res_type' => ("TeamSpeak" or "Ventrilo" or "TSViewer.com")
 	'ventsort' => ("alpha" or "manual")
 )
 */
@@ -402,7 +404,7 @@ array(
 		unset( $tmp );
 
 		// Let's check whether the selected server (custom or predefined) is acceptable (ip / hostname, port and the optional queryport) - minimum amount of data available. More elaborate format check will be performed on a later stage.
-		if ( !check_ip_port($server['res_data']['ip'], $server['res_data']['port'], ( ( $server['res_type'] === 'TeamSpeak' ) ? $server['res_data']['optional'] : NULL ) ) )
+		if ( ( $server['res_type'] === 'TSViewer.com' && !is_numeric($server['res_data']['ip']) ) || ( $server['res_type'] !== 'TSViewer.com' && !check_ip_port($server['res_data']['ip'], $server['res_data']['port'], ( ( $server['res_type'] === 'TeamSpeak' ) ? $server['res_data']['optional'] : NULL ) ) ) )
 		{
 			early_error( '{TEXT_IP_PORT_COMB_ERROR}' );
 		}
@@ -571,7 +573,7 @@ LIMIT 1';
 		/*compress and store the data*/
 		$GLOBALS['db']->execquery( 'updatecachedata', $sql, array(
 			$GLOBALS['table']['cache'],
-			$GLOBALS['db']->escape_string( gzcompress( implode( "\r\n", $this->rawdata ), 1 ) ),
+			$GLOBALS['db']->escape_string( gzcompress( ( ( is_array($this->rawdata) ) ? implode( "\r\n", $this->rawdata ) : $this->rawdata ), 1 ) ),
 			$this->time_now,
 			$this->server['res_id']
 		) );
@@ -604,7 +606,14 @@ LIMIT 0,1';
 
 			if ( !empty($this->rawdata['data']) )
 			{
-				$this->rawdata = explode( "\r\n", trim( $this->rawdata['data'] ) );
+				if ( $this->server['res_type'] !== 'TSViewer.com' )
+				{
+					$this->rawdata = explode( "\r\n", trim( $this->rawdata['data'] ) );
+				}
+				else
+				{
+					$this->rawdata = trim( $this->rawdata['data'] );
+				}
 
 				$this->usecached = true;
 
@@ -741,7 +750,7 @@ quit
 
 		if ( !is_resource($connection) && empty($errno) && empty($errstr) )
 		{
-			$errstr = strip_tags( ob_get_contents() );
+			$errstr = trim( str_ireplace( array( '<br />', '<br>' ), '', ob_get_contents() ) );
 			$errno = 'hidden';
 		}
 		ob_end_clean();
@@ -1295,7 +1304,11 @@ class vent_commsdata extends commsdata
 
 		if ( empty($this->rawdata) )
 		{
-			$this->rawdata[0] = strip_tags( ob_get_contents() );
+			$this->rawdata[0] = trim( str_ireplace( array( '<br />', '<br>' ), '', ob_get_contents() ) );
+			if ( strlen( trim( $this->rawdata[0] ) ) === 0 )
+			{
+				early_error( '{TEXT_UNKNOWN_EXEC_ERROR}' );
+			}
 			$execcmd = 'hidden';
 		}
 		ob_end_clean();
@@ -1307,7 +1320,7 @@ class vent_commsdata extends commsdata
 			echo '<table border="0" align="center"><tr><td class="error"><p>DEBUG: Processing time required for retrieving the live server data: ' . round( $cnt_time->tottime, 4 ) . 's.</p></td></tr></table><p></p>';
 		}
 
-		if ( ( isset($execcmd) && $execcmd !== 0 ) || !isset($this->rawdata[0]) || strncmp($this->rawdata[0], "ERROR", 5) === 0 ) // ($execcmd) 0 = execution went OK. Be carefull though that there could still be an error message in the output.
+		if ( ( isset($execcmd) && $execcmd !== 0 ) || !isset($this->rawdata[0]) || strncmp($this->rawdata[0], "ERROR", 5) === 0 ) // ($execcmd) 0 = execution went OK. Be carefull though that there could still be an error message in the output. Also when $execcmd is filled with value 1 its possible safe mode is activated but since all of the return codes are not documented, and because of that unreliable across different platforms this will not be used.
 		{
 			if ( $execcmd === 'hidden' )
 			{
@@ -1391,7 +1404,8 @@ class vent_commsdata extends commsdata
 					{
 						$ventdata['CID'] = 0;
 					}
-					$this->clients[ $ventdata['CID'] ][ $ventdata['UID'] ] = $ventdata;
+
+					$this->clients[ $ventdata['CID'] ][] = $ventdata;
 					$this->calc_tot['TOT_CLIENTS']++;
 				}
 			}
@@ -1441,7 +1455,7 @@ class vent_commsdata extends commsdata
 		{
 			$div_content = '<table class=\'tooltip\' cellspacing=\'1\' cellpadding=\'0\'>
 <tr><td nowrap valign=\'top\'>{TEXT_CHANNEL}:&nbsp;</td><td>' . htmlentities( $channel['NAME'] ) . '</td></tr>
-<tr><td nowrap valign=\'top\'>{TEXT_PASSWORD_PROT}:&nbsp;</td><td>' . ( ( $channel['PROT'] ) ? '{TEXT_YES}' : '{TEXT_NO}' ) . '</td></tr>' . ( ( !empty( $channel['COMM'] ) ) ? '
+<tr><td nowrap valign=\'top\'>{TEXT_PASSWORD_PROT}:&nbsp;</td><td>' . ( ( $channel['PROT'] == 1 ) ? '{TEXT_YES}' : ( ( $channel['PROT'] == 2 ) ? '{TEXT_USERAUTH}' : '{TEXT_NO}' ) ) . '</td></tr>' . ( ( !empty( $channel['COMM'] ) ) ? '
 <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 <tr><td nowrap valign=\'top\'>{TEXT_COMMENT}:&nbsp;</td><td>' . htmlentities( $channel['COMM'] ) . '</td></tr>' : NULL ) . '</table>';
 
@@ -1450,7 +1464,7 @@ class vent_commsdata extends commsdata
 			$content .= '
 	<tr class="channel_row">
 		<td nowrap onMouseOver="toolTip(\'' . $div_content . '\')" onMouseOut="toolTip()"><p>
-			' . ( ( $level !== 0 ) ? '<img src="{BASE_URL}images/spacer.gif" width="' . ( $level * 16 ) . '" height="16" border="0" align="absmiddle" alt="" />' : NULL ) . '<img width="16" height="16" src="{BASE_URL}templates/{TEMPLATE}/images/ventrilo/' . ( ( $channel['PROT'] ) ? 'p' : 'n' ) . 'channel' . ( ( isset( $this->clients[ $channel['CID'] ] ) || isset($this->channels[ $channel['CID'] ]) ) ? '-ext' : NULL ) . '.gif" align="absmiddle" alt="{TEXT_CHANNEL}" border="0" />&nbsp;' . htmlentities( $channel['NAME'] ) . ( ( !empty( $channel['COMM'] ) ) ? '&nbsp;&nbsp;&nbsp;(<span class="ventcomment">' . htmlentities( linewrap( $channel['COMM'], 30 ) ) . '</span>)' : NULL ) . '
+			' . ( ( $level !== 0 ) ? '<img src="{BASE_URL}images/spacer.gif" width="' . ( $level * 16 ) . '" height="16" border="0" align="absmiddle" alt="" />' : NULL ) . '<img width="16" height="16" src="{BASE_URL}templates/{TEMPLATE}/images/ventrilo/' . ( ( $channel['PROT'] == 1 ) ? 'p' : ( ( $channel['PROT'] == 2 ) ? 'a' : 'n' ) ) . 'channel' . ( ( isset( $this->clients[ $channel['CID'] ] ) || isset($this->channels[ $channel['CID'] ]) ) ? '-ext' : NULL ) . '.gif" align="absmiddle" alt="{TEXT_CHANNEL}" border="0" />&nbsp;' . htmlentities( $channel['NAME'] ) . ( ( !empty( $channel['COMM'] ) ) ? '&nbsp;&nbsp;&nbsp;(<span class="ventcomment">' . htmlentities( linewrap( $channel['COMM'], 30 ) ) . '</span>)' : NULL ) . '
 		</p></td>' . ( ( $GLOBALS['tssettings']['Display_ping'] ) ? '<td nowrap align="right"><p>&nbsp;</p></td>' : NULL ) . '
 	</tr>';
  
@@ -1498,4 +1512,55 @@ class vent_commsdata extends commsdata
 		return( $content );
 	}
 }
+
+// This class contains all the TSViewer.com specific functions
+class ts_viewerdata extends commsdata
+{
+	// this function manages TSViewer.com live server data retrieval
+	function get_livedata()
+	{
+		if ( $this->server['res_data']['port'] === 'FULL' )
+			$cmd = 'http://www.tsviewer.com/ts_viewer.php?ID=' . (int) $this->server['res_data']['ip'];
+		else
+			$cmd = 'http://www.tsviewer.com/ts_viewer_pur.php?ID=' . (int) $this->server['res_data']['ip'];
+
+		$cmd .= '&bg=transparent&type=&type_size=11&type_family=1&info=1&channels=1&users=1&type_s_weight=normal&type_s_style=normal&type_s_variant=normal&type_s_decoration=none&type_s_weight_h=normal&type_s_style_h=normal&type_s_variant_h=normal&type_s_decoration_h=none&type_i_weight=normal&type_i_style=normal&type_i_variant=normal&type_i_decoration=none&type_i_weight_h=normal&type_i_style_h=normal&type_i_variant_h=normal&type_i_decoration_h=none&type_c_weight=normal&type_c_style=normal&type_c_variant=normal&type_c_decoration=none&type_c_weight_h=normal&type_c_style_h=normal&type_c_variant_h=normal&type_c_decoration_h=none&type_u_weight=normal&type_u_style=normal&type_u_variant=normal&type_u_decoration=none&type_u_weight_h=normal&type_u_style_h=normal&type_u_variant_h=normal&type_u_decoration_h=none';
+
+		if ( defined("SLG_DEBUG") )
+		{
+			$cnt_time = new timecount;
+			$cnt_time->starttimecount();
+		}
+
+		$this->rawdata = file_get_contents( $cmd );
+
+		if ( defined("SLG_DEBUG") )
+		{
+			// Because this is DEBUG only output it will be outputted outside of the template class.
+			echo '<table border="0" align="center"><tr><td class="error"><p>DEBUG: Processing time required for retrieving the live server data: ' . round( $cnt_time->tottime, 4 ) . 's.</p></td></tr></table><p></p>';
+		}
+
+		if ( $this->server['refreshcache'] != 0 )
+		{
+			$this->savecache();
+		}
+	}
+
+	// this function processes the raw TeamSpeak server data so that SLG Comms has access to nicely sorted and processed data. (has an Ventrilo counterpart with the same name)
+	function process_rawdata()
+	{
+		$search_array = array(
+			'<body style="margin:0">',
+//			'<link href="http://88.198.54.206/design.css" rel="stylesheet" type="text/css" />',
+		);
+
+		$replace_array = array(
+			'<body>',
+//			'',
+		);
+
+		$this->rawdata = str_replace( $search_array, $replace_array, $this->rawdata );
+	}
+}
+
 ?>

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_common.php,v 1.31 2007/01/29 22:49:17 SC Kruiper Exp $
+ *   $Id: lng_common.php,v 1.33 2008/08/12 22:59:41 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -97,7 +97,7 @@ Please keep in mind that this directory must be from a servers point of view and
 
 Make sure you end with a slash.
 
-For the best cross platform support use only slashes for the directory separators.
+For the best cross platform support only use slashes for the directory separators.
 
 This setting is case sensitive.',
 
@@ -145,7 +145,7 @@ Incase the current value is incorrect it\'s highly advised to correct it.',
 
 '{TEXT_HELP_TEAMSPEAK_SUPPORT}'            => 'This enables or disables support for TeamSpeak servers.',
 
-'{TEXT_HELP_TEMPLATE}'                     => 'Here you can select which template you would like to use with SLG Comms. The 3 templates delivered with this release, "Default" and "Default 2" are almost exactly the same except for the menu in the admin pages. So select the version with the menu you like best.
+'{TEXT_HELP_TEMPLATE}'                     => 'Here you can select which template you would like to use with SLG Comms. There are 3 templates delivered with this release. "Default" and "Default 2" are almost exactly the same except for the menu in the admin pages. So select the version with the menu you like best.
 
 "Default 2" though has only one purpose and thats to show that it\'s possible to create a template with a vertical menu instead of the horizontal one in the "Default" template. The vertical menu will work without problems although layout might be a bit irritating sometimes.
 

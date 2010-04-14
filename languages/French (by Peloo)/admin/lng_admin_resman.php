@@ -1,12 +1,12 @@
 <?php
 /***************************************************************************
- *                              lng_header.php
+ *                            lng_admin_resman.php
  *                            -------------------
  *   begin                : Saturday, March 13, 2005
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_header.php,v 1.14 2007/11/17 00:18:18 SC Kruiper Exp $
+ *   $Id: lng_admin_resman.php,v 1.2 2007/04/22 22:26:10 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -27,13 +27,14 @@ if ( !defined("IN_SLG") )
 }
 
 $this->text += array(
-'{TEXT_ADMIN}'                => 'Administration',
-'{TEXT_INDEX}'                => 'Frontpage',
-'{TEXT_INSTALLATION}'         => 'Installation',
-'{TEXT_UNKNOWN_TITLE}'        => 'SLG Comms - No page title present',
-);
+'{TEXT_RESOURCE_DATA}'         => 'Données de ressource',
+'{TEXT_RESOURCE_NAME}'         => 'Nom de ressource',
+'{TEXT_RESOURCE_TYPE}'         => 'Type de ressource',
 
-$this->tooltips += array(
-'{TEXT_SHOW_HELPTEXT_TIMER}'  => 'Click to enable or disable the automatic page refresh timer.',
+'{TEXT_DELETE}'                => 'Effacer',
+'{TEXT_EDIT}'                  => 'Editer',
+
+'{TEXT_RESOURCE_DELETE}'       => 'La ressource a été éffacé avec succès.',
+'{TEXT_RESOURCECACHE_DELETE}'  => 'La ressource du cache a été éffacé avec succès.'
 );
 ?>

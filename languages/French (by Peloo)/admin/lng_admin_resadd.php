@@ -1,12 +1,12 @@
 <?php
 /***************************************************************************
- *                              lng_header.php
+ *                            lng_admin_resadd.php
  *                            -------------------
  *   begin                : Saturday, March 13, 2005
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_header.php,v 1.14 2007/11/17 00:18:18 SC Kruiper Exp $
+ *   $Id: lng_admin_resadd.php,v 1.2 2007/04/22 22:26:10 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -27,13 +27,17 @@ if ( !defined("IN_SLG") )
 }
 
 $this->text += array(
-'{TEXT_ADMIN}'                => 'Administration',
-'{TEXT_INDEX}'                => 'Frontpage',
-'{TEXT_INSTALLATION}'         => 'Installation',
-'{TEXT_UNKNOWN_TITLE}'        => 'SLG Comms - No page title present',
-);
+'{TEXT_MISSING_FORMDATA}'           => 'Toutes les zones nécessaires n\' ont pas été remplies.',
 
-$this->tooltips += array(
-'{TEXT_SHOW_HELPTEXT_TIMER}'  => 'Click to enable or disable the automatic page refresh timer.',
+'{TEXT_RESOURCE_ADD_SUCCESS}'       => 'Ressource ajoutée avec succès.',
+'{TEXT_RESOURCE_UPDATE_SUCCESS}'    => 'Ressource mise à jour avec succès.',
+
+'{TEXT_RESOURCE_ADD}'               => 'Ressource ajouter',
+'{TEXT_RESOURCE_UPDATE}'            => 'Ressource de mise à jour',
+
+'{TEXT_HELP}'                       => 'AIDE',
+'{TEXT_RESOURCE_DATA}'              => 'données de ressource',
+'{TEXT_RESOURCE_NAME}'              => 'Nom de ressource',
+'{TEXT_RESOURCE_TYPE}'              => 'Type de ressource',
 );
 ?>

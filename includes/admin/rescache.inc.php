@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: rescache.inc.php,v 1.28 2006/06/11 20:32:43 SC Kruiper Exp $
+ *   $Id: rescache.inc.php,v 1.29 2008/03/24 16:07:50 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -59,7 +59,7 @@ FROM
   `%1$s` AS RES
   LEFT OUTER JOIN `%2$s` AS CACHE ON ( RES.`res_id` = CACHE.`res_id` )
 WHERE
-  RES.`res_type` IN ( "TeamSpeak", "Ventrilo" )
+  RES.`res_type` IN ( "TeamSpeak", "TSViewer.com", "Ventrilo" )
 ORDER BY
   RES.`res_name`';
 $querygetres = $db->execquery( 'querygetres-cached', $sql, array(

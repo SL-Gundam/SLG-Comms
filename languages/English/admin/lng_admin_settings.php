@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_settings.php,v 1.14 2007/01/29 22:49:17 SC Kruiper Exp $
+ *   $Id: lng_admin_settings.php,v 1.15 2008/08/10 20:23:37 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -28,7 +28,7 @@ if ( !defined("IN_SLG") )
 
 $this->text += array(
 '{TEXT_SETTINGS_NOTE_P1}'           => 'If you\'re planning on changing the settings for the forum you want to use with SLG Comms, please use the following steps. Once this proces has been started it is required to finish it. You can change back afterwards if you changed your mind.',
-'{TEXT_SETTINGS_NOTE_P2}'           => 'Note: Make sure you do this in one login session (Meaning don\'t logout under any surcumstance except for the last step.). You might not be able to login again if you do logout. The only way to correct the situation if you can\'t login again is to do the following.',
+'{TEXT_SETTINGS_NOTE_P2}'           => 'Note: Make sure you do this in one login session (Meaning don\'t logout under any circumstance except for the last step.). You might not be able to login again if you do logout. The only way to correct the situation if you can\'t login again is to do the following.',
 '{TEXT_SETTINGS_NOTE_P3}'           => 'Start install.php. It\'s possible you have to upload install.php again if you deleted it.  Select the following as "Installation type": "Restore settings". Fill everything with the correct information when asked for it. You should be back up and running soon enough.',
 '{TEXT_SETTINGS_NOTE_L1}'           => 'Change "Forum relative path" and "Forum type".',
 '{TEXT_SETTINGS_NOTE_L2}'           => 'Save the settings.',

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_earlyerrors.php,v 1.40 2007/01/30 16:16:48 SC Kruiper Exp $
+ *   $Id: lng_earlyerrors.php,v 1.43 2008/08/15 17:46:50 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -32,7 +32,7 @@ $this->text += array(
 '{TEXT_QUERY}'                      => 'QUERY',
 '{TEXT_SQLERROR}'                   => 'SQL ERROR',
 
-'{TEXT_NOINSTALL}' 				    => 'By all accounts it seems you havn\'t run install.php yet.
+'{TEXT_NOINSTALL}'                  => 'By all accounts it seems you haven\'t run install.php yet.
 <a href="install.php">Please do so now by clicking here</a>.',
 '{TEXT_NO_DATABASE_MODE_ACT}'       => 'SLG Comms is operating in a so called "NO DATABASE" mode which means that its not working with support from a database. The result is that this page is disabled.
 All the settings at your disposal are in the file "dbsettings.inc.php"',
@@ -66,6 +66,7 @@ Please update SLG Comms by running <a href="install.php">install.php</a>.',
 '{TEXT_DEFINED_VENT_PROG_INVALID}'  => 'The defined Ventrilo status program is invalid. Please check the setting and correct it.',
 '{TEXT_NOVENTRILO}'                 => 'You havn\'t defined a Ventrilo status program yet. Because of that support for ventrilo is not yet available.',
 '{TEXT_VENTRILO_NOT_IN_SLG_DIR}'    => 'The Ventrilo status program needs to be located within the SLG Comms root directory or a sub directory of the SLG Comms root directory. The name of the sub directory doesn\'t matter.',
+'{TEXT_UNKNOWN_EXEC_ERROR}'         => 'Unknown EXEC() function error encountered. Its possible that PHP\'s safe mode is activated. See <a href="http://www.php.net/exec">PHP EXEC() function documentation</a> and <a href="http://www.php.net/safe+mode+functions">PHP functions restricted/disabled by safe mode</a>.',
 
 '{TEXT_NOTTEAMSPEAK}'               => 'Corrupt or invalid TeamSpeak server data encountered.',
 '{TEXT_STREAM_TIMEOUT}'             => 'TeamSpeak server data retrieval timed out.',
