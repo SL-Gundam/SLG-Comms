@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: rescache.inc.php,v 1.4 2005/06/30 19:04:42 SC Kruiper Exp $
+ *   $Id: rescache.inc.php,v 1.5 2005/09/12 23:13:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -88,7 +88,7 @@ while ($rowres = $db->getrow($querygetres)){
 	}
 	$rescache_content .= '
   <tr>
-    <td nowrap><p class="para">'.$rowres['res_name'].'</p></td>
+    <td nowrap><p class="para">'.htmlspecialchars($rowres['res_name']).'</p></td>
 	<td nowrap><p class="para">'.((isset($rowres['refreshcache']) && $rowres['refreshcache'] != 0) ? $rowres['cachehits'] : NULL).'</p></td>
 	<td nowrap><p class="para">'.$rescache_live.'</p></td>
     <td nowrap><p class="para"><input name="oldrefreshcache['.$rowres['res_id'].']" type="hidden" value="'.((isset($rowres['refreshcache'])) ? $rowres['refreshcache'] : '-1').'">

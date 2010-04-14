@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.18 2005/09/10 14:39:29 SC Kruiper Exp $
+ *   $Id: index.php,v 1.19 2005/09/12 23:13:44 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -65,7 +65,7 @@ if ($Servertable){
 			$res_type = $server['res_type'];
 			$ts['id'] = $server['res_id'];
 		}
-		$ipbyname .= '>'.$server['res_name'].'</option>';
+		$ipbyname .= '>'.htmlspecialchars($server['res_name']).'</option>';
 	}
 	// insert the serverlist into the template
 	$index->insert_content('{IPBYNAME_OPTIONS}', $ipbyname);

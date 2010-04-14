@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.25 2005/09/10 14:39:30 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.26 2005/09/12 23:13:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -250,20 +250,20 @@ if (!$connection){
 
 	uasort($channels, "SORT_CHANNELS");
 	reset($channels);
-	$div_content = '{TEXT_SERVER_NAME}: {SERVER_NAME}
-{TEXT_PLATFORM}: {PLATFORM}
-{TEXT_VERSION}: {VERSION}
+	$div_content = '{TEXT_SERVER_NAME}: '.$vserver['server_name'].'
+{TEXT_PLATFORM}: '.$vserver['server_platform'].'
+{TEXT_VERSION}: '.$gserver['total_server_version'].'
 {TEXT_UPTIME}: '.$uptime.'
 {TEXT_PASSWORD_PROT}: '.$password_prot.'
 {TEXT_CLANSERVER}: '.$clanserver.'
-{TEXT_UDPPORT}: {UDPPORT}
+{TEXT_UDPPORT}: '.$vserver['server_udpport'].'
 {TEXT_DATASENT}: '.$datasent.'
 {TEXT_DATARECEIVED}: '.$datareceived.'
-{TEXT_MAXCLIENTS}: {MAXCLIENTS}
-{TEXT_CLIENTS_CON}: {CLIENTS_CON}
-{TEXT_CHANNEL_COUNT}: {CHANNEL_COUNT}
+{TEXT_MAXCLIENTS}: '.$vserver['server_maxusers'].'
+{TEXT_CLIENTS_CON}: '.$vserver['server_currentusers'].'
+{TEXT_CHANNEL_COUNT}: '.$vserver['server_currentchannels'].'
 '.((isset($gserver['isp_ispname']) || isset($vserver['isp_ispname'])) ? '
-{TEXT_PROVIDER}: {PROVIDER}
+{TEXT_PROVIDER}: '.((isset($isp_name)) ? htmlspecialchars($isp_name) : NULL ).'
 {TEXT_PROVIDER_WEBSITE}: '.((isset($isp_linkurl1)) ? $isp_linkurl1 : NULL ).'
 {TEXT_PROVIDER_EMAIL}: '.((isset($isp_adminemail1)) ? $isp_adminemail1 : NULL ).'
 ' : NULL ).'

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.19 2005/09/10 14:39:29 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.20 2005/09/12 23:13:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -50,8 +50,7 @@ class template{
 	var $text_adv = array();
 	var $tooltips = array();
 	var $text_search = array('{ERROR}' => NULL);
-	var $display_search = array();
-	var $display_replace = array();
+	var $display = array();
 	
 	function load_template($filename){
 		if(!function_exists('file_get_contents')){
@@ -112,8 +111,7 @@ Query: '.wordwrap($sql, 100).'
 
 	function insert_display($name, $replace){
 		$name = rtrim($name, '}');
-		$this->display_search[] = '@'.$name.'_BEGIN}(.*?)'.$name.'_END}@s';
-		$this->display_replace[] = (($replace) ? '$1' : NULL);
+		$this->display['@'.$name.'_BEGIN}(.*?)'.$name.'_END}@s'] = (($replace) ? '$1' : NULL);
 	}
 
 	// content is when the string includes more translation items
@@ -180,15 +178,13 @@ Query: '.wordwrap($sql, 100).'
 	}
 
 	function process(){
-		if (!empty($this->display_search) && !empty($this->display_replace)){
-			$this->template = preg_replace($this->display_search, $this->display_replace, $this->template);
-			$this->display_search = array();
-			$this->display_replace = array();
+		if (!empty($this->display)){
+			$this->template = preg_replace(array_keys($this->display), $this->display, $this->template);
+			$this->display = array();
 		}
 
 		if (!empty($this->text_search)){
-			$text_search_keys = array_keys($this->text_search);
-			$this->template = str_replace($text_search_keys, $this->text_search, $this->template);
+			$this->template = str_replace(array_keys($this->text_search), $this->text_search, $this->template);
 			$this->text_search = array('{ERROR}' => NULL);
 		}
 

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.31 2005/09/10 14:39:30 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.32 2005/09/12 23:13:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -38,7 +38,7 @@ $ventclientindex = array();
 //Connection with server...
 $ipstring = $ts['ip'].':'.$ts['port'].((isset($ts['queryport'])) ? ':'.$ts['queryport'] : NULL);
 if (!$usecached){
-	exec($tssettings['Ventrilo status program'].' -c2 -t'.$ipstring .' 2>&1', $routput, $execcmd);
+	exec($tssettings['Ventrilo status program'].' -a2 -c2 -t'.$ipstring .' 2>&1', $routput, $execcmd);
 }
 else{
 	$routput = explode('/%/', $cache['data']);
@@ -68,7 +68,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 		foreach($routput as $line1){
 			$diffisor1 = strpos($line1,":");
 			$start1 = substr($line1, 0 , $diffisor1);
-			$end1 = substr($line1, ($diffisor1+2));
+			$end1 = strdecode(substr($line1, ($diffisor1+2)));
 			if (trim($start1) == 'CHANNELFIELDS'){
 				$ventchannelindex = explode(",",$end1);
 			}
@@ -78,7 +78,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 				foreach($loutput as $line2){
 					$diffisor2 = strpos($line2,"=");
 					$start2 = substr($line2, 0 , $diffisor2);
-					$end2 = substr($line2, ($diffisor2+1));
+					$end2 = strdecode(substr($line2, ($diffisor2+1)));
 					$ventdata[$start2] = $end2;
 				}
 				if (trim($start1) == 'CLIENT'){
@@ -138,16 +138,16 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 ## DISPLAY ##
 #############
 
-		$div_content = '{TEXT_SERVER_NAME}: {SERVER_NAME}
-{TEXT_SERVER_PHONETIC}: {SERVER_PHONETIC}
-{TEXT_PLATFORM}: {PLATFORM}
-{TEXT_VERSION}: {VERSION}
+		$div_content = '{TEXT_SERVER_NAME}: '.$ventserver['NAME'].'
+{TEXT_SERVER_PHONETIC}: '.$ventserver['PHONETIC'].'
+{TEXT_PLATFORM}: '.$ventserver['PLATFORM'].'
+{TEXT_VERSION}: '.$ventserver['VERSION'].'
 {TEXT_UPTIME}: '.$uptime.'
 {TEXT_PASSWORD_PROT}: '.$password_prot.'
-{TEXT_UDPPORT}: {UDPPORT}
-{TEXT_MAXCLIENTS}: {MAXCLIENTS}
-{TEXT_CLIENTS_CON}: {CLIENTS_CON}
-{TEXT_CHANNEL_COUNT}: {CHANNEL_COUNT}
+{TEXT_UDPPORT}: '.$ts['port'].'
+{TEXT_MAXCLIENTS}: '.$ventserver['MAXCLIENTS'].'
+{TEXT_CLIENTS_CON}: '.$ventserver['CLIENTCOUNT'].'
+{TEXT_CHANNEL_COUNT}: '.$ventserver['CHANNELCOUNT'].'
 
 {TEXT_COMMENT}: '.$ventserver['COMMENT'];
 

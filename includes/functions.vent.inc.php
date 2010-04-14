@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.vent.inc.php,v 1.4 2005/09/10 14:39:30 SC Kruiper Exp $
+ *   $Id: functions.vent.inc.php,v 1.5 2005/09/12 23:13:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -97,5 +97,16 @@ function vent_channels(&$channels, &$clients, $cid=0, $level=0){
 	}
 
 	return($server_content);
+}
+
+function strdecode( $str ){
+	for ($start = 0; $pos = strpos ($str, "%", $start); $start = $pos+1){
+		$decode[substr( $str, $pos, 3 )] = sprintf( "%c", intval( substr( $str, $pos + 1, 2 ), 16 ) );
+	}
+	if (isset($decode)){
+		$str = str_replace(array_keys($decode), $decode, $str);
+	}
+	
+	return($str);
 }
 ?>

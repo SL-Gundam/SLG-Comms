@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.46 2005/09/10 14:39:29 SC Kruiper Exp $
+ *   $Id: install.php,v 1.47 2005/09/12 23:13:44 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -57,7 +57,7 @@ if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 if (isset($tssettings['SLG version'])){
 	$old_version = $tssettings['SLG version'];
 }
-$tssettings['SLG version'] = 'v2.1.6';
+$tssettings['SLG version'] = 'v2.1.7';
 $tssettings['Page title'] = 'SLG Comms '.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
 
 //If a language has been selected lets switch to that language instead of the default

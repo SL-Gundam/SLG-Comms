@@ -18,7 +18,7 @@ body {
 
 .addniceborder
 {
-	border: 1px groove gray;
+	border: 1px solid gray;
 	background-color: #F4F4F4;
 	width: 450px;
 }
