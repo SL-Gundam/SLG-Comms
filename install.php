@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.41 2005/07/01 15:34:54 SC Kruiper Exp $
+ *   $Id: install.php,v 1.43 2005/07/08 10:58:32 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -53,7 +53,10 @@ if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 }
 
 // lets fill some default values which will be used as default values
-$tssettings['SLG version'] = 'v2.1.3';
+if (isset($tssettings['SLG version'])){
+	$old_version = $tssettings['SLG version'];
+}
+$tssettings['SLG version'] = 'v2.1.4';
 $tssettings['Page title'] = 'SLG Comms '.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
 
 //If a language has been selected lets switch to that language instead of the default
@@ -582,7 +585,7 @@ $tssettings[\'table_prefix\'] = \''.((isset($_POST['variable']['table_prefix']))
 	}
 	elseif ($_POST['variable']['install_type'] == 'upgrade'){
 		$content = file_get_contents($filename);
-		$content = str_replace(array('v2.1.1', 'v2.1.2'), 'v2.1.3', $content);
+		$content = str_replace($old_version, $tssettings['SLG version'], $content);
 	}
 	else{
 		$content = '<?php

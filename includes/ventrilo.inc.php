@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.27 2005/06/30 19:04:42 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.28 2005/07/01 18:35:38 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -42,6 +42,7 @@ if (!$usecached){
 }
 else{
 	$routput = explode('/%/', $cache['data']);
+	unset($cache['data']);
 }
 
 //print_r($execcmd);
@@ -54,6 +55,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 		if (!empty($cache['data'])){
 			$usecached = true;
 			$routput = explode("/%/", $cache['data']);
+			unset($cache['data']);
 			$ventrilo->displaymessage($pre_error.'<br /><br />{TEXT_CACHED_LOADED}');
 			$tuntilrefresh = ($refreshtime + $cache['refreshcache']) - $cache['timestamp'];
 		}
@@ -227,7 +229,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 
 					$server_content .= '    <tr class="client_row">
 	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'</a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'</a>
       </p></td>
 	  <td nowrap><p>'.$player['PING'].'ms</p></td>
 	</tr>
@@ -249,7 +251,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 
 					$server_content .= '    <tr class="channel_row">
 	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="channel_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_CH}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="32" height="16" src="images/vent/'. (($channel['PROT']) ? 'p' : 'n' ) .'subchannel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($subchannel['NAME']) .'</a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/'. (($channel['PROT']) ? 'p' : 'n' ) .'channel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($subchannel['NAME']) .'</a>
       </p></td>
 	  <td nowrap><p>&nbsp;</p></td>
 	</tr>
@@ -272,7 +274,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 
 							$server_content .= '    <tr class="client_row">
 	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'</a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'</a>
       </p></td>
 	  <td nowrap><p>'.$player['PING'].'ms</p></td>
 	</tr>

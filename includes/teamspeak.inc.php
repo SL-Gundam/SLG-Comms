@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.23 2005/06/22 20:24:43 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.24 2005/07/01 18:35:38 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -59,18 +59,19 @@ if (!$connection){
 }
 /*if ($usecached || $connection)*/{
 	if (!$usecached){
+		if (isset($ts['id']) && $cache['refreshcache'] != 0){
+			$cacheuserdata = NULL;
+		}
 		fwrite($connection,$cmd, strlen($cmd));
-	}
-	$type = array('select','channels','players','vserver','gserver');
-	reset($type);
-	$counter = 0;
-	if (!$usecached && isset($ts['id']) && $cache['refreshcache'] != 0){
-		$cacheuserdata = NULL;
 	}
 	else{
 		$cachedata = explode("\n", $cache['data']);
 		reset($cachedata);
 	}
+	unset($cache['data']);
+	$type = array('select','channels','players','vserver','gserver');
+	reset($type);
+	$counter = 0;
 	while((!$usecached && ($userdata = fgets($connection, 4096))) || ($usecached && ($userdata = current($cachedata)))){
 //		print $userdata;
 		if (!$usecached && isset($ts['id']) && $cache['refreshcache'] != 0){
@@ -320,7 +321,7 @@ if (!$connection){
 
 				$server_content .= '    <tr class="channel_row">
 	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="channel_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_CH}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="48" height="16" src="images/ts/bullet_subchannel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($subchannel['name']) .'</a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="32" height="16" src="images/ts/bullet_channel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($subchannel['name']) .'</a>
       </p></td>
 	  <td nowrap><p>&nbsp;</p></td>
 	</tr>
@@ -349,7 +350,7 @@ if (!$connection){
 
 						$server_content .= '    <tr class="client_row">
 	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')</a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')</a>
       </p></td>
 	  <td nowrap><p>'.$player['ping'].'ms</p></td>
 	</tr>
