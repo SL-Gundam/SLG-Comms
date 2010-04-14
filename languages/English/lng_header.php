@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_header.php,v 1.9 2005/10/03 10:55:56 SC Kruiper Exp $
+ *   $Id: lng_header.php,v 1.13 2006/06/11 20:32:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,19 +21,20 @@
  ***************************************************************************/
 
 //security through the use of define != defined
-if (!defined("IN_SLG")){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") )
+{ 
+	die( "Hacking attempt." );
 }
 
 $this->text += array(
-'{CHARSET}' => 'iso-8859-1',
-'{TEXT_ADMIN}' => 'Administrator',
-'{TEXT_INDEX}' => 'Frontpage',
-'{TEXT_UNKNOWN_TITLE}' => 'SLG Comms - No page title present',
-'{TEXT_INSTALLATION}' => 'Installation'
+'{CHARSET}'                   => 'iso-8859-1',
+'{TEXT_ADMIN}'                => 'Administration',
+'{TEXT_INDEX}'                => 'Frontpage',
+'{TEXT_INSTALLATION}'         => 'Installation',
+'{TEXT_UNKNOWN_TITLE}'        => 'SLG Comms - No page title present',
 );
 
 $this->tooltips += array(
-'{TEXT_SHOW_HELPTEXT_TIMER}' => 'Click to enable or disable the automatic page refresh timer.'
+'{TEXT_SHOW_HELPTEXT_TIMER}'  => 'Click to enable or disable the automatic page refresh timer.',
 );
 ?>

@@ -1,9 +1,140 @@
+v3.0.0.
+- New language items called:  "{TEXT_UNKNOWNSETTING}", "{TEXT_DIFFERENT_DB_INFO}", "{TEXT_CONNECT_ALLREADY}", "{TEXT_SUCCESFULL_ADD_COL}", "{TEXT_ADDCOL_SUCCESS}", "{TEXT_NO_CONNECT_AVAILABLE}", "{TEXT_CHANGE_SUCCESS}", "{TEXT_UPDATE_SUCCESS}", "{TEXT_SETTINGUPDATE_FAILURE}", "{TEXT_RAWDATA_UNAVAILABLE}", "{TEXT_FSOCKOPEN_FUNC}", "{TEXT_FSOCKOPEN_INFO}", "{TEXT_MILLISECONDS}", "{TEXT_CUSTOM_SERVER_VENT_SORT}", "{TEXT_ALPHABETICALLY}", "{TEXT_MANUALLY}", "{TEXT_SERVER}", "{TEXT_STREAM_TIMEOUT}", "{TEXT_UPDATEINPROGRESS}", "{TEXT_LOADCACHE_FAILED}", "{TEXT_SERVER_ENABLED}", "{TEXT_SERVERUPDATE_DISABLED}", "{TEXT_LAST_ERROR}", "{TEXT_ADDEDNEWSETTINGS}", "{TEXT_CLIENT}", "{TEXT_TS_RAWDATA_FLAW}", "{TEXT_CONF_FILE_NOT_IN_DOCROOT}", "{TEXT_RECURSIVE_FUNC_PROT}", "{TEXT_NEW_FORUM_INVALID}"
+- Removed language items: "{TEXT_PAGEGEN}", "{TEXT_SQL_QUERIES}", "{TEXT_GZIP_ENABLED}", "{TEXT_GZIP_DISABLED}", "{TEXT_DEBUG_ON}", "{TEXT_DEBUG_OFF}", "{TEXT_CUSTOM}", "{TEXT_SUBCHANNEL}", "{TEXT_NAME}", "{TEXT_VENTRILO_STAT_PROG_CHECK}", "{TEXT_DISABLED}", "{TEXT_LOGIN_FORM}"
+- Modified names and content of a large amount of language variables. 
+- Added compatibility for PhpBB 2.0.21
+- Added compatibility for Invision Power Board (IPB) 2.1.5
+- Added compatibility for Simple Machines Forum (SMF) 1.0.7
+- Added compatibility for XOOPS 2.2.4 + CBB 3.04
+- Added support for Woltlab Burning Board Lite 1.0.2
+- Added support for Woltlab Burning Board 2.3.4
+- From now on its required that the Ventrilo status program is within the SLG Comms root directory or a sub directory of choice.
+- From now on its required that the configuration file of the forum is within the document root of your webserver or a sub directory of choice.
+- Fixed an Undefined variable notice level error in mysql.inc.php and mysql41.inc.php
+- Updated the Apache1.3 PHP5 bug tester concerning the "apache_get_modules" function
+- Updated code as far as possible to be up2date for PHP5 deprecated items, but still retaining PHP4 compatibility. If you run PHP 5.0.0 till 5.1.2 SLG Comms will have deprecated items (var $variable; calls) in PHP 5.1.3 and higher these were no longer deprecated ( They removed the notice at least ).
+- A whole bunch of language fixes.
+- Updated the ip:port checker
+- Renamed the db class from "db" to "database" due to SLG Comms using the same name ("db") to use the class ("$db = new db;" is now "$db = new database;").
+- Changed some error messages from just being displayed to stopping SLG Comms all together.
+- Updated the bug checker to check for open MySQL connections
+- Fixed a bug where the statistics of the second database connection were not retrieved properly.
+- Added more functionality to the database classes (mysql.inc.php and mysql41.inc.php) one of these is the affected rows function.
+- Serious bug fixed when trying to restore the settings table. This feature has apparently never worked correctly.
+- Added new icons for Ventrilo channels.
+- Added a trim on saved settings to remove possible spaces at the end or beginning.
+- Fixed a glitch where an empty page could be returned to the client browser after a version update. This was not a bug in SLG Comms but rather a bug in Internet Explorer :s
+- Fixed problem with the table prefix not being properly used sometimes in install.php.
+- Settings that are of no use to people who want to use the "NO_DATABASE" mode will not see them anymore. Before these settings were grayed out.
+- Added a dump of all open GLOBAL variables to the end of the script in case DEBUG is enabled. This code will be commented out in the releases because even you enable DEBUG a dump of the variables should be enabled only when you really want that
+- Updated the DELETE queries where usefull with a "LIMIT 1".
+- Removed passing by referenes in function calls where it wasn't necessary.
+- Finetuned DB structure.
+- Finetuned the SQL queries.
+- "SLG version" setting removed from the settings page.
+- Administrator menu's now show whether a menuitem has submenu's (Shown by a "(S)" in small lettering behind the name of the menu item)
+- Improved readability of the "English" Language files.
+- Fixed a small problem with the vBulletin 3.5 forum profile
+- EXPERIMENTAL IPv6 support added. The ventrilo_status program probably doesn't support this yet though, the fsockopen thats used to connect to TeamSpeak servers does support it but i'm not sure the TeamSpeak server program itself supports it yet. TeamSpeak 3 probably will support IPv6 though but that would definitly require a new version of SLG Comms.
+- SLG Comms now clears variables sooner when they are no longer needed. This has been done so that the more memory intensive actions cause less problems.
+- Required PHP version changed to PHP 4.2.0 ( PHP 4.2.0 was already required if you were running SLG Comms with the old MySQL 3.23.xx extension. In other cases the minimum would have been PHP 4.1.0 ).
+- Improved security access checking
+- Template class improved. Performance improved slightly.
+- Ventrilo error handling has been improved.
+- Added the fsockopen function to the requirement list while installing SLG Comms.
+- Improved errors displayed during retrieval of livedata for TeamSpeak and Ventrilo servers.
+- Fixed a bug in the TeamSpeak server data parser.
+- Added option to sort the Ventrilo channels Alphabetically or not at all. This is a fix for a missing Ventrilo server data.
+- To free memory as fast as possible "while array_shift" has been used in favor of "foreach" while looping through channels and clients
+- Made hyperlinks of the resource names on the "administrator -> Manage resources" and "administrator -> Manage servers" pages so that you can easily go to the specific TeamSpeak or Ventrilo server when you click on it.
+- Updated formattime function to support years. Weeks and Months will not be added. Weeks is not really necessary and months is not possible with the current structure as its length is not the same every single time. 1 Year = 31556926 seconds according to google's "seconds in a year"
+- Added TeamSpeak fsockopen stream timeout checks. These only work for PHP 4.3.0 of higher.
+- Added checks in Database classes whether the received parameters were really what they should be.
+- The retrieval of live server data and its managements is now completely done from a class to improve performance and ease of use.
+- Various code optimizations
+- Changed global variable calls from functions from "global $var;" to "$GLOBALS['var'];"
+- Improved the update messages of the "administrator -> Resource cache" (Now called "Manage servers") page to resemble the udate messages of the "administrator -> settings" page.
+- During live server updates of cached server data, simultaneous requests will now use cached data instead of also trying to retrieve live server data. (Only applicable when caching is enabled)
+- If live server updates of cached server data fails, SLG Comms will not immediatly try again. It will return cached server data for 30 seconds before trying again. (Only applicable when caching is enabled).
+- A maximum of failed consecutive connection attempts has been added. When 25 consecutive connection attempts failed to a specific server the server will no longer update his data. To fix this you have to click on the exclamation mark in front of the server on the "Manage servers" page in the administrator section.
+- Changed all include() functions to require() functions (same for the _once versions of these functions)
+- Modified the layout of SQL error messages a bit
+- Fixed a glitch with the fsockopen (used for TeamSpeak server connections) errors returned by PHP.
+- Changed the order in which TeamSpeak server data is requested a tiny bit. This shouldn't affect cache data from earlier versions in a fatal way
+- Optimized several parts of the Live data retrieval process and improved its error handling
+- Optimized several parts of the rawdata processing part
+- Changed uasort functions to usort functions as this might save a bit performance and memory wise.
+- SLG Comms now displays a proper error when fsockopen is disabled in php.ini
+- Fixed a bug in the processing of the TeamSpeak server data where certain characters were removed when they shouldn't be.
+- Fixed a bug in the parsing of TeamSpeak server data when tabs were present in certain names. Tabs will be removed from strings because they can screw up the layout of the pages.
+- Fixed Opera compatiblity issue concerning the css class "error" and "error2" and its usage (This class was not used in the templates so thats why its not a change in the templates, also the style class itself wasn't changed. What was changed was the way it was used)
+- Updated the error handling system to support sequential errors in a nicer way.
+- Changed the way the prep_tooltip function works. Now htmlentities is applied seperately so that prep_tooltip can be called on the whole tooltip
+- Added a version conflict check to detect whether the installed version has the right files that belong to that version.
+- Some of the form variable names used by SLG Comms caused problems when the apache module "mod_security" (http://www.modsecurity.org/) was used and the Default rules were applied. This has now been fixed and SLG Comms will now stay completely within the boundaries of those rules.
+- Removed the unused icons from images/ts/ directory
+- Changed all the TeamSpeak icons to TeamSpeak icons i found zipped on a website. These icons are better looking and show whether a channel is locked or not.
+- Increased the amount of allowed servers within the database from 255 to 65535
+- Added 2 new settings, namely: Base_url and Root_path. Base_url is used to link images and stylesheets in safer way in the template. Root_path serves the same purpose only then for require, include, exec, checkfilelock and file_get_content functions. So Base_url is from a clientside point of view and Root_path is from a serverside point of view.
+- TeamSpeak rights will now be calculated during the processing of the raw server data.
+- Added protection against eternal looping in recursive functions.
+- Proper translation name will now be displayed for settings being updated in the Administrator interface
+- Added a new setting which allows you to remove the ping behind in the name of clients in the channel information pane. This was added so that the new template for Content Management Systems has some more free space if disable this setting
+- Renamed the setting "Show server information" > "Display server information"
+- Added sticky to the TeamSpeak client tooltip
+- Adjusted parameters for the link to edit resources
+- Changed the name of the primary key field in the cache table.
+- Applied a fix to the DB::MYSQL database profile which used a function from PHP4.3 while SLG Comms should not go beyond PHP 4.1 or 4.2 depending on the installation type. SLG Comms now requires PHP4.2 for all installation types
+- Enhanced the sorting of TeamSpeak channels and clients a tiny bit.
+- Removed the encode_ip and decode_ip functions and replaced them with simple MD5's
+- Enhanced security in secure.inc.php a bit
+- Added better protection against loading incorrect template or language files
+- Improved the execquery function within the database class. Also improved query security against SQL injection
+- Added checks whether language and template files are actually in the right directories upon loading them.
+- Changed the indentations of channel and client rows from non-breakable spaces to 16 by 16 transparent gif spacer image
+- Fixed a notice level error when there are no server available and the custom server ability is disabled.
+- Added extra checks on the new values for settings to make sure they are correct.
+- Improved the retrieve_forumsettings function.
+- Improved forum connection handling.
+- Fixed a bug where SLG Comms would mix up the database connections when you try to login in the administrator section.
+- Improved the menu creation functions for the admin pages.
+- If template files don't exist in a template the default ones from template "Default" will be loaded.
+- Reordered the language items so that they are more easily to navigate
+
+v3.0.0 template changes
+- Moved the position of errors and notes in the administrator pages for template "Default 2" + updated the vertical menu styles (Also for template "Default 2")
+- Removed "Page generation time" part out of the tpl_footer.html template. The conditional setting whether you want to see the Page generation time will still work properly, it just won't be translatable.
+- Copyright notice in tpl_header.html and tpl_footer.html updated.
+- Changed some of the server information pane columns to colspan="2".
+- Added a missing notice placeholder in template "Default 2" file "tpl_admin_rescache.html"
+- tpl_admin_rescache.html for template "Default" and "Default 2" updated with new columns
+- Fixed firefox browser compatiblity issue concerning Firefox onmouseover effects in tpl_index.html in both templates
+- Removed some border="" tags as they weren't needed.
+- Added a missing border="0" tag to tpl_admin.html in template "Default"
+- Increased the font size for the texts of the menu in the administrator pages of template "Default"
+- Added several "border: none;" to the stylesheets of template "Default" and "Default 2"
+- Modified template "Default" and "Default 2" with the Base_url ( translatable item name {BASE_URL}) setting for all the images and the stylesheet link
+- Added border="0" tags to the channel information pane channels used for displaying the rows of channels and clients.
+- Replaced various color declarations to a name. ea. "#000000" is now "black"
+- Fixed some paragraph class definitions concerning the css .para class in template "Default" and "Default 2"
+- Changed the css classes a bit for the vertical menu in the admin pages of template "Default 2"
+- Added new template "Default compact" designed for the CMS side-blocks. Manual modifications are required based on your CMS, used template in that CMS and the way you integrate SLG Comms with your CMS.
+- Made html img tags xhtml compliant
+- Adjusted the size of the columns of the server selection table for template "Default" and "Default 2"
+- All images except for the spacer.gif image are now in the templates instead of the separate images directory. This allows you to create templates with different images.
+- Added {TEMPLATE} to the available placeholders within the templates so added this to the url of the css stylesheet in tpl_header.html
+- Added {BASE_URL} to the available placeholders within the templates. It is used to create a proper url for images and the stylesheet.
+- Changed the table builtup for MENU HORIZONTAL a bit in all admin templates for template "Default"
+- The custom server form will now be hidden when not needed. This is done with the help of javascript. Incase javascript is disabled in the browser, tooltips will not be displayed and the custom server form will not be hidden. template "Default" and "Default 2" files changed: tpl_header.html, tpl_index.html
+- Form text boxes and drop down boxes are now 25px longer.
+- Renamed the language placeholder "{TEXT_LOGIN_FORM}" in template file tpl_login.html to "{TEXT_LOGIN}"
+
 v2.2.4
 - Added XOOPS 2.2.3 Final + CBB 2.32 support. You are required to place SLG Comms in a sub directory of xoops, the name doesn't matter so you can even create a new directory. This is because XOOPS has a protection against scripts outside of the XOOPS root directory.
 - Fixed a problem with the configuration file downloading during installation.
-- Fixed a problem when certain information is missing from the ventrilo server data. (v2.3.0 of the ventrilo server allows the hiding of selective data). A message will be displayed if channel and / or client data is missing (Comment data excluded).
+- Fixed a problem when certain information is missing from the ventrilo server data. (v2.3.0+ of the ventrilo server allows the hiding of selective data). A message will be displayed if channel and / or client data is missing (Comment data excluded).
 - Added {TEXT_CHANNELDATA_DISABLED}, {TEXT_CLIENTDATA_DISABLED} and {TEXT_UNKNOWN} language items in lng_index_vent.php
-- If an error is encountered during data retrieval and cached data is being displayed the Cached data status will allways be displayed. This is so visitors know how old that data is.
+- If an error is encountered during data retrieval and cached data is being displayed the Cached data status will always be displayed. This is so visitors know how old that data is.
 
 v2.2.4 template changes
 - Added extra table (table within {SERVER_NOTICE_BEGIN} and {SERVER_NOTICE_END}) in tpl_ventrilo.html
@@ -21,7 +152,7 @@ v2.2.2
 - Fixed a glitch in install.php when selecting the wrong installation type when you're upgrading an existing installation of SLG Comms.
 - Added a extra check whether the queryport for TeamSpeak is actually a port number.
 - Improved ip:port checker
-- Automatically select the right install type and hide the language and template options incase of updating an old version of SLG Comms.
+- Automatically select the right install type and hide the language and template options in case of updating an old version of SLG Comms.
 - Fixed a whitespace problem in the custom ip:port field
 - A number of small tweaks to the TeamSpeak channel / client looping process
 - Fixed a bug in the TeamSpeak server parser which could cause NOTICE and WARNING level errors to be generated.
@@ -84,7 +215,6 @@ v2.2.0
 - Added a Setting that enabled the ability to show or hide the Processing time stuff at the bottom of the pages.
 - Changed the TeamSpeak provider info to be more resistant against spam engines looking for email addresses.
 - Removed the strdecode function because php seems to have a builtin faster alternative, namely: rawurldecode().
-- Added some protection against email spam catchers for the email address which could be present in the the TeamSpeak server data.
 - Improved the url checker for TeamSpeak provider url field
 
 v2.2.0 template changes
@@ -101,7 +231,7 @@ v2.1.8
 - Fixed a problem with the strdecode function applied to the ventrilo server data.
 - Ventrilo Channel and Server comments are now displayed the same way Ventrilo client comments are displayed.
 - Improved the linewrap function.
-- Added the necassary voicecodec and voiceformat language variables to "lng_index_sub.php" + adjusted some texts in the same file.
+- Added the necessary voicecodec and voiceformat language variables to "lng_index_sub.php" + adjusted some texts in the same file.
 
 v2.1.8 template changes
 - Added the CSS class ".ventclient_phantom_row".
@@ -111,14 +241,14 @@ v2.1.8 template changes
 - Added a hide tooltip timer of 1 millisecond in "tpl_header.html" to avoid flashing of the tooltip when hovering from text to table cell but still within the same tooltip.
 - Removed some obsolete javascript code for the refresh page timer from "tpl_header.html"
 - Removed duplicate align tag within the html img tag used for displaying the refresh page timer image.
-- Added the necassary voicecodec and voiceformat table rows to "tpl_ventrilo.html".
+- Added the necessary voicecodec and voiceformat table rows to "tpl_ventrilo.html".
 
 v2.1.7
 - Fixed problem with html tag chars in server / resource names.
-- Added style tags for hiding the tooltips incase you've got an older version of the stylesheet.
+- Added style tags for hiding the tooltips in case you've got an older version of the stylesheet.
 - Fixed a problem with special characters returned by ventrilo (ea. '=' being converted to '%3D').
 - Improved the template process.
-- Incase stylesheet doesn't load properly for some reason layout would be terribly wrong. Fixed this so that the pages would at least be navigatable.
+- In case stylesheet doesn't load properly for some reason layout would be terribly wrong. Fixed this so that the pages would at least be navigatable.
 - Amount of retries when trying to connect to ventrilo servers lowered from 3 to 2 retries
 
 v2.1.7 template changes
@@ -153,7 +283,7 @@ v2.1.4
 - improved version updater for NO-DATABASE mode updates
 - decreased number of required images in Channel information pane
 - fixed notice level error in teamspeak.inc.php
-- improved memory consumnption.... should be less now.
+- improved memory consumption.... should be less now.
 
 v2.1.3
 - fixed bug with template and language drop down boxes

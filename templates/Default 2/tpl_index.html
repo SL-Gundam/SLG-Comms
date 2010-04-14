@@ -1,29 +1,42 @@
 {SELECT_SERVER_BEGIN}
 <form action="index.php" method="POST" name="selectipform" id="selectipform">
-	<table class="addniceborder" align="center">
+	<table class="addniceborder" align="center" border="0">
 		<tr>
-			<td class="tdpadding"><table width="100%">
+			<td class="tdpadding"><table width="100%" border="0">
 					<tr>
-						<th width="30%" class="para" nowrap><p align="left">{TEXT_SERVER}:</p></th>
-						<td width="70%"><p class="para">
-								<select name="ipbyname" class="textline">
+						<th width="40%" nowrap><p class="para" align="left">{TEXT_SERVER}:</p></th>
+						<td width="60%"><p class="para" align="right">
+								<select id="customserver" name="ipbyname" class="textline" {CUSTOM_SERVER_BEGIN} onChange="showhidecustom('all')"{CUSTOM_SERVER_END}>
 									{IPBYNAME_OPTIONS}
 								</select>
 							</p></td>
 					</tr>
 					{CUSTOM_SERVER_BEGIN}
-					<tr>
-						<th class="para" nowrap><p align="left">{TEXT_CUSTOM_SERVER_TYPE}:</p></th>
-						<td><p class="para">
-								<select name="type" class="textline">
+					<tr id="customserverrow1">
+						<th colspan="2"><hr>
+							{TEXT_CUSTOM_SERVER}</th>
+					</tr>
+					<tr id="customserverrow2">
+						<th nowrap><p class="para" align="left">{TEXT_CUSTOM_SERVER_TYPE}:</p></th>
+						<td><p class="para" align="right">
+								<select id="servertype" name="type" class="textline" onChange="showhidecustom('servertype')">
 									{TYPE_OPTIONS}
 								</select>
 							</p></td>
 					</tr>
-					<tr>
-						<th class="para" nowrap onMouseOver="toolTip('{TEXT_HELPTEXT}', 500)" onMouseOut="toolTip()"><p align="left">{TEXT_CUSTOM_SERVER} [{TEXT_IP_PORT}]:</p></th>
-						<td><p class="para">
+					<tr id="customserverrow3">
+						<th nowrap onMouseOver="toolTip('{TEXT_HELPTEXT}', 500)" onMouseOut="toolTip()"><p class="para" align="left">{TEXT_SERVER} [{TEXT_IP_PORT}]:</p></th>
+						<td><p class="para" align="right">
 								<input name="ipport" type="text" id="ipport" value="{IPPORT_VALUE}" size="20" maxlength="50" class="textline">
+							</p></td>
+					</tr>
+					<tr id="customserverrow4">
+						<th nowrap><p class="para" align="left">{TEXT_CUSTOM_SERVER_VENT_SORT}:</p></th>
+						<td><p class="para">
+								<input id="ventsort_alpha" name="ventsort" type="radio" value="alpha" {VENT_SORT_ALPHA}>
+								<label for="ventsort_alpha">{TEXT_ALPHABETICALLY}</label>
+								<input id="ventsort_manual" name="ventsort" type="radio" value="manual" {VENT_SORT_MANUAL}>
+								<label for="ventsort_manual">{TEXT_MANUALLY}</label>
 							</p></td>
 					</tr>
 					{CUSTOM_SERVER_END}
@@ -37,4 +50,5 @@
 	</table>
 </form>
 <p></p>
-{SELECT_SERVER_END} {ERROR}
+{SELECT_SERVER_END}
+{ERROR}

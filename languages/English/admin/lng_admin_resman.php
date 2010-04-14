@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_resman.php,v 1.3 2005/06/30 19:40:05 SC Kruiper Exp $
+ *   $Id: lng_admin_resman.php,v 1.6 2006/06/11 20:32:44 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,17 +21,20 @@
  ***************************************************************************/
 
 //security through the use of define != defined
-if (!defined("IN_SLG")){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") )
+{ 
+	die( "Hacking attempt." );
 }
 
 $this->text += array(
-'{TEXT_RESOURCE_NAME}' => 'Resource name',
-'{TEXT_RESOURCE_DATA}' => 'Resource data',
-'{TEXT_RESOURCE_TYPE}' => 'Resource type',
-'{TEXT_EDIT}' => 'edit',
-'{TEXT_DELETE}' => 'delete',
-'{TEXT_RESOURCE_DELETE}' => 'Resource successfully deleted.',
-'{TEXT_RESOURCECACHE_DELETE}' => 'Resource cache successfully deleted.'
+'{TEXT_RESOURCE_DATA}'         => 'Resource data',
+'{TEXT_RESOURCE_NAME}'         => 'Resource name',
+'{TEXT_RESOURCE_TYPE}'         => 'Resource type',
+
+'{TEXT_DELETE}'                => 'delete',
+'{TEXT_EDIT}'                  => 'edit',
+
+'{TEXT_RESOURCE_DELETE}'       => 'Resource successfully deleted.',
+'{TEXT_RESOURCECACHE_DELETE}'  => 'Resource cache successfully deleted.',
 );
 ?>

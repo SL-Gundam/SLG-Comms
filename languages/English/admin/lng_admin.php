@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin.php,v 1.7 2005/10/03 10:55:56 SC Kruiper Exp $
+ *   $Id: lng_admin.php,v 1.15 2006/06/11 20:32:44 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,30 +21,42 @@
  ***************************************************************************/
 
 //security through the use of define != defined
-if (!defined("IN_SLG")){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") )
+{ 
+	die( "Hacking attempt." );
 }
 
 $this->text += array(
-'{TEXT_LOGIN}' => 'Login',
-'{TEXT_USERNAME}' => 'Username',
-'{TEXT_PASSWORD}' => 'Password',
-'{TEXT_LOGIN_FORM}' => 'Login',
-'{TEXT_LOGIN_SUCCESS}' => 'Succesfully logged in.',
-'{TEXT_LOGIN_FAILURE}' => 'That username and password combination did not match any of our records.
+'{TEXT_LOGIN}'                 => 'Login',
+'{TEXT_LOGOUT}'                => 'Logout',
+
+'{TEXT_USERNAME}'              => 'Username',
+'{TEXT_PASSWORD}'              => 'Password',
+
+'{TEXT_LOGIN_FAILURE}'         => 'That username and password combination did not match any of our records.
 Please try again.',
-'{TEXT_LOGOUT_SUCCESS}' => 'Succesfully logged out.',
-'{TEXT_INSTALL_FILE_PRESENT}' => 'WARNING: You havn\'t removed install.php yet.
+'{TEXT_LOGIN_SUCCESS}'         => 'Successfully logged in.',
+'{TEXT_LOGOUT_SUCCESS}'        => 'Successfully logged out.',
+
+'{TEXT_RESOURCES}'             => 'Resources',
+'{TEXT_SETTINGS}'              => 'Settings',
+
+'{TEXT_ADD_RESOURCES}'         => 'Add resources',
+'{TEXT_CACHE_RESOURCES}'       => 'Manage servers',
+'{TEXT_MANAGE_RESOURCES}'      => 'Manage resources',
+
+'{TEXT_ADMIN_WELCOME}'         => 'Welcome to the admin section.',
+
+'{TEXT_INSTALL_FILE_PRESENT}'  => 'WARNING: You havn\'t removed install.php yet.
 Its highly advised to remove it as its a mayor security risk.',
-'{TEXT_SESSION_VIOLATION}' => 'Your session has been terminated because a security rule has been violated.
-Don\'t worry just continue what you were doing. If necassary you can login again.',
-'{TEXT_MISSING_MENUTYPE}' => 'Couldn\'t find a menu placeholder in the template.',
-'{TEXT_RESOURCES}' => 'Resources',
-'{TEXT_SETTINGS}' => 'Settings',
-'{TEXT_LOGOUT}' => 'Logout',
-'{TEXT_ADD_RESOURCES}' => 'Add resources',
-'{TEXT_MANAGE_RESOURCES}' => 'Manage resources',
-'{TEXT_CACHE_RESOURCES}' => 'Caching servers',
-'{TEXT_ADMIN_WELCOME}' => 'Welcome to the admin section.'
+
+'{TEXT_SESSION_VIOLATION}'     => 'Your session has been terminated because a security rule has been violated.
+Don\'t worry just continue what you were doing. If necessary you can login again.',
+
+'{TEXT_NAVIGATION}'            => 'Navigation menu',
+);
+
+$this->text_adv += array(
+'{TEXT_MISSING_MENUTYPE}'      => 'Couldn\'t find the menu placeholder "$1" in the template.',
 );
 ?>

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: mysql.inc.php,v 1.15 2005/12/25 20:18:11 SC Kruiper Exp $
+ *   $Id: mysql.inc.php,v 1.31 2006/06/14 15:58:21 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -20,11 +20,14 @@
  *
  ***************************************************************************/
 
-if (!defined("IN_SLG")){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") )
+{ 
+	die( "Hacking attempt." );
 }
 
-class db {
+// this class manages the mysql db functions
+class database
+{
 	var $num_queries = 0;
 	var $num_freequeries = 0;
 	var $num_nofreequeries = 0;
@@ -32,142 +35,270 @@ class db {
 	var $sqltime = NULL;
 	var $sqlconnectid = NULL;
    
-	function __construct(){
-		$this->sqltime = new timecount;
-
-		if (!extension_loaded('mysql')){
-			early_error('{TEXT_MYSQLEXTNOTLOAD}');
+	function connect( $serverid, $db_server, $db_user, $db_passwd, $db_name )
+	{
+		if ( !extension_loaded('mysql') )
+		{
+			early_error( '{TEXT_EXTNOTLOAD;MySQL;}' );
 		}
-	}
 
-	function db(){
-		$this->__construct();
-	}
+		if ( !is_null($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_CONNECT_ALLREADY}' );
+		}
 
-	function connect($serverid, $db_server, $db_user, $db_passwd, $db_name){
+		if ( is_null($this->sqltime) )
+		{
+			$this->sqltime = new timecount;
+		}
+
 		$this->sqltime->starttimecount();
 
-		$this->sqlconnectid = @mysql_connect($db_server, $db_user, $db_passwd, true) OR early_error('{TEXT_DB_CONNECT_ERROR;'.$serverid.';}', '{TEXT_DB_CONNECT_FAILED}', $this->getconnecterror());
-
-		@mysql_select_db($db_name, $this->sqlconnectid) OR early_error('{TEXT_DB_SELECT_ERROR;'.$serverid.';}', '{TEXT_DB_SELECT_FAILED}', $this->geterror());
+		$result = @mysql_connect( $db_server, $db_user, $db_passwd, true );
 
 		$this->sqltime->endtimecount();
+
+		if ( $result === false )
+		{
+			early_error( '{TEXT_DB_CONNECT_ERROR;' . $serverid . ';}', NULL, $this->getconnecterror() );
+		}
 		
-//		return($result);
+		$this->sqlconnectid = $result;
+
+		$this->selectdb( $serverid, $db_name );
 	}
 
-	function disconnect(){
+	function disconnect()
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
 		$this->sqltime->starttimecount();
 
-		@mysql_close($this->sqlconnectid) OR early_error('{TEXT_DB_DISCONNECT_ERROR;'.$serverid.';}', '{TEXT_DB_DISCONNECT_FAILED}', $this->geterror());
+		$result = @mysql_close( $this->sqlconnectid );
 
 		$this->sqltime->endtimecount();
 
-//		return($result);
+		if ( $result === false )
+		{
+			early_error( '{TEXT_DB_DISCONNECT_ERROR}', NULL, $this->geterror() );
+		}
+
+		$this->sqlconnectid = NULL;
     }
    
-	function selectdb($dbid, $db_name){
+	function selectdb( $dbid, $db_name )
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
 		$this->sqltime->starttimecount();
 
-		$result = @mysql_select_db($db_name, $this->sqlconnectid) OR early_error('{TEXT_DB_SELECT_ERROR;'.$dbid.';}', '{TEXT_DB_SELECT_FAILED}', $this->geterror());
+		$result = @mysql_select_db( $db_name, $this->sqlconnectid );
 
 		$this->sqltime->endtimecount();
 
-		return($result);
+		if ( $result === false )
+		{
+			early_error( '{TEXT_DB_SELECT_ERROR;' . $dbid . ';}', NULL, $this->geterror() );
+		}
     }
    
-	function execquery($queryid, $sql){
+	function execquery( $queryid, $sql, $parameters=array() )
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
+		$sql = vsprintf( trim( $sql ), array_values( (array) $parameters ) );
+
 		$this->sqltime->starttimecount();
 
-		$result = @mysql_query($sql, $this->sqlconnectid) OR early_error('{TEXT_DB_QUERY_FAILED;'.$queryid.';}', $sql, $this->geterror());
+		$result = @mysql_query( $sql, $this->sqlconnectid );
+
+		$this->sqltime->endtimecount();
+
+		if ( $result === false )
+		{
+			early_error( '{TEXT_DB_QUERY_FAILED;' . $queryid . ';}', $sql, $this->geterror() );
+		}
 
 		$this->num_queries++;
-		if (isset($this->queries[$queryid])){
-			$this->queries[$queryid] .= '[{TEXT_FREE}?]-';
+		if ( isset($this->queries[ $queryid ]) )
+		{
+			$this->queries[ $queryid ] .= '[{TEXT_FREE}?]->';
 		}
-		else{
-			$this->queries[$queryid] = '[{TEXT_FREE}?]-';
+		else
+		{
+			$this->queries[ $queryid ] = '[{TEXT_FREE}?]->';
 		}
 
-		if ($result === true && (strncasecmp($sql, "create", 6) === 0 || strncasecmp($sql, "insert", 6) === 0 || strncasecmp($sql, "delete", 6) === 0 || strncasecmp($sql, "update", 6) === 0 || strncasecmp($sql, "drop", 4) === 0 || strncasecmp($sql, "alter", 5) === 0)){
+		if ( $result === true )
+		{
 			$this->num_nofreequeries++;
-			$this->queries[$queryid] .= '[{TEXT_NONEED}]';
+			$this->queries[ $queryid ] .= '[{TEXT_NONEED}]';
 		}
 
-		$this->sqltime->endtimecount();
-
-		return($result);
+		return( $result );
 	}
 	
-	function freeresult($queryid, $resultid){
-		$this->sqltime->starttimecount();
-
-		$result = @mysql_free_result($resultid) OR early_error('{TEXT_DB_FREEQUERY_FAILED;'.$queryid.';}');
-
-		if ($result === true){
-			$this->num_freequeries++;
-			$this->queries[$queryid] .= '[{TEXT_FREE}.]';
+	function freeresult( $queryid, $resultid )
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
 		}
 
-		$this->sqltime->endtimecount();
-	}
+		if ( !is_resource($resultid) )
+		{
+			early_error( '{TEXT_NO_RESOURCE}' );
+		}
 
-	function getrow($resultset){
 		$this->sqltime->starttimecount();
 
-		$result = @mysql_fetch_assoc($resultset);
+		$result = @mysql_free_result( $resultid );
 
 		$this->sqltime->endtimecount();
 
-		return($result);
+		if ( $result === false )
+		{
+			early_error( '{TEXT_DB_FREEQUERY_FAILED;' . $queryid . ';}' );
+		}
+		elseif ( !is_resource($resultid) )
+		{
+			$this->num_freequeries++;
+			$this->queries[ $queryid ] .= '[{TEXT_FREE}.]';
+		}
 	}
 
-	function numrows($resultset){
+	function getrow( $resultset )
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
+		if ( !is_resource($resultset) )
+		{
+			early_error( '{TEXT_NO_RESOURCE}' );
+		}
+
 		$this->sqltime->starttimecount();
 
-		$result = @mysql_num_rows($resultset);
+		$result = @mysql_fetch_assoc( $resultset );
 
 		$this->sqltime->endtimecount();
 
-		return($result);
+		return( $result );
 	}
 
-	function dataseek($resultset, $position){
+	function numrows( $resultset )
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
+		if ( !is_resource($resultset) )
+		{
+			early_error( '{TEXT_NO_RESOURCE}' );
+		}
+
 		$this->sqltime->starttimecount();
 
-		@mysql_data_seek($resultset, $position) OR early_error('{TEXT_DB_DATASEEK_FAILED;'.$resultset.';}');
+		$result = @mysql_num_rows( $resultset );
 
 		$this->sqltime->endtimecount();
+
+		return( $result );
 	}
 
-	function escape_string($str){
+	function dataseek( $resultset, $position )
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
+		if ( !is_resource($resultset) )
+		{
+			early_error( '{TEXT_NO_RESOURCE}' );
+		}
+
 		$this->sqltime->starttimecount();
 
-		$str = mysql_real_escape_string($str, $this->sqlconnectid);
+		$result = @mysql_data_seek( $resultset, $position );
 
 		$this->sqltime->endtimecount();
 
-		return($str);
+		if ( $result === false )
+		{
+			early_error( '{TEXT_DB_DATASEEK_FAILED;' . $resultset . ';}' );
+		}
 	}
 
-	function geterror(){
-//		$this->sqltime->starttimecount();
+	function affected_rows()
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
+		$this->sqltime->starttimecount();
+
+		$result = @mysql_affected_rows( $this->sqlconnectid );
+
+		$this->sqltime->endtimecount();
+
+		return( $result );
+	}
+
+	function escape_string( $str )
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
+		$this->sqltime->starttimecount();
+
+		$str = ( ( function_exists('mysql_real_escape_string') ) ? mysql_real_escape_string( $str, $this->sqlconnectid ) : mysql_escape_string( $str ) );
+
+		$this->sqltime->endtimecount();
+
+		return( $str );
+	}
+
+	function geterror()
+	{
+		if ( !is_resource($this->sqlconnectid) )
+		{
+			early_error( '{TEXT_NO_CONNECT_AVAILABLE}' );
+		}
+
+		$this->sqltime->starttimecount();
 		
-		$result = @mysql_error($this->sqlconnectid).' ('.@mysql_errno($this->sqlconnectid).')';
+		$result = @mysql_error( $this->sqlconnectid ) . ' (' . @mysql_errno( $this->sqlconnectid ) . ')';
 
-//		$this->sqltime->endtimecount();
+		$this->sqltime->endtimecount();
 
-		return($result);
+		return( $result );
 	}
 
-	function getconnecterror(){
-//		$this->sqltime->starttimecount();
+	function getconnecterror()
+	{
+		$this->sqltime->starttimecount();
 		
-		$result = @mysql_error().' ('.@mysql_errno().')';
+		$result = @mysql_error() . ' (' . @mysql_errno() . ')';
 
-//		$this->sqltime->endtimecount();
+		$this->sqltime->endtimecount();
 
-		return($result);
+		return( $result );
 	}
 }
 ?>

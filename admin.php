@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: admin.php,v 1.23 2005/10/21 14:29:25 SC Kruiper Exp $
+ *   $Id: admin.php,v 1.41 2006/06/12 14:24:01 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -20,126 +20,110 @@
  *
  ***************************************************************************/
 
-define("IN_SLG", 10);
-include('includes/config.inc.php');
+define( "IN_SLG", 10 );
+$tssettings['Root_path'] = './';
+
+require( $tssettings['Root_path'] . 'includes/config.inc.php' );
 
 $admin = new template;
 $template = 'admin';
 
-include('includes/secure.inc.php');
+require( $tssettings['Root_path'] . 'includes/secure.inc.php' );
 
-$page_title = $tssettings['Page title']; // backup of name before modification for header.inc.php.
-$tssettings['Page title'] .= ' - {TEXT_ADMIN}';
-include_once('includes/header.inc.php');
-$template = 'admin'; //the include_once for header.inc.php resetted this variable to another value so we set it back to the correct one for further use in this script. this can not be any other order because secure.inc.php requires to be within a template but before any output to the client. So it should be before header.inc.php but after the start of the template of the main working file.
-$tssettings['Page title'] = $page_title; // settings.inc.php checks this value for changes so we need to set it back to the value in the database. This is only necassary in the admin pages. more precise it's only needed for the settings page within the admin pages.
+$tssettings['Page_title'] .= ' - {TEXT_ADMIN}';
+require_once( $tssettings['Root_path'] . 'includes/header.inc.php' );
+$template = 'admin'; //the require_once for header.inc.php resetted this variable to another value so we set it back to the correct one for further use in this script. this can not be any other order because secure.inc.php requires to be within a template but before any output to the client. So it should be before header.inc.php but after the start of the template of the main working file.
 
-// disable thid page if NO_DATABASE mode is activated
-if (defined("NO_DATABASE")){
-	early_error('{TEXT_NO_DATABASE_MODE_ACT}');
+// disable this page if NO_DATABASE mode is activated
+if ( defined("NO_DATABASE") )
+{
+	early_error( '{TEXT_NO_DATABASE_MODE_ACT}' );
 }
 
 // lets see if we have logged in
-if (isset($_SESSION['username'])){
-	// lets create navigation menu
-	$menuarray = array(
-		'baseurl' => 'admin.php?',
-		'basevar' => 'page',
-		'menuitems' => array(
-			array(
-				'name' => '{TEXT_RESOURCES}', 
-				'url' => 'resources',
-				'seclevel' => $tssettings['Forum group'],
-				'subitems' => array(
-					array(
-						'name' => '{TEXT_ADD_RESOURCES}', 
-						'url' => 'resadd',
-						'seclevel' => $tssettings['Forum group'],
-						'subitems' => NULL
-					),
-					array(
-						'name' => '{TEXT_MANAGE_RESOURCES}', 
-						'url' => 'resman',
-						'seclevel' => $tssettings['Forum group'],
-						'subitems' => NULL
-					),
-					array(
-						'name' => '{TEXT_CACHE_RESOURCES}', 
-						'url' => 'rescache',
-						'seclevel' => $tssettings['Forum group'],
-						'subitems' => NULL
-					)
-				)
-			),
-			array(
-				'name' => '{TEXT_SETTINGS}', 
-				'url' => 'settings',
-				'seclevel' => $tssettings['Forum group'],
-				'subitems' => NULL
-			),
-			array(
-				'name' => '{TEXT_LOGOUT} (<i>'.$_SESSION['realname'].'</i>)', 
-				'url' => 'logout',
-				'seclevel' => NULL,
-				'subitems' => NULL
-			)
-		)
-	);
-
-	if (isset($_GET['page']) && checkaccess($tssettings['Forum group'])){
+if ( isset($_SESSION['username']) )
+{
+	if ( isset($_GET['page']) && checkaccess($tssettings['Forum_group']) )
+	{
 		// which files should we load?
-		switch ($_GET['page']){
+		switch ( $_GET['page'] )
+		{
 			case 'resources':
 //--------------------------
-				if (isset($_GET['resources'])){
-					if ($_GET['resources'] === 'resadd' || ($_GET['resources'] === 'resman' && isset($_GET['edit']))) {
-						include('includes/admin/resadd.inc.php');
-						$admin->load_template('admin/tpl_admin_resadd');
-						$admin->load_language('admin/lng_admin_resadd');
+				if ( isset($_GET['resources']) )
+				{
+					if ( $_GET['resources'] === 'resadd' || ( $_GET['resources'] === 'resedit' && isset($_GET['edit']) ) )
+					{
+						require( $tssettings['Root_path'] . 'includes/admin/resadd.inc.php' );
+						$admin->load_template( 'admin/tpl_admin_resadd' );
+						$admin->load_language( 'admin/lng_admin_resadd' );
+						$admin->load_language( 'lng_index' );
 					}
-					elseif ($_GET['resources'] === 'resman') {
-						include('includes/admin/resman.inc.php');
-						$admin->load_template('admin/tpl_admin_resman');
-						$admin->load_language('admin/lng_admin_resman');
+					elseif ( $_GET['resources'] === 'resman' )
+					{
+						require( $tssettings['Root_path'] . 'includes/admin/resman.inc.php' );
+						$admin->load_template( 'admin/tpl_admin_resman' );
+						$admin->load_language( 'admin/lng_admin_resman' );
 					}
-					elseif ($_GET['resources'] === 'rescache'){
-						include('includes/admin/rescache.inc.php');
-						$admin->load_template('admin/tpl_admin_rescache');
-						$admin->load_language('admin/lng_admin_rescache');
+					elseif ( $_GET['resources'] === 'rescache' )
+					{
+						require( $tssettings['Root_path'] . 'includes/admin/rescache.inc.php' );
+						$admin->load_template( 'admin/tpl_admin_rescache' );
+						$admin->load_language( 'admin/lng_admin_rescache' );
+						$admin->load_language( 'lng_index' );
 					}
 				}
-				else{
+				else
+				{
 					$load_def_tpl = true;
 				}
 //--------------------------
 				break;
+
 			case 'settings':
-				include('includes/admin/settings.inc.php');
-				$admin->load_template('admin/tpl_admin_settings');
-				$admin->load_language('admin/lng_admin_settings');
-				$admin->load_language('admin/lng_common');
+				require( $tssettings['Root_path'] . 'includes/admin/settings.inc.php' );
+				$admin->load_template( 'admin/tpl_admin_settings' );
+				$admin->load_language( 'admin/lng_admin_settings' );
+				$admin->load_language( 'admin/lng_common' );
 				break;
+
 			default: $load_def_tpl = true;
 		}
 	}
-	else{
+	else
+	{
 		$load_def_tpl = true;
 	}
-	if (isset($load_def_tpl) && $load_def_tpl === true){
-		$admin->load_template('admin/tpl_admin');
+	if ( isset($load_def_tpl) && $load_def_tpl === true )
+	{
+		$admin->load_template( 'admin/tpl_admin' );
 	}
-	// parse and insert menu into template
-	$admin->insert_menu('{MENU}', $menuarray);
+	unset( $load_def_tpl );
+
+	//create the navigation menu
+	$admin->insert_menubase( '{MENU}', 'admin.php?', 'page' );
+
+	$admin->insert_menuitem( '{MENU}', 'page', '{TEXT_RESOURCES}', 'resources', $tssettings['Forum_group'] );
+	$admin->insert_menuitem( '{MENU}', 'resources', '{TEXT_ADD_RESOURCES}', 'resadd', $tssettings['Forum_group'] );
+	$admin->insert_menuitem( '{MENU}', 'resources', '{TEXT_MANAGE_RESOURCES}', 'resman', $tssettings['Forum_group'] );
+	$admin->insert_menuitem( '{MENU}', 'resources', '{TEXT_CACHE_RESOURCES}', 'rescache', $tssettings['Forum_group'] );
+
+	$admin->insert_menuitem( '{MENU}', 'page', '{TEXT_SETTINGS}', 'settings', $tssettings['Forum_group'] );
+
+	$admin->insert_menuitem( '{MENU}', 'page', '{TEXT_LOGOUT} (<i>' . $_SESSION['realname'] . '</i>)', 'logout' );
 }
-else{
-	$admin->load_template('admin/tpl_login');
+else
+{
+	$admin->load_template( 'admin/tpl_login' );
 }
 
 // process template
-$admin->load_language('admin/lng_admin');
+$admin->insert_text( '{BASE_URL}', ( isset( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
+$admin->insert_text( '{TEMPLATE}', ( isset( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
+$admin->load_language( 'admin/lng_admin' );
 $admin->process();
 $admin->output();
-unset($admin);
+unset( $admin, $template );
 
-include('includes/footer.inc.php');
+require_once( $tssettings['Root_path'] . 'includes/footer.inc.php' );
 ?>

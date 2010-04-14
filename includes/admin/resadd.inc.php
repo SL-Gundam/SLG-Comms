@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resadd.inc.php,v 1.6 2005/10/21 14:29:26 SC Kruiper Exp $
+ *   $Id: resadd.inc.php,v 1.17 2006/06/11 20:32:43 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,81 +21,116 @@
  ***************************************************************************/
 
 //security through the use of define != defined
-if (!defined("IN_SLG") || !checkaccess($tssettings['Forum group'])){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") || !checkaccess($tssettings['Forum_group']) )
+{ 
+	die( "Hacking attempt." );
 }
 
 // this file manages the resource add pages
-if (isset($_POST['baddres'])) {
-	if (!empty($_POST['resname']) && !empty($_POST['restype'])){
-		$sql = 'INSERT INTO '.$table['resources'].'
+if ( isset($_POST['baddres']) )
+{
+	if ( !empty($_POST['resname']) && !empty($_POST['restype']) )
+	{
+		$sql = '
+INSERT INTO `%1$s`
 ( `res_name` , `res_data` , `res_type` )
-VALUES (
-"'.$db->escape_string($_POST['resname']).'", ';
-		if (empty($_POST['resdata'])){
-			$sql .= 'NULL';
+VALUES 
+("%2$s", %3$s, "%4$s")';// number %3 not quoted because we need to be able to set that one to NULL
+
+		$db->execquery( 'queryinsertres', $sql, array(
+			$table['resources'],
+			$db->escape_string( $_POST['resname'] ),
+			( ( empty($_POST['resdata']) ) ? 'NULL' : '"' . $db->escape_string( $_POST['resdata'] ) . '"' ),
+			$db->escape_string( $_POST['restype'] )
+		) );
+
+		if ( $_POST['restype'] === 'TeamSpeak' || $_POST['restype'] === 'Ventrilo' )
+		{
+			$sql = '
+INSERT INTO `%1$s`
+( `res_id` )
+(
+  SELECT `res_id`
+  FROM `%2$s`
+  WHERE
+    `res_name` = "%3$s" AND
+    `res_data` = %4$s AND
+    `res_type` = "%5$s"
+  LIMIT 0,1
+)';// number %4 not quoted because we need to be able to set that one to NULL
+
+			$db->execquery( 'queryinsertrescache', $sql, array(
+				$table['cache'],
+				$table['resources'],
+				$db->escape_string( $_POST['resname'] ),
+				( ( empty($_POST['resdata']) ) ? 'NULL' : '"' . $db->escape_string( $_POST['resdata'] ) . '"' ),
+				$db->escape_string( $_POST['restype'] )
+			) );
 		}
-		else{
-			$sql .= '"'.$db->escape_string($_POST['resdata']).'"';
-		}
-		$sql .= ', "'.$_POST['restype'].'")';
-		$queryinsertres = $db->execquery('queryinsertres',$sql);
-		if ($queryinsertres === true){
-			$admin->displaymessage('{TEXT_RESOURCE_ADD_SUCCESS}');
-		}
+
+		$admin->displaymessage( '{TEXT_RESOURCE_ADD_SUCCESS}' );
 	}
-	else{
-		$admin->displaymessage('{TEXT_MISSING_FORMDATA}');
+	else
+	{
+		$admin->displaymessage( '{TEXT_MISSING_FORMDATA}' );
 	}
 }
-elseif (isset($_POST['beditres'])) {
-	if (!empty($_POST['resname']) && !empty($_POST['restype'])) {
-		$sql = 'UPDATE '.$table['resources'].' SET
-  res_name = "'.$db->escape_string($_POST['resname']).'",';
-		if (empty($_POST['resdata'])){
-			$sql .= 'res_data = NULL,';
-		}
-		else{
-			$sql .= 'res_data = "'.$db->escape_string($_POST['resdata']).'",';
-		}
-		$sql .= 'res_type = "'.$db->escape_string($_POST['restype']).'"
+elseif ( isset($_POST['beditres']) )
+{
+	if ( !empty($_POST['resname']) && !empty($_POST['restype']) )
+	{
+		$sql = '
+UPDATE `%1$s` SET
+  res_name = "%2$s",
+  res_data = %3$s,
+  res_type = "%4$s"
 WHERE
-  (res_id = '.$_GET['edit'].')';
-		$queryupdateres = $db->execquery('queryupdateres',$sql);
-		if ($queryupdateres === true){
-			$admin->displaymessage('{TEXT_RESOURCE_UPDATE_SUCCESS}');
-		}
+  `res_id` = %5$u
+LIMIT 1'; // number %3 not quoted because we need to be able to set that one to NULL
+
+		$db->execquery( 'queryupdateres', $sql, array(
+			$table['resources'],
+			$db->escape_string( $_POST['resname'] ),
+			( ( empty($_POST['resdata']) ) ? 'NULL' : '"' . $db->escape_string( $_POST['resdata'] ) . '"' ),
+			$db->escape_string( $_POST['restype'] ),
+			$_GET['edit']
+		) );
+		$admin->displaymessage( '{TEXT_RESOURCE_UPDATE_SUCCESS}' );
 	}
-	else{
-		$admin->displaymessage('{TEXT_MISSING_FORMDATA}');
+	else
+	{
+		$admin->displaymessage( '{TEXT_MISSING_FORMDATA}' );
 	}
 }
 
-if ($_GET['resources'] === 'resman' && isset($_GET['edit'])) {
-	$queryeditres = $db->execquery('queryeditres','
-SELECT res_name, res_data, res_type 
-FROM `'.$table['resources'].'`
+if ( $_GET['resources'] === 'resedit' && isset($_GET['edit']) )
+{
+	$sql = '
+SELECT `res_name`, `res_data`, `res_type`
+FROM `%1$s`
 WHERE
-  res_id = '.$db->escape_string($_GET['edit']));
-	$roweditres = $db->getrow($queryeditres);
-	$db->freeresult('queryeditres',$queryeditres);
-}
+  `res_id` = %2$u
+LIMIT 0,1';
 
-$resfields = $db->execquery($table['resources'].'-fieldsquery','SHOW COLUMNS
-FROM 
-  '.$table['resources'].'
-LIKE
-  "res_type"');
+	$queryeditres = $db->execquery( 'queryeditres', $sql, array(
+		$table['resources'],
+		$_GET['edit']
+	) );
 
-if ($_GET['resources'] === 'resman' && isset($_GET['edit'])){
-	$form_action_type = 'resman&edit='.$_GET['edit'];
-	$actiontype = '{TEXT_RESOURCE_EDIT}';
-	$resname = htmlspecialchars($roweditres['res_name']);
-	$resdata = htmlspecialchars($roweditres['res_data']);
+	$roweditres = $db->getrow( $queryeditres );
+
+	$db->freeresult( 'queryeditres', $queryeditres );
+	unset( $queryeditres );
+
+	$form_action_type = 'resedit&edit=' . $_GET['edit'];
+	$actiontype = '{TEXT_RESOURCE_UPDATE}';
+	$resname = htmlentities( $roweditres['res_name'] );
+	$resdata = htmlentities( $roweditres['res_data'] );
 	$button_action = 'beditres';
 	$button_text = '{TEXT_RESOURCE_UPDATE}';
 }
-else{
+else
+{
 	$form_action_type = 'resadd';
 	$actiontype = '{TEXT_RESOURCE_ADD}';
 	$resname = NULL;
@@ -104,29 +139,38 @@ else{
 	$button_text = '{TEXT_RESOURCE_ADD}';
 }
 
-$admin->insert_text('{FORM_ACTION_TYPE}', $form_action_type);
-$admin->insert_content('{ACTION_TYPE}', $actiontype);
-$admin->insert_text('{VALUE_RESNAME}', $resname);
-$admin->insert_text('{VALUE_RESDATA}', $resdata);
+$admin->insert_text( '{FORM_ACTION_TYPE}', $form_action_type );
+$admin->insert_content( '{ACTION_TYPE}', $actiontype );
+$admin->insert_text( '{VALUE_RESNAME}', $resname );
+$admin->insert_text( '{VALUE_RESDATA}', $resdata );
+$admin->insert_text( '{FORM_SUBMIT_TYPE}', $button_action );
+$admin->insert_text( '{SUBMIT_TYPE}', $button_text );
+unset( $form_action_type, $actiontype, $resname, $resdata, $button_action, $button_text );
 
-while ($field = $db->getrow($resfields)){
-	if ($field['Field'] == 'res_type'){
-		$fieldtype = explode(',',removechars(substr($field['Type'], 5, -1), "'"));
-	}
-}
-$db->freeresult($table['resources'].'-fieldsquery',$resfields);
+$sql = '
+SHOW COLUMNS
+FROM 
+  `%1$s`
+LIKE
+  "res_type"';
+$resfields = $db->execquery( $table['resources'] . '-fieldsquery', $sql, $table['resources'] );
+unset( $sql );
 
-reset($fieldtype);
+$field = $db->getrow( $resfields );
+
+$fieldtype = explode( ',', removechars( substr( $field['Type'], 5, -1 ), "'" ) );
+
+$db->freeresult( $table['resources'] . '-fieldsquery', $resfields );
+unset( $resfields, $field );
+
+reset( $fieldtype );
 $type_options = NULL;
-foreach ($fieldtype as $field){
-	$type_options .= '<option value="'.$field.'"';
-	if ($_GET['resources'] === 'resman' && isset($_GET['edit']) && $roweditres['res_type'] == $field){
-		$type_options .= ' selected';
-	}
-	$type_options .= '>'.$field.'</option>';
+while ( $field = array_shift($fieldtype) )
+{
+	$type_options .= '<option value="' . $field . '"' . ( ( $_GET['resources'] === 'resedit' && isset($_GET['edit']) && $roweditres['res_type'] == $field ) ? ' selected' : NULL ) . '>' . $field . '</option>';
 }
+unset( $fieldtype, $field, $roweditres );
 
-$admin->insert_text('{TYPE_OPTIONS}', $type_options);
-$admin->insert_text('{FORM_SUBMIT_TYPE}', $button_action);
-$admin->insert_text('{SUBMIT_TYPE}', $button_text);
+$admin->insert_text( '{TYPE_OPTIONS}', $type_options );
+unset( $type_options );
 ?>

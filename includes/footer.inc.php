@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.19 2005/12/25 20:18:12 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.40 2006/06/12 12:43:06 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -20,111 +20,186 @@
  *
  ***************************************************************************/
 
-if (!defined("IN_SLG")){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") )
+{ 
+	die( "Hacking attempt." );
 }
 
 $footer = new template;
 $template = 'footer';
 
-$footer->insert_text('{SLG_VERSION}', ((isset($tssettings['SLG version'])) ? $tssettings['SLG version'] : '{TEXT_UNKNOWN_VERSION}'));
+$footer->insert_text( '{SLG_VERSION}', ( ( isset($GLOBALS['tssettings']['SLG_version']) ) ? $GLOBALS['tssettings']['SLG_version'] : '{TEXT_UNKNOWN_VERSION}' ) );
 
-if (isset($db)){
-	$db->disconnect();
+if ( isset($GLOBALS['db']->sqlconnectid) )
+{
+	$GLOBALS['db']->disconnect();
 }
 
-//it seems php 5.0.0 or higher has a bug with windows versions of apache 1.3 and the function apache_get_modules(). It says the function exists but hangs the connection when the function is called. This behaviour has only been tested with Apache for windows. It probably works fine for Linux / Unix but i'm not sure.
-$gzipheaders = ((function_exists('apache_response_headers')) ? apache_response_headers() : array() );
-if (function_exists('apache_get_modules') && (version_compare(phpversion(), '5.0.0', '<'))){
-	$gzipmod = apache_get_modules();
-}
-else{
-	$gzipmod = array();
-}
-$gzip_text = ((isset($gzipheaders['vary']) || isset($gzipheaders['Vary'])) || ini_get('zlib.output_compression') || (in_array('mod_deflate',$gzipmod) || in_array('mod_gzip',$gzipmod))) ? '{TEXT_GZIP_ENABLED}' : '{TEXT_GZIP_DISABLED}';
+$executed_queries = ( ( isset($GLOBALS['db']) ) ? $GLOBALS['db']->num_queries : 0 );
+$free_queries = ( ( isset($GLOBALS['db']) ) ? $GLOBALS['db']->num_freequeries : 0 );
+$nofree_queries = ( ( isset($GLOBALS['db']) ) ? $GLOBALS['db']->num_nofreequeries : 0 );
+$sql_time = ( ( isset($GLOBALS['db']->sqltime, $GLOBALS['db']->sqltime->tottime)) ? $GLOBALS['db']->sqltime->tottime : 0 );
+$db_disc_ok = ( ( isset($GLOBALS['db']->sqlconnectid) ) ? true : false );
 
-$debug_text = (defined("DEBUG")) ? '{TEXT_DEBUG_ON}' : '{TEXT_DEBUG_OFF}';
-
-$executed_queries = (isset($db)) ? $db->num_queries : 0;
-$free_queries = (isset($db)) ? $db->num_freequeries : 0;
-$nofree_queries = (isset($db)) ? $db->num_nofreequeries : 0;
-$sql_time = round((isset($db)) ? $db->sqltime->tottime : 0, 4 );
-
-if (isset($otherdatabase, $forumdatabase, $$forumdatabase) && $otherdatabase){
-	$executed_queries += (isset($$forumdatabase)) ? $$forumdatabase->num_queries : 0;
-	$free_queries += (isset($$forumdatabase)) ? $$forumdatabase->num_freequeries : 0;
-	$nofree_queries += (isset($$forumdatabase)) ? $$forumdatabase->num_nofreequeries : 0;
-	$sql_time += round((isset($$forumdatabase)) ? $$forumdatabase->sqltime->tottime : 0, 4 );
+if ( isset($GLOBALS['dbforum']) )
+{
+	$executed_queries += $GLOBALS['dbforum']->num_queries;
+	$free_queries += $GLOBALS['dbforum']->num_freequeries;
+	$nofree_queries += $GLOBALS['dbforum']->num_nofreequeries;
+	$sql_time += ( ( isset($GLOBALS['dbforum']->sqltime, $GLOBALS['dbforum']->sqltime->tottime) ) ? $GLOBALS['dbforum']->sqltime->tottime : 0 );
+	$fdb_disc_ok = ( ( isset($GLOBALS['dbforum']->sqlconnectid) ) ? true : false );
 }
 
-if (($free_queries + $nofree_queries) != $executed_queries && defined("DEBUG")){
+if ( defined("DEBUG") && ( ( $free_queries + $nofree_queries ) !== $executed_queries || $db_disc_ok || ( isset($fdb_disc_ok) && $fdb_disc_ok ) ) )
+{
 	$divbugfound = '
 <script language="JavaScript" type="text/JavaScript">
 <!--
-function MM_findObj(n, d) { //v4.01
-  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
-    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
-  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
-  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
-  if(!x && d.getElementById) x=d.getElementById(n); return x;
+
+var errordiv=null;
+var errorIEfix=null;
+
+var ns4 = document.layers;
+
+var userAgent = navigator.userAgent;
+if (userAgent.indexOf(\'MSIE\') != -1 && userAgent.indexOf(\'Opera\') == -1) var ie4 = document.all;
+
+var initrunerror=false;
+
+function initerror()
+{
+	errordiv = document.getElementById("errorlayer");
+	if (ie4){
+		errorIEfix = document.getElementById("errorlayerIEfix");
+	}
+
+	errordiv.style.visibility = "visible";
+	errordiv.style.display = "block";
+	if (ie4){
+		errorIEfix.style.visibility = "visible";
+		errorIEfix.style.display = "block";
+	}
+
+	x = 0;
+	y = 0;
+
+	x = width / 2 - 250;
+	y = height / 2 - 175;
+
+	errordiv.style.left = x;
+	errordiv.style.top = y;
+	if (ie4){
+		errorIEfix.style.left = x;
+		errorIEfix.style.top = y;
+		errorIEfix.style.width = errordiv.offsetWidth;
+		errorIEfix.style.height = errordiv.offsetHeight;
+	}
 }
 
-function MM_changeProp(objName,x,theProp,theValue) { //v6.0
-  var obj = MM_findObj(objName);
-  if (obj && (theProp.indexOf("style.")==-1 || obj.style)){
-    if (theValue == true || theValue == false)
-      eval("obj."+theProp+"="+theValue);
-    else eval("obj."+theProp+"=\'"+theValue+"\'");
-  }
+function hide_errorlayer()
+{
+	if(ns4) errordiv.style.visibility = "hidden";
+	else{
+		errordiv.style.display = "none";
+		if (ie4) errorIEfix.style.display = "none";
+	}
 }
+
+setTimeout("initerror()", 2500);
 //-->
 </script>
 
-<div id="errorlayer" style="padding: 20px; position:Absolute; width:500px; height:175px; z-index:1; left: 200px; top: 150px; overflow: visible;" class="error2">
-  <p>{TEXT_BUGNOTIFY_P1}</p>
-  <p>{TEXT_BUGNOTIFY_P2}</p>
-  <pre>'.((isset($db)) ? print_r($db->queries, true) : '{TEXT_DATANOTFOUND}').'</pre>
-  <pre>'.((isset($otherdatabase, $forumdatabase, $$forumdatabase) && $otherdatabase) ? print_r($$forumdatabase->queries, true) : NULL).'</pre>
-  <p>{TEXT_THANKS}</p>
+<iframe id="errorlayerIEfix" frameborder=0 scrolling=no marginwidth=0 src="" marginheight=0 style="position:absolute; display:none; visibility: hidden;"></iframe>
+<div id="errorlayer" style="padding: 20px; width:500px; position:absolute; display:none; visibility: hidden;" class="error2">
+	<p>{TEXT_BUGNOTIFY_P1}</p>
+	<p>{TEXT_BUGNOTIFY_P2}</p>
+	<pre>' . ( ( isset($GLOBALS['db']) ) ? print_r($GLOBALS['db']->queries, true) : '{TEXT_DATANOTFOUND}' ) . '</pre>
+	<pre>' . ( ( isset($GLOBALS['dbforum']) ) ? print_r($GLOBALS['dbforum']->queries, true) : NULL ) . '</pre>
+	' . ( ( !$db_disc_ok ) ? '{TEXT_DBCLOSED}' : '{TEXT_DBOPEN}' ) . '<br />
+	' . ( ( !isset($fdb_disc_ok) || !$fdb_disc_ok ) ? '{TEXT_DBFORUMCLOSED}' : '{TEXT_DBFORUMOPEN}' ) . '
+	<p>{TEXT_THANKS}</p>
   
-    <input align="center" name="Close thingy" type="button" id="Close thingy" onClick="MM_changeProp(\'errorlayer\',\'\',\'style.visibility\',\'hidden\',\'LAYER\')" value="{TEXT_CLOSE}">
+	<input align="center" name="Close thingy" type="button" id="Close thingy" onClick="hide_errorlayer()" value="{TEXT_CLOSE}">
   
 </div>
 ';
 }
-else{
+else
+{
 	$divbugfound = NULL;
 }
 
-$footer->insert_content('{BUG_FINDER}', $divbugfound);
-
-if (isset($starttime) && (!isset($tssettings['Page generation time']) || $tssettings['Page generation time'])){
-	$mtime = explode(" ",microtime());
-	$endtime = $mtime[1] + $mtime[0];
-
-	$gentime = round(($endtime - $starttime), 4);
-
-	$sql_part = round($sql_time / $gentime * 100);
-	$php_part = 100 - $sql_part;
-
-	$generation = '<table border="0" align="center"><div style="font-family: Verdana; font-size: 10px; color: #000000; letter-spacing: -1px" align="center">{TEXT_PAGEGEN}: '. $gentime .'s (PHP: '. $php_part .'% - SQL: '. $sql_part .'%) - {TEXT_SQL_QUERIES}: '. $executed_queries;
-	if (defined("DEBUG")){
-
-		$generation .= ' ('. $free_queries .' + '. $nofree_queries .')';
-	}
-	$generation .= ' - '. $gzip_text .' - '. $debug_text .'</div></table>';
-}
-else{
-	$generation = NULL;
+if ( isset($GLOBALS['db']) )
+{
+	unset( $GLOBALS['db'], $GLOBALS['table'] );
 }
 
-$footer->insert_content('{PAGE_GENERATION}', $generation);
+if ( isset($GLOBALS['dbforum']) )
+{
+	unset( $GLOBALS['dbforum'], $GLOBALS['forumdatabase'] );
+}
+elseif ( isset($GLOBALS['forumdatabase']) )
+{
+	unset( $GLOBALS['forumdatabase'] );
+}
 
-$footer->load_language('lng_footer');
-$footer->load_template('tpl_footer');
+$footer->insert_content( '{BUG_FINDER}', $divbugfound );
+unset( $divbugfound, $db_disc_ok, $fdb_disc_ok );
+
+$footer->insert_text( '{BASE_URL}', ( isset( $GLOBALS['tssettings']['Base_url'] ) ? 'http://' . $GLOBALS['tssettings']['Base_url'] : NULL ) );
+$footer->insert_text( '{TEMPLATE}', ( isset( $GLOBALS['tssettings']['Template'] ) ? $GLOBALS['tssettings']['Template'] : 'Default' ) );
+$footer->load_language( 'lng_footer' );
+$footer->load_template( 'tpl_footer' );
 $footer->process();
 $footer->output();
-unset($footer);
+unset( $footer, $template );
+
+if ( isset($GLOBALS['starttime']) && ( !isset($GLOBALS['tssettings']['Page_generation_time']) || $GLOBALS['tssettings']['Page_generation_time'] ) )
+{
+	//it seems php 5.0.0 or higher has a bug with windows versions of apache 1.3 and the function apache_get_modules(). It says the function exists but hangs the connection when the function is called. This behaviour has only been tested with Apache 1.3 and PHP5 for windows. It probably works fine for Linux / Unix but i'm not sure. anyways just to be sure lets only use it with Apache2
+	$gzipheaders = ( ( function_exists('apache_response_headers') ) ? apache_response_headers() : array() );
+	$gzipmod = ( ( function_exists('apache_get_modules') && strncasecmp($_SERVER['SERVER_SOFTWARE'], 'Apache/2', 8) === 0 ) ? apache_get_modules() : array() );
+
+	$gzip_text = (
+	(
+		isset($gzipheaders['vary']) ||
+		isset($gzipheaders['Vary']) ||
+		(
+			isset($gzipheaders['Content-Encoding']) && stristr($gzipheaders['Content-Encoding'], 'gzip') !== false
+		) || 
+		ini_get('zlib.output_compression') ||
+		in_array('mod_deflate', $gzipmod) ||
+		in_array('mod_gzip', $gzipmod) ||
+		$tssettings['GZIP_Compression']
+	) ? 'GZIP enabled' : 'GZIP disabled' );
+
+	unset( $gzipmod, $gzipheaders );
+
+	$debug_text = ( defined("DEBUG") ) ? 'Debug on' : 'Debug off';
+
+	$mtime = explode( ' ',microtime() );
+	$endtime = $mtime[1] + $mtime[0];
+
+	$gentime = $endtime - $GLOBALS['starttime'];
+
+	$sql_part = (int) round( ( $sql_time / $gentime * 100 ), 0 );
+
+	echo '
+<table height="25" border="0" align="center" cellspacing="0" cellpadding="0">
+	<tr><td align="center" valign="top" style="font-family: Verdana; font-size: 10px; color: #000000; letter-spacing: -1px">
+		Page generation time: ' . round( $gentime, 4 ) . 's (PHP: ' . ( 100 - $sql_part ) . '% - SQL: ' . $sql_part . '%) - SQL queries: ' . $executed_queries . ( ( defined("DEBUG") ) ? ' (' . $free_queries . ' + ' . $nofree_queries . ')' : NULL ) . ' - ' . $gzip_text . ' - ' . $debug_text . '
+	</td></tr>
+</table>';
+	unset( $gentime, $sql_part, $gzip_text, $debug_text, $mtime, $GLOBALS['starttime'], $endtime );
+}
+
+unset( $executed_queries, $free_queries, $nofree_queries, $sql_time, $GLOBALS['tssettings'] );
+
+/*if ( defined("DEBUG") ) // This is a debug only feature but because of the implications of showing this data it will also be outcommented.
+{
+	echo '<p>DEBUG information: Still open variables.</p>';
+	var_dump( $GLOBALS );
+}*/
 
 exit;
 ?>

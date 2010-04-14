@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index_vent.php,v 1.2 2006/03/14 01:17:12 SC Kruiper Exp $
+ *   $Id: lng_index_vent.php,v 1.6 2006/06/11 20:32:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,23 +21,21 @@
  ***************************************************************************/
 
 //security through the use of define != defined
-if (!defined("IN_SLG")){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") )
+{ 
+	die( "Hacking attempt." );
 }
 
 $this->text += array(
-'{TEXT_VOICECODEC}' => 'Voice codec',
-'{TEXT_VOICEFORMAT}' => 'Voice codec format',
-'{TEXT_SERVER_PHONETIC}' => 'Server phonetic',
-'{TEXT_COMMENT}' => 'Comment',
-'{TEXT_ADMINS_CON}' => 'Administrators present',
-'{TEXT_CHANNELDATA_DISABLED}' => 'Channel information disabled by Ventrilo server administrator.',
-'{TEXT_CLIENTDATA_DISABLED}' => 'Client information disabled by Ventrilo server administrator.',
-'{TEXT_UNKNOWN}' => 'Unknown',
-);
-
-$this->tooltips += array(
-'{TEXT_ADMIN}' => 'Administrator?',
-'{TEXT_PHANTOM}' => 'Phantom?',
+'{TEXT_ADMIN}'                  => 'Administrator?',
+'{TEXT_ADMINS_CON}'             => 'Administrators online',
+'{TEXT_CHANNELDATA_DISABLED}'   => 'Channel information disabled by Ventrilo server administrator.',
+'{TEXT_CLIENTDATA_DISABLED}'    => 'Client information disabled by Ventrilo server administrator.',
+'{TEXT_COMMENT}'                => 'Comment',
+'{TEXT_PHANTOM}'                => 'Phantom?',
+'{TEXT_SERVER_PHONETIC}'        => 'Server phonetic',
+'{TEXT_UNKNOWN}'                => 'Unknown',
+'{TEXT_VOICECODEC}'             => 'Voice codec',
+'{TEXT_VOICEFORMAT}'            => 'Voice codec format',
 );
 ?>

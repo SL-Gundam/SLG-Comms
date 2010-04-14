@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.17 2006/03/15 22:23:00 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.35 2006/06/14 15:58:22 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -20,126 +20,203 @@
  *
  ***************************************************************************/
 
-if (!defined("IN_SLG")){ 
-	die("Hacking attempt.");
+if ( !defined("IN_SLG") )
+{ 
+	die( "Hacking attempt." );
 }
 
-session_name("slgstatssessid");
+session_name( "slgstatssessid" );
 session_start();
 
-if (checkfilelock('admin.php')){
-	include('includes/functions.secure.inc.php');
+if ( checkfilelock('admin.php') )
+{
+	require( $tssettings['Root_path'] . 'includes/functions.secure.inc.php' );
 
-	if ($_SERVER['REQUEST_METHOD'] === 'GET' && !isset($_SESSION['prerecorded_ip'])){
-		$_SESSION['prerecorded_ip'] = encode_ip($_SERVER['REMOTE_ADDR']);
+	// some times proxies only work for GET requests and not POST requests. this code fixes the ip checking in that case
+	if ( !isset($_SESSION['prerecorded_ip']) )
+	{
+		if ( $_SERVER['REQUEST_METHOD'] === 'GET' )
+		{
+			$_SESSION['prerecorded_ip'] = md5( $_SERVER['REMOTE_ADDR'] );
+		}
+		else
+		{
+			$_SESSION['prerecorded_ip'] = NULL;
+		}
 	}
 
-	if (isset($_POST['login'], $_POST['fusername'], $_POST['fpasswd'])){
-		$forumsettings = retrieve_forumsettings($tssettings, true);
+	// shall we login?
+	if ( isset($_POST['login'], $_POST['fusername'], $_POST['fpasswd']) )
+	{
+		handle_forum_db_connection( array(
+			'fusername' => $_POST['fusername'],
+			'fpasswd'   => $_POST['fpasswd']
+		) );
 
-		if ($forumsettings['otherdatabase']){
-			$forumdatabase = 'dbforum';
-			$$forumdatabase = new db;
-			$$forumdatabase->connect('pzforumserverconnect', $forumsettings['alt_db_host'], $forumsettings['alt_db_user'], $forumsettings['alt_db_passwd'], $forumsettings['alt_db_name']);
-		}
-		else{
-			$forumdatabase = 'db';
-		}
+		$authresult = $GLOBALS[ $GLOBALS['forumdatabase'] ]->execquery( 'authcheckquery', $forumsettings['authchecksql'], $forumsettings['authchecksql_params'] );
 
-		$authresult = $$forumdatabase->execquery('authcheckquery',$forumsettings['authchecksql']);
+		unset( $forumsettings );
 
-		if ($$forumdatabase->numrows($authresult) > 0){
-			while ($authrow = $$forumdatabase->getrow($authresult)){
-				if ((($tssettings['Forum type'] !== 'phpbb2015' && $tssettings['Forum type'] !== 'xoops_cbb' || (($tssettings['Forum type'] === 'phpbb2015' || $tssettings['Forum type'] === 'xoops_cbb') && $authrow['groupid'] == $tssettings['Forum group'])))){
-					$sql = 'DELETE FROM '.$table['sessions'].' WHERE `session_user_id` = '.$authrow['userid'];
-					$logincleanquery = $db->execquery('logincleanquery',$sql);
+		if ( $GLOBALS[ $GLOBALS['forumdatabase'] ]->numrows($authresult) > 0 )
+		{
+			while ( $authrow = $GLOBALS[ $GLOBALS['forumdatabase'] ]->getrow($authresult) )
+			{
+				if (
+					( $tssettings['Forum_type'] !== 'phpbb2015' && $tssettings['Forum_type'] !== 'xoops_cbb' ) || 
+					( ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' ) && $authrow['groupid'] == $tssettings['Forum_group'] )
+				)
+				{
+					$sql = '
+DELETE FROM `%1$s`
+WHERE `session_user_id` = %2$u';
+					$db->execquery( 'logincleanquery', $sql, array(
+						$table['sessions'],
+						$authrow['userid']
+					) );
 
-					$sql = 'INSERT INTO `'.$table['sessions'].'` ( `session_id` , `session_user_id` , `session_ip` ) VALUES ( MD5("'.session_id().'") , "'.$authrow['userid'].'", "'.encode_ip($_SERVER['REMOTE_ADDR']).'" );'; 
-					$loginquery = $db->execquery('loginquery',$sql);
-					if ($loginquery === true){
-						$$template->displaymessage('{TEXT_LOGIN_SUCCESS}');
-					}
+					$sql = '
+INSERT INTO `%1$s`
+( `session_id` , `session_user_id` , `session_ip` )
+VALUES 
+( "%2$s" , %3$u, "%4$s" )'; 
+					$db->execquery( 'loginquery', $sql, array(
+						$table['sessions'],
+						md5( session_id() ),
+						$authrow['userid'],
+						md5( $_SERVER['REMOTE_ADDR'] )
+					) );
+					unset( $sql );
+					$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_LOGIN_SUCCESS}' );
 
 					$_SESSION['user_id'] = $authrow['userid'];
 					$_SESSION['username'] = $authrow['username'];
 					$_SESSION['realname'] = $authrow['realname'];
-					if ($tssettings['Forum type'] === 'smf103' || $tssettings['Forum type'] === 'ipb204' || $tssettings['Forum type'] === 'vb307' || $tssettings['Forum type'] === 'smf110' || $tssettings['Forum type'] === 'vb350'){
-						$group_id = trim($authrow['groupid'], ',');
-						if (!empty($authrow['additionalgroups'])){
-							$group_id .= ','.trim($authrow['additionalgroups'], ',');
+
+					if (
+						$tssettings['Forum_type'] === 'bboardfull234' || 
+						$tssettings['Forum_type'] === 'ipb204' || 
+						$tssettings['Forum_type'] === 'vb307' || 
+						$tssettings['Forum_type'] === 'smf103' || 
+						$tssettings['Forum_type'] === 'smf110' || 
+						$tssettings['Forum_type'] === 'vb350'
+					)
+					{
+						$group_id = trim( $authrow['groupid'], ',' );
+						if ( !empty($authrow['additionalgroups']) )
+						{
+							$group_id .= ',' . trim( $authrow['additionalgroups'], ',' );
 						}
-						$_SESSION['group_id'] = explode(',',$group_id);
+						$group_id = explode( ',', $group_id );
+						for ( $i=0, $max=count($group_id); $i < $max; $i++ )
+						{
+							$_SESSION['group_id'][] = (int) $group_id[ $i ];
+						}
+						unset( $group_id, $i, $max );
 					}
-					elseif ($tssettings['Forum type'] === 'ipb131'){
-						$_SESSION['group_id'] = array($authrow['groupid']);
+					elseif ( $tssettings['Forum_type'] === 'ipb131' || $tssettings['Forum_type'] === 'bboardlite102' )
+					{
+						$_SESSION['group_id'] = array( (int) $authrow['groupid'] );
 					}
 				}
-				if ($tssettings['Forum type'] === 'phpbb2015' || $tssettings['Forum type'] === 'xoops_cbb'){
-					$_SESSION['group_id'][] = $authrow['groupid'];
+				if ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' )
+				{
+					$_SESSION['group_id'][] = (int) $authrow['groupid'];
 				}
 			}
+			unset( $authrow );
+
+			$secure = true;
+		}
+		
+		if ( !isset($_SESSION['username']) )
+		{
+			$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_LOGIN_FAILURE}' );
 		}
 
-		if (!isset($loginquery)){
-			$$template->displaymessage('{TEXT_LOGIN_FAILURE}');
-			$_SESSION = array(); 
-			session_destroy(); 
+		$GLOBALS[ $GLOBALS['forumdatabase'] ]->freeresult( 'authcheckquery', $authresult );
+		unset( $authresult );
+
+		if ( isset($GLOBALS['dbforum']->sqlconnectid) )
+		{
+			$GLOBALS['dbforum']->disconnect();
+		}
+	}
+
+	// session checkup
+	if ( isset($_SESSION['username']) )
+	{
+		if ( file_exists($tssettings['Root_path'] . 'install.php') )
+		{
+			$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_INSTALL_FILE_PRESENT}' );
 		}
 
-		$$forumdatabase->freeresult('authcheckquery',$authresult);
-		if ($forumsettings['otherdatabase']){
-			$$forumdatabase->disconnect();
+		$sql = '
+SELECT `session_id`
+FROM `%1$s`
+WHERE 
+  `session_id` = "%2$s" AND 
+  `session_user_id` = %3$u AND
+  (`session_ip` = "%4$s" OR
+  ("%5$s" = "GET" AND
+  "%6$s" = "%4$s" AND
+  `session_ip` = "%7$s"))'; 
+		$authtestresult = $db->execquery( 'annualcheckup', $sql, array(
+			$table['sessions'],
+			md5( session_id() ),
+			$_SESSION['user_id'],
+			md5( $_SERVER['REMOTE_ADDR'] ),
+			$db->escape_string( $_SERVER['REQUEST_METHOD'] ),
+			$db->escape_string( $_SESSION['prerecorded_ip'] ),
+			( ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) ? md5( $_SERVER['HTTP_X_FORWARDED_FOR'] ) : 'false' )
+		) );
+
+		if ( $db->numrows($authtestresult) < 1 )
+		{
+			$sql = '
+DELETE FROM `%1$s`
+WHERE `session_id` = "%2$s"
+LIMIT 1';  
+			$db->execquery( 'session_destruct', $sql, array(
+				$table['sessions'],
+				md5( session_id() )
+			) );
+
+			$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_SESSION_VIOLATION}' );
+			$_SESSION = array();
+			session_destroy();
 		}
+
+		$db->freeresult( 'annualcheckup', $authtestresult );
+		unset( $authtestresult, $sql );
 		$secure = true;
 	}
 
-	if (isset($_SESSION['username'])){
-		if (file_exists('install.php')){
-			$$template->displaymessage('{TEXT_INSTALL_FILE_PRESENT}');
-		}
-
-		$sql = 'SELECT `session_id` , `session_ip` FROM `'.$table['sessions'].'` WHERE `session_id` = MD5("'.session_id().'") AND `session_user_id` = '.$_SESSION['user_id']; 
-		$authtestresult = $db->execquery('annualcheckup',$sql);
-
-		if ($db->numrows($authtestresult) > 0){
-			while ($authtestrow = $db->getrow($authtestresult)){
-				if ((decode_ip($authtestrow['session_ip']) == $_SERVER['REMOTE_ADDR']) || (decode_ip($_SESSION['prerecorded_ip']) == $_SERVER['REMOTE_ADDR'] && decode_ip($authtestrow['session_ip']) == $_SERVER['HTTP_X_FORWARDED_FOR'])){
-					$securityok = true;
-				}
-				else{
-					$sql = 'DELETE FROM `'.$table['sessions'].'` where `session_id` = MD5("'.session_id().'") limit 1';  
-					$authtestfailed = $db->execquery('iperror_session_destruct',$sql);
-
-					$$template->displaymessage('{TEXT_SESSION_VIOLATION}');
-					$_SESSION = array();
-					session_destroy();
-				}
-			}
-		}
-		else{
-			$$template->displaymessage('{TEXT_SESSION_VIOLATION}');
-			$_SESSION = array(); 
-			session_destroy(); 
-		}
-		$db->freeresult('annualcheckup',$authtestresult);
-		$secure = true;
-	}
-
-	if (isset($_SESSION['username'], $_GET['page']) && $_GET['page'] === 'logout') {
-		$sql = 'DELETE FROM `'.$table['sessions'].'` where `session_id` = MD5("'.session_id().'") limit 1';
-		$logoutquery = $db->execquery('logoutquery',$sql);
-		if ($logoutquery === true){
-			$$template->displaymessage('{TEXT_LOGOUT_SUCCESS}');
-		}
+	// shall we logout?
+	if ( isset($_SESSION['username'], $_GET['page']) && $_GET['page'] === 'logout' )
+	{
+		$sql = '
+DELETE FROM `%1$s`
+WHERE `session_id` = "%2$s"
+LIMIT 1';
+		$db->execquery( 'logoutquery', $sql, array(
+			$table['sessions'],
+			md5( session_id() )
+		) );
+		unset( $sql );
+		$GLOBALS[ $GLOBALS['template'] ]->displaymessage( '{TEXT_LOGOUT_SUCCESS}' );
 
 		$_SESSION = array();
 		session_destroy();
 		$secure = true;
 	}
 
-	if (!isset($secure) || !$secure){
-		$_SESSION = (isset($_SESSION['prerecorded_ip'])) ? array('prerecorded_ip' => $_SESSION['prerecorded_ip']) : array();
+	// did anything happen above?
+	if ( !isset($secure) || $secure === false )
+	{
+		$_SESSION = array( 'prerecorded_ip' => $_SESSION['prerecorded_ip'] );
 	//	session_destroy(); 
 	}
+
+	unset( $secure );
 }
 ?>
