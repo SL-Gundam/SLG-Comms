@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.40 2006/06/12 12:43:06 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.41 2006/06/24 18:28:18 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -185,11 +185,8 @@ if ( isset($GLOBALS['starttime']) && ( !isset($GLOBALS['tssettings']['Page_gener
 	$sql_part = (int) round( ( $sql_time / $gentime * 100 ), 0 );
 
 	echo '
-<table height="25" border="0" align="center" cellspacing="0" cellpadding="0">
-	<tr><td align="center" valign="top" style="font-family: Verdana; font-size: 10px; color: #000000; letter-spacing: -1px">
-		Page generation time: ' . round( $gentime, 4 ) . 's (PHP: ' . ( 100 - $sql_part ) . '% - SQL: ' . $sql_part . '%) - SQL queries: ' . $executed_queries . ( ( defined("DEBUG") ) ? ' (' . $free_queries . ' + ' . $nofree_queries . ')' : NULL ) . ' - ' . $gzip_text . ' - ' . $debug_text . '
-	</td></tr>
-</table>';
+<div class="pagegen">Page generation time: ' . round( $gentime, 4 ) . 's (PHP: ' . ( 100 - $sql_part ) . '% - SQL: ' . $sql_part . '%) - SQL queries: ' . $executed_queries . ( ( defined("DEBUG") ) ? ' (' . $free_queries . ' + ' . $nofree_queries . ')' : NULL ) . ' - ' . $gzip_text . ' - ' . $debug_text . '</div>';
+
 	unset( $gentime, $sql_part, $gzip_text, $debug_text, $mtime, $GLOBALS['starttime'], $endtime );
 }
 

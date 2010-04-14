@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.63 2006/06/12 14:24:02 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.65 2006/06/24 18:46:10 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -408,11 +408,9 @@ array(
 		}
 
 		$this->server = $server;
-		unset( $server );
 
 		$ptime = explode( ' ', microtime() );
 		$this->time_now = $ptime[1];
-		unset( $ptime );
 	}
 
 	// this function makes the decisions whether live or cached data should be loaded and takes the actions
@@ -483,7 +481,10 @@ LIMIT 0,1';
 				$this->server['res_id']
 			) );
 
-			$this->server += $GLOBALS['db']->getrow( $getserverinfo );
+			if ( $GLOBALS['db']->numrows( $getserverinfo ) > 0 )
+			{
+				$this->server += $GLOBALS['db']->getrow( $getserverinfo );
+			}
 
 			$GLOBALS['db']->freeresult( 'getserverinfo', $getserverinfo );
 
@@ -500,9 +501,7 @@ SET
 WHERE
   `res_id` = %3$u AND
   `timestamp` = %4$u AND
-  `update_attempt` = %5$u AND
-  `refreshcache` = %6$u AND
-  `con_attempts` = %7$u
+  `update_attempt` = %5$u
 LIMIT 1';
 
 						$GLOBALS['db']->execquery( 'claimupdate', $sql, array(
@@ -510,9 +509,7 @@ LIMIT 1';
 							$this->time_now,
 							$this->server['res_id'],
 							$this->server['timestamp'],
-							$this->server['update_attempt'],
-							$this->server['refreshcache'],
-							$this->server['con_attempts']
+							$this->server['update_attempt']
 						) );
 						if ( $GLOBALS['db']->affected_rows() === 0 )
 						{
@@ -715,9 +712,9 @@ quit\n";
 
 		ob_start();
 
-		$connection = fsockopen ( 'tcp://[' . $this->server['res_data']['ip'] . ']', $this->server['res_data']['optional'], $errno, $errstr, 2 );
+		$connection = fsockopen( 'tcp://' . $this->server['res_data']['ip'], $this->server['res_data']['optional'], $errno, $errstr, 2 );
 
-		if ( empty($errno) && empty($errstr) )
+		if ( !is_resource($connection) && empty($errno) && empty($errstr) )
 		{
 			$errstr = strip_tags( ob_get_contents() );
 			$errno = 'hidden';
@@ -760,6 +757,8 @@ quit\n";
 		}
 		else
 		{
+			unset( $errno, $errstr );
+			
 			if ( defined("DEBUG") )
 			{
 				$cnt_time = new timecount;

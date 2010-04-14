@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resadd.inc.php,v 1.17 2006/06/11 20:32:43 SC Kruiper Exp $
+ *   $Id: resadd.inc.php,v 1.18 2006/06/24 18:28:17 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -49,7 +49,6 @@ VALUES
 			$sql = '
 INSERT INTO `%1$s`
 ( `res_id` )
-(
   SELECT `res_id`
   FROM `%2$s`
   WHERE
@@ -57,7 +56,7 @@ INSERT INTO `%1$s`
     `res_data` = %4$s AND
     `res_type` = "%5$s"
   LIMIT 0,1
-)';// number %4 not quoted because we need to be able to set that one to NULL
+';// number %4 not quoted because we need to be able to set that one to NULL
 
 			$db->execquery( 'queryinsertrescache', $sql, array(
 				$table['cache'],

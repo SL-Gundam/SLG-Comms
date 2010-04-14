@@ -265,3 +265,11 @@ table.server_notice{
 	background-color: #F4F4F4;
 	width: 450px;
 }
+
+.pagegen{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #000000;
+	letter-spacing: -1px;
+	text-align: center;
+}

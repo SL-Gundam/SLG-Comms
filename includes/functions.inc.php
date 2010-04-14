@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.51 2006/06/12 14:24:02 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.52 2006/06/24 18:28:18 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -276,10 +276,10 @@ function check_ip_port( $ip, $port, $queryport=NULL )
 	$ipv4_parts = substr_count( $ip, '.' );
 	$ipv4 = ( ( $testip !== -1 && $testip !== false && $ipv4_parts === 3 ) ? true : false );
 	//ipv6 check - EXPERIMENTAL
-	$ipv6_parts = substr_count( $ip, ':' );
-	$ipv6 = ( ( $ipv6_parts >= 2 && $ipv6_parts <= 7 ) ? true : false );
+/*	$ipv6_parts = substr_count( $ip, ':' );
+	$ipv6 = ( ( $ipv6_parts >= 2 && $ipv6_parts <= 7 ) ? true : false );*/
 
-	return( $port && ( $ipv4 || $ipv6 ) && $queryport );
+	return( $port && ( $ipv4 /*|| $ipv6*/ ) && $queryport );
 }
 
 // this function prepares a email address

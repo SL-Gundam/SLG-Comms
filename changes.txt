@@ -1,3 +1,18 @@
+v3.0.1
+- Fixed a bug in the check_cache_status() function
+- Changed example ip addresses to 127.0.0.1 and localhost in new installations
+- Fixed a missing query needed for the example servers inserted upon new installations.
+- Fix for sub query's applied which were used during update to v3.0.0 during Installation and in the "Add Resource" page.
+- IPv6 support disabled since PHP4 returns incorrect errors when this feature is activated.
+- Added support for "PHP-Nuke 7.8 + PhpBB 2.0.7"
+- Added an extra check in secure.inc.php for the realname retrieved from the forum tables incase the realname is empty
+- Removed the md5() of the username during login to improve performance on forums with a lot of users.
+- Modified install.php to use the test_new_forum() function to check whether the forum settings are valid.
+
+v3.0.1 template changes
+- Added a new CSS class called "pagegen". This class is used for the page generation time at the bottom of the page.
+- Fixed some table width problems for several template files for template "Default", "Default 2", "Default compact".
+
 v3.0.0.
 - New language items called:  "{TEXT_UNKNOWNSETTING}", "{TEXT_DIFFERENT_DB_INFO}", "{TEXT_CONNECT_ALLREADY}", "{TEXT_SUCCESFULL_ADD_COL}", "{TEXT_ADDCOL_SUCCESS}", "{TEXT_NO_CONNECT_AVAILABLE}", "{TEXT_CHANGE_SUCCESS}", "{TEXT_UPDATE_SUCCESS}", "{TEXT_SETTINGUPDATE_FAILURE}", "{TEXT_RAWDATA_UNAVAILABLE}", "{TEXT_FSOCKOPEN_FUNC}", "{TEXT_FSOCKOPEN_INFO}", "{TEXT_MILLISECONDS}", "{TEXT_CUSTOM_SERVER_VENT_SORT}", "{TEXT_ALPHABETICALLY}", "{TEXT_MANUALLY}", "{TEXT_SERVER}", "{TEXT_STREAM_TIMEOUT}", "{TEXT_UPDATEINPROGRESS}", "{TEXT_LOADCACHE_FAILED}", "{TEXT_SERVER_ENABLED}", "{TEXT_SERVERUPDATE_DISABLED}", "{TEXT_LAST_ERROR}", "{TEXT_ADDEDNEWSETTINGS}", "{TEXT_CLIENT}", "{TEXT_TS_RAWDATA_FLAW}", "{TEXT_CONF_FILE_NOT_IN_DOCROOT}", "{TEXT_RECURSIVE_FUNC_PROT}", "{TEXT_NEW_FORUM_INVALID}"
 - Removed language items: "{TEXT_PAGEGEN}", "{TEXT_SQL_QUERIES}", "{TEXT_GZIP_ENABLED}", "{TEXT_GZIP_DISABLED}", "{TEXT_DEBUG_ON}", "{TEXT_DEBUG_OFF}", "{TEXT_CUSTOM}", "{TEXT_SUBCHANNEL}", "{TEXT_NAME}", "{TEXT_VENTRILO_STAT_PROG_CHECK}", "{TEXT_DISABLED}", "{TEXT_LOGIN_FORM}"

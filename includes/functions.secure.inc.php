@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.41 2006/06/14 15:58:21 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.42 2006/06/24 18:28:18 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -61,6 +61,7 @@ function forum_existence_check( $forumtype, $forumpath )
 			break;
 
 		case 'phpbb2015':
+		case 'phpnuke78_phpbb207':
 			$conf_file .= 'config.php';
 			break;
 
@@ -142,14 +143,14 @@ SELECT
 FROM
   `%1$s`
 WHERE
-  MD5(`username`) = "%2$s" AND
+  `username` = "%2$s" AND
   `password` = "%3$s" AND
   `groupid` = %4$u
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] ),
 						$settings['Forum_group']
 					);
@@ -203,7 +204,7 @@ FROM
   `%2$s` AS GRM
 WHERE
   MEM.`groupcombinationid` = GRM.`groupcombinationid` AND
-  MD5(MEM.`username`) = "%3$s" AND
+  MEM.`username` = "%3$s" AND
   MEM.`password` = "%4$s" AND
   MEM.`sha1_password` = "%5$s" AND
   %6$u IN (GRM.`groupids`)
@@ -212,7 +213,7 @@ LIMIT 0,1';
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] ),
 						sha1( $action_login['fpasswd'] ),
 						$settings['Forum_group']
@@ -262,14 +263,14 @@ SELECT
 FROM
   `%1$s`
 WHERE
-  MD5(`name`) = "%2$s" AND
+  `name` = "%2$s" AND
   `password` = "%3$s" AND
   `mgroup` = %4$u
 LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] ),
 						$settings['Forum_group']
 					);
@@ -322,7 +323,7 @@ FROM
   `%2$s` AS CON
 WHERE
   MEM.`id` = CON.`converge_id` AND
-  MD5(MEM.`name`) = "%3$s" AND
+  MEM.`name` = "%3$s" AND
   CON.`converge_pass_hash` = MD5(CONCAT(MD5(CON.`converge_pass_salt`), "%4$s")) AND
   ((TRIM(BOTH "," FROM MEM.`mgroup`) = %5$u) OR 
   (%5$u IN (TRIM(BOTH "," FROM MEM.`mgroup_others`))))
@@ -331,7 +332,7 @@ LIMIT 0,1';
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['memconverge'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] ),
 						$settings['Forum_group']
 					);
@@ -385,14 +386,74 @@ FROM
   `%2$s` AS GRM
 WHERE
   MEM.`user_id` = GRM.`user_id` AND
-  MD5(MEM.`username`) = "%3$s" AND
+  MEM.`username` = "%3$s" AND
   MEM.`user_password` = "%4$s" AND
   MEM.`user_active` = 1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
+						md5( $action_login['fpasswd'] )
+					);
+				}
+				break;
+
+/* START - PHPNUKE78_PHPBB207 */
+			case 'phpnuke78_phpbb207':
+				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'config.php' );
+
+				if ( !isset($prefix, $user_prefix, $dbhost, $dbname, $dbuname, $dbpass) )
+				{
+					early_error( '{TEXT_INVALID_CONF_FILE}' );
+				}
+
+				$forumsettings['alt_db_host'] = $dbhost;
+				$forumsettings['alt_db_name'] = $dbname;
+				$forumsettings['alt_db_user'] = $dbuname;
+				$forumsettings['alt_db_passwd'] = $dbpass;
+
+				if ( $action_login === false )
+				{
+					$table['groups'] = $prefix . '_bbgroups';
+
+					$forumsettings['groups_sql'] = '
+SELECT
+  `group_id` AS groupid,
+  `group_name` AS groupname
+FROM
+  `%1$s`
+WHERE
+  `group_single_user` = 0
+ORDER BY
+  `groupname`';
+
+					$forumsettings['groups_sql_params'] = $table['groups'];
+				}
+				else
+				{
+					$table['members'] = $user_prefix . '_users';
+					$table['groupsmembers'] = $prefix . '_bbuser_group';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  MEM.`user_id` AS userid,
+  MEM.`username` AS username,
+  MEM.`name` AS realname,
+  GRM.`group_id` AS groupid
+FROM
+  `%1$s` AS MEM,
+  `%2$s` AS GRM
+WHERE
+  MEM.`user_id` = GRM.`user_id` AND
+  MEM.`username` = "%3$s" AND
+  MEM.`user_password` = "%4$s" AND
+  MEM.`user_active` = 1';
+
+					$forumsettings['authchecksql_params'] = array(
+						$table['members'],
+						$table['groupsmembers'],
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] )
 					);
 				}
@@ -443,7 +504,7 @@ SELECT
 FROM
   `%1$s` 
 WHERE
-  MD5(`memberName`) = "%2$s" AND
+  `memberName` = "%2$s" AND
   `passwd` = "%3$s" AND
   `is_activated` = 1 AND
   ((`ID_GROUP` = %4$u) OR 
@@ -452,7 +513,7 @@ LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5_hmac( $action_login['fpasswd'], strtolower( $action_login['fusername'] ) ),
 						$settings['Forum_group']
 					);
@@ -504,7 +565,7 @@ SELECT
 FROM
   `%1$s` 
 WHERE
-  MD5(`memberName`) = "%2$s" AND
+  `memberName` = "%2$s" AND
   `passwd` = "%3$s" AND
   `is_activated` = 1 AND
   ((`ID_GROUP` = %4$u) OR 
@@ -513,7 +574,7 @@ LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						sha1( strtolower( $action_login['fusername'] ) . ( $action_login['fpasswd'] ) ),
 						$settings['Forum_group']
 					);
@@ -565,7 +626,7 @@ SELECT
 FROM
   `%1$s` 
 WHERE
-  MD5(`username`) = "%2$s" AND
+  `username` = "%2$s" AND
   `password` = MD5(CONCAT("%3$s", `salt`)) AND
   ((`usergroupid` = %4$u) OR 
   (%4$u IN (`membergroupids`)))
@@ -573,7 +634,7 @@ LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] ),
 						$settings['Forum_group']
 					);
@@ -625,7 +686,7 @@ SELECT
 FROM
   `%1$s` 
 WHERE
-  MD5(`username`) = "%2$s" AND
+  `username` = "%2$s" AND
   `password` = MD5(CONCAT("%3$s", `salt`)) AND
   ((`usergroupid` = %4$u) OR 
   (%4$u IN (`membergroupids`)))
@@ -633,7 +694,7 @@ LIMIT 0,1';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] ),
 						$settings['Forum_group']
 					);
@@ -688,13 +749,13 @@ FROM
   `%2$s` AS GRM
 WHERE
   MEM.`uid` = GRM.`uid` AND
-  MD5(MEM.`loginname`) = "%3$s" AND
+  MEM.`loginname` = "%3$s" AND
   MEM.`pass` = "%4$s"';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
 						$table['groupsmembers'],
-						md5( $action_login['fusername'] ),
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
 						md5( $action_login['fpasswd'] )
 					);
 				}
@@ -968,6 +1029,7 @@ ORDER BY `res_name`';
 <option value="ipb131"' . ( ( $setting['value'] === 'ipb131' ) ? ' selected' : NULL ) . '>Invision Power Board 1.3.1</option>
 <option value="ipb204"' . ( ( $setting['value'] === 'ipb204' ) ? ' selected' : NULL ) . '>Invision Power Board 2.0.3-2.1.5</option>
 <option value="phpbb2015"' . ( ( $setting['value'] === 'phpbb2015' ) ? ' selected' : NULL ) . '>PhpBB 2.0.9-2.0.21</option>
+<option value="phpnuke78_phpbb207"' . ( ( $setting['value'] === 'phpnuke78_phpbb207' ) ? ' selected' : NULL ) . '>PHP-Nuke 7.8 + PhpBB 2.0.7</option>
 <option value="smf103"' . ( ( $setting['value'] === 'smf103' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.0.3-1.0.7</option>
 <option value="smf110"' . ( ( $setting['value'] === 'smf110' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.1 RC1-RC2</option>
 <option value="vb307"' . ( ( $setting['value'] === 'vb307' ) ? ' selected' : NULL ) . '>vBulletin v3.0.7</option>

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.94 2006/06/12 14:42:42 SC Kruiper Exp $
+ *   $Id: install.php,v 1.96 2006/06/24 22:01:03 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -360,18 +360,14 @@ if (
 		}
 
 		// check whether the selected forum is correct
-		if ( forum_existence_check($_POST['variable']['Forum_type'], $_POST['variable']['Forum_relative_path']) )
-		{
-			// retrieve needed forum information
-			$forumsettings = retrieve_forumsettings( array(
-				'Forum_type'          => $_POST['variable']['Forum_type'],
-				'Forum_relative_path' => $_POST['variable']['Forum_relative_path']
-			) );
-		}
-		else
+		if ( isset($_POST['variable']['Forum_type'], $_POST['variable']['Forum_relative_path']) && !test_new_forum($_POST['variable']['Forum_type'], prep_dir_string(ltrim($_POST['variable']['Forum_relative_path'], '/'))) )
 		{
 			early_error( '{TEXT_FORUM_NOT_FOUND_ERROR}' );
 		}
+
+		$GLOBALS['tssettings']['Forum_type'] = $_POST['variable']['Forum_type'];
+		$GLOBALS['tssettings']['Forum_relative_path'] = $_POST['variable']['Forum_relative_path'];
+		$GLOBALS['tssettings']['Forum_group'] = NULL;
 
 		$configlist = array(
 			array(
@@ -486,8 +482,8 @@ CREATE TABLE `%1$s` (
 
 		$sql = '
 INSERT INTO `%1$s` VALUES
-(NULL, "Example TeamSpeak", "12.23.34.45:6464:51234", "TeamSpeak"),
-(NULL, "Example Ventrilo", "ventrilo.game-host.org:8767:45t8hg4", "Ventrilo")';
+(NULL, "Example TeamSpeak", "127.0.0.1:6464:51234", "TeamSpeak"),
+(NULL, "Example Ventrilo", "localhost:8767:45t8hg4", "Ventrilo")';
 		$db->execquery( 'insertresdata', $sql, $table['resources'] );
 		$install->displaymessage( '{TEXT_INSERT_DATA_SUCCESS;' . $table['resources'] . ';}' );
 
@@ -519,6 +515,15 @@ CREATE TABLE `%1$s` (
 )'; 
 		$db->execquery( 'createsertable', $sql, $table['cache'] );
 		$install->displaymessage( '{TEXT_TABLE_CREATE_SUCCESS;' . $table['cache'] . ';}' );
+
+		$sql = '
+INSERT INTO `%1$s`
+  ( `res_id` )
+VALUES
+( 1 ),
+( 2 )';
+		$db->execquery( 'insertcacdata', $sql, $table['cache'] );
+		$install->displaymessage( '{TEXT_INSERT_DATA_SUCCESS;' . $table['cache'] . ';}' );
 	}
 
 	//settings table
@@ -653,7 +658,6 @@ DROP INDEX `refreshcache`';
 			$sql = '
 INSERT INTO `%1$s`
 ( `res_id` )
-(
   SELECT RES.`res_id`
   FROM
     `%2$s` AS RES
@@ -661,7 +665,7 @@ INSERT INTO `%1$s`
   WHERE
     CAC.`res_id` IS NULL AND
 	RES.`res_type` IN ("TeamSpeak", "Ventrilo")
-)';
+';
 			$db->execquery( 'insertcacdata', $sql, array(
 				$table['cache'],
 				$table['resources']
@@ -920,14 +924,14 @@ $servers = array(
 	array(
 			\'res_id\'   => 1,                                  /*Here you enter a unique id for the server.*/
 			\'res_name\' => \'Example TeamSpeak\',              /*The name you want to be displayed in the drop down list.*/
-			\'res_data\' => \'12.23.34.45:6464:51234\',         /*Here you fill in the ip and port of the servers. For teamspeak servers optionally also the queryport of the server. The default queryport for a teamspeak server is 51234. For Ventrilo the queryport should be replaced with the password to join the server. format is [ip]:[port]:[optional requirements]*/
+			\'res_data\' => \'127.0.0.1:6464:51234\',         /*Here you fill in the ip and port of the servers. For teamspeak servers optionally also the queryport of the server. The default queryport for a teamspeak server is 51234. For Ventrilo the queryport should be replaced with the password to join the server. format is [ip]:[port]:[optional requirements]*/
 			\'res_type\' => \'TeamSpeak\'                       /*This is used for possibly extending this script to encompass support for other voice communication servers other then teamspeak. At the moment the only types are "TeamSpeak" and "Ventrilo".*/
 	),                                                          /*This comma is needed to imply that there is another server following after this one. The last server doesn\'t need a comma but it wouldn\'t matter one way or the other if there was one.*/
 
 	array(
 			\'res_id\'   => 2,
 			\'res_name\' => \'Example Ventrilo\',
-			\'res_data\' => \'ventrilo.game-host.org:8767:45t8hg4\',
+			\'res_data\' => \'localhost:8767:45t8hg4\',
 			\'res_type\' => \'Ventrilo\',
 			\'ventsort\' => \'alpha\'                           /* This can be "alpha" or "manual". Since ventrilo has the option to sort his channels Alphabetically or Manually and doesn\'t show what was used in the retrieved data, SLG Comms can\'t decide on its own what should be used to sort the channels. You can define here what should be used. This is only available for Ventrilo channels. As you can see above, its not available for the TeamSpeak server */
 	),

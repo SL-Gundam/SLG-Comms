@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.35 2006/06/14 15:58:22 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.36 2006/06/24 18:28:18 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -62,8 +62,8 @@ if ( checkfilelock('admin.php') )
 			while ( $authrow = $GLOBALS[ $GLOBALS['forumdatabase'] ]->getrow($authresult) )
 			{
 				if (
-					( $tssettings['Forum_type'] !== 'phpbb2015' && $tssettings['Forum_type'] !== 'xoops_cbb' ) || 
-					( ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' ) && $authrow['groupid'] == $tssettings['Forum_group'] )
+					( $tssettings['Forum_type'] !== 'phpbb2015' && $tssettings['Forum_type'] !== 'xoops_cbb' && $tssettings['Forum_type'] !== 'phpnuke78_phpbb207' ) || 
+					( ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' ) && $authrow['groupid'] == $tssettings['Forum_group'] )
 				)
 				{
 					$sql = '
@@ -90,7 +90,7 @@ VALUES
 
 					$_SESSION['user_id'] = $authrow['userid'];
 					$_SESSION['username'] = $authrow['username'];
-					$_SESSION['realname'] = $authrow['realname'];
+					$_SESSION['realname'] = ( ( !empty($authrow['realname']) ) ? $authrow['realname'] : $authrow['username'] );
 
 					if (
 						$tssettings['Forum_type'] === 'bboardfull234' || 
@@ -118,7 +118,7 @@ VALUES
 						$_SESSION['group_id'] = array( (int) $authrow['groupid'] );
 					}
 				}
-				if ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' )
+				if ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' )
 				{
 					$_SESSION['group_id'][] = (int) $authrow['groupid'];
 				}
