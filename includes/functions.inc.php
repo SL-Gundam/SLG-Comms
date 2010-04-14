@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.24 2005/10/21 14:29:26 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.26 2005/11/18 13:38:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -151,8 +151,7 @@ function print_check_cache_lifetime($usecached, &$cache, $tuntilrefresh, $errors
 
 function checkfilelock($files){
 	$path_parts1 = pathinfo($_SERVER['PHP_SELF']);
-	$files = explode(',', $files);
-	return(in_array($path_parts1['basename'], $files));
+	return(in_array($path_parts1['basename'], explode(',', $files)));
 }
 
 function savecache(&$cacheddata){
@@ -170,13 +169,14 @@ LIMIT 1';
 	return($sql);
 }
 
-function check_ip_port($ip, $port){
+function check_ip_port($ip, $port, $queryport=NULL){
 	$testip = ip2long($ip);
 	if ($testip === -1 || $testip === FALSE){
 		$ip = gethostbyname($ip);
 		$testip = ip2long($ip);
 	}
-	return((int)$port < 0 || (int)$port > 65535 || !is_numeric($port) || $testip === -1 || $testip === FALSE || count(explode('.', $ip)) !== 4);
+	$ipv4_parts = count(explode('.', $ip));
+	return( ( $port > 0 && $port < 65535 && is_numeric($port) ) && ( $testip !== -1 && $testip !== FALSE && $ipv4_parts === 4 ) && ( is_null($queryport) || ( $queryport > 0 && $queryport < 65535 && is_numeric($queryport) ) ) );
 }
 
 if(!function_exists('file_get_contents')){

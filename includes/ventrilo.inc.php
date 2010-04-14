@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.36 2005/10/24 14:08:13 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.37 2005/11/06 23:09:59 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -45,6 +45,7 @@ if (!$usecached){
 	if (empty($tssettings['Ventrilo status program'])){
 		early_error('{TEXT_NOVENTRILO}');
 	}
+
 	$ipstring = escapeshellarg($tssettings['Ventrilo status program']).' -a2 -c2 -t'. escapeshellcmd($ts['ip'].':'.$ts['port'].((isset($ts['queryport'])) ? ':'.$ts['queryport'] : NULL)) .' 2>&1';
 
 	if (defined("DEBUG")){
@@ -227,7 +228,9 @@ if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything wen
 			}
 		} 
 
-		$server_content .= vent_channels($ventchannels, $ventclients);
+		if (isset($ventchannels[0])){
+			$server_content .= vent_channels($ventchannels, $ventclients);
+		}
 
 		$ventrilo->insert_content('{CHANNEL_INFO_CONTENT}', $server_content);
 	}

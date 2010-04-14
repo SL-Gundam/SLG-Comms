@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.7 2005/10/21 14:29:27 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.9 2005/11/18 13:38:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/

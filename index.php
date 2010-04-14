@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.21 2005/10/21 14:29:25 SC Kruiper Exp $
+ *   $Id: index.php,v 1.22 2005/11/06 23:09:58 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 define("IN_SLG", 10);
-include('includes/config.inc.php');
+require('includes/config.inc.php');
 include_once('includes/header.inc.php');
 
 // start new template
@@ -121,17 +121,18 @@ unset($servers);
 // incase of the custom server we need to check whether the format is acceptable.
 if(isset($_POST['ipport']) && $_POST['ipbyname'] == 0 && $tssettings['Custom servers']){
 	$pice = explode(':',$_POST['ipport'], 3);
+	$pice_type = $_POST['type'];
 }
 
-if (empty($pice[0]) || empty($pice[1]) || check_ip_port($pice[0], $pice[1])){
+if (empty($pice[0]) || empty($pice[1]) || !check_ip_port(trim($pice[0]), trim($pice[1]), ((isset($pice[2]) && ( ( !isset($pice_type) && $res_type === 'TeamSpeak' ) || ( isset($pice_type) && $pice_type === 'TeamSpeak' ) ) ) ? trim($pice[2]) : NULL ))){
 	$index->displaymessage('{TEXT_IP_PORT_COMB_ERROR}');
 	unset($_POST);
 	unset($res_type);
 }
 
-$ts['ip'] = (isset($pice[0])) ? $pice[0] : NULL;
-$ts['port'] = (isset($pice[1])) ? $pice[1] : NULL;
-$ts['queryport'] = (isset($pice[2])) ? $pice[2] : NULL;
+$ts['ip'] = (isset($pice[0])) ? trim($pice[0]) : NULL;
+$ts['port'] = (isset($pice[1])) ? trim($pice[1]) : NULL;
+$ts['queryport'] = (isset($pice[2])) ? trim($pice[2]) : NULL;
 
 // checking whether cached server data is available
 if(isset($ts['id']) && !isset($cache)){

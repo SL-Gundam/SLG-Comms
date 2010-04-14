@@ -1,3 +1,13 @@
+v2.2.2
+- Fixed a glitch in install.php when selecting the wrong installation type when you're upgrading an existing installation of SLG Comms.
+- Added a extra check whether the queryport for TeamSpeak is actually a port number.
+- Improved ip:port checker
+- Automatically select the right install type and hide the language and template options incase of updating an old version of SLG Comms.
+- Fixed a whitespace problem in the custom ip:port field
+- A number of small tweaks to the TeamSpeak channel / client looping process
+- Fixed a bug in the TeamSpeak server parser which could cause NOTICE and WARNING level errors to be generated.
+- Removed version number from the default Page title field upon a new installation of SLG Comms as this number might be confusing when updating SLG Comms.
+
 v2.2.1
 - Improved the displaymessage function when it's supposed to stop script execution.
 - Overhauled the complete TeamSpeak server data parser code to improve performance.

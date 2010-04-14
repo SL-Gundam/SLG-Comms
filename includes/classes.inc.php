@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.23 2005/10/24 14:08:13 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.24 2005/11/06 23:09:58 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -167,8 +167,8 @@ Query: '.wordwrap(htmlentities($sql), 100).'
 	function insert_menu($menu, &$menuarray){
 		$menu = rtrim($menu, '}');
 		$pattern = $menu.';(VERTICAL|HORIZONTAL);}';
-		preg_match($pattern, $this->template, $foundmenu);
-		if (count($foundmenu) > 0){
+		$matches = preg_match($pattern, $this->template, $foundmenu);
+		if ($matches > 0){
 			$parsedmenu = $this->processmenu($menuarray['menuitems'], $foundmenu[1], $menuarray['baseurl'], $menuarray['basevar']);
 			$this->insert_text('{'.$foundmenu[0].'}', $parsedmenu);
 		}

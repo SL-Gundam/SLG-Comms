@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.ts.inc.php,v 1.6 2005/10/24 14:08:13 SC Kruiper Exp $
+ *   $Id: functions.ts.inc.php,v 1.8 2005/11/18 13:38:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -236,13 +236,13 @@ function prepare_http_link($url, $text=NULL, $hyperlink=true){
 if (!function_exists('array_combine')){
 	function array_combine(&$keys, &$values){
 		$key_count = count($keys);
-	
+
 		$combined = array();
 		for ($i = 0; $i < $key_count; $i++) {
 			$combined[$keys[$i]] = $values[$i];
 		}
-	
-		return $combined;
+
+		return($combined);
 	}
 }
 ?>

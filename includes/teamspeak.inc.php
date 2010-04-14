@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.30 2005/10/24 14:08:13 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.31 2005/11/06 23:09:59 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -107,6 +107,7 @@ if (!$connection){
 //		echo $userdata.'<br />';
 //		$userdatamerge[] = explode("\t", $userdata);
 //		echo $userdata;
+		$userdata = trim($userdata);
 		if($userdata === '[TS]'){
 			$counter = 0;
 			$data_accept = true;
@@ -265,8 +266,6 @@ if (!$connection){
 ## DISPLAY ##
 #############
 
-	uasort($channels, "SORT_CHANNELS");
-	reset($channels);
 	$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_SERVER_NAME}:&amp;nbsp;</td><td>'.prep_tooltip($vserver['server_name']).'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_PLATFORM}:&amp;nbsp;</td><td>'.prep_tooltip($vserver['server_platform']).'</td></tr>
@@ -300,6 +299,8 @@ if (!$connection){
 	</tr>
 ';
 
+	uasort($channels, "SORT_CHANNELS");
+	reset($channels);
 	foreach($channels as $channel){
 		//Information echo'en...
 		$chflags = ch_flags($channel['flags']);

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.51 2005/10/24 14:08:13 SC Kruiper Exp $
+ *   $Id: install.php,v 1.52 2005/11/06 23:09:58 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,11 +21,11 @@
  ***************************************************************************/
 
 define("IN_SLG", 10);
-$new_version = 'v2.2.1';
+$new_version = 'v2.2.2';
 include('includes/config.inc.php');
 
-// if step doesn't exist step will be 1
-if (!isset($_GET['step']) || !is_numeric($_GET['step']) || !isset($_POST['variable']['Database']) || (!$_POST['variable']['Database'] && $_POST['variable']['install_type'] === 'rescue')){
+// if step doesn't exist step must be 1
+if (!isset($_GET['step']) || !is_numeric($_GET['step']) || !isset($_POST['variable']['install_type']) || ($_POST['variable']['install_type'] !== 'upgrade' && $_POST['variable']['install_type'] !== 'rescue' && !isset($_POST['variable']['Database']))){
 	$_GET['step'] = 1;
 	$_POST = array();
 }
@@ -46,12 +46,15 @@ elseif ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 }
 
 // lets fill some default values which will be used as default values
-if (isset($tssettings['SLG version']) && isset($_POST['variable']['install_type']) && $_POST['variable']['install_type'] === 'upgrade'){
+if (isset($tssettings['SLG version']) && isset($_POST['variable']['install_type'])){
 	$old_version = $tssettings['SLG version'];
-	if (version_compare($old_version, $new_version, '>=')){
+	if (version_compare($old_version, $new_version, '>=') && $_POST['variable']['install_type'] === 'upgrade'){
 		early_error('{TEXT_SAMEVERSIONUPDATE}');
 	}
-	elseif (!defined("NO_DATABASE")){
+	elseif (defined("NO_DATABASE")){
+		$_POST['variable']['Database'] = 0;
+	}
+	else{
 		$_POST['variable']['Database'] = 1;
 	}
 }
@@ -83,20 +86,24 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			array(
 				'variable' => 'install_type',
 				'value' => 'new'
-			),
-			array(
-				'variable' => 'Database',
-				'value' => NULL
-			),
-			array(
-				'variable' => 'Language',
-				'value' => 'English'
-			),
-			array(
-				'variable' => 'Template',
-				'value' => 'Default'
 			)
 		);
+		if (!isset($old_version)){
+			$configlist = array_merge($configlist, array(
+				array(
+					'variable' => 'Database',
+					'value' => NULL
+				),
+				array(
+					'variable' => 'Language',
+					'value' => 'English'
+				),
+				array(
+					'variable' => 'Template',
+					'value' => 'Default'
+				)
+			));
+		}
 	}
 	elseif ($_GET['step'] == 2 && $_POST['variable']['Database']){
 		if ($_POST['variable']['install_type'] === 'upgrade'){
@@ -191,7 +198,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			),
 			array(
 				'variable' => 'Page title',
-				'value' => 'SLG Comms '.$tssettings['SLG version']
+				'value' => 'SLG Comms'
 			),
 			array(
 				'variable' => 'Retrieved data status',
@@ -302,9 +309,9 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 		switch ($row['variable']){
 			case 'install_type':
 				$configrows .= '<select name="variable['.$row['variable'].']" class="textline">
-'.((!isset($old_version)) ? '<option value="new">{TEXT_NEW_INSTALL}</option>' : NULL ).'
-<option value="upgrade">{TEXT_UPGRADE_INSTALL}</option>
-<option value="rescue">{TEXT_RESCUE_INSTALL}</option>
+'.((!isset($old_version)) ? '<option value="new">{TEXT_NEW_INSTALL}</option>' : '<option value="upgrade">{TEXT_UPGRADE_INSTALL}</option>
+'.((!defined("NO_DATABASE")) ? '<option value="rescue">{TEXT_RESCUE_INSTALL}</option>' : NULL ).'
+' ).'
 </select>';
 				break;
 			case 'Database': $configrows .= '<input id="'.$row['variable'].'_enable" name="variable['.$row['variable'].']" type="radio" value="1"><label for="'.$row['variable'].'_enable">{TEXT_YES}</label>
