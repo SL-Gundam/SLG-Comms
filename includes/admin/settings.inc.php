@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: settings.inc.php,v 1.7 2005/06/30 19:40:04 SC Kruiper Exp $
+ *   $Id: settings.inc.php,v 1.8 2005/07/01 15:34:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -161,13 +161,14 @@ foreach ($configlist as $row){
 		case 'Language':
 			$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline">';
 
-			$d = dir("languages");
-			while (false !== ($entry = $d->read())){
-				if ($entry != '.' && $entry != '..'){
+			$dir = 'languages';
+			$d = scandir($dir);
+			foreach ($d as $entry){
+				if ($entry != '.' && $entry != '..' && is_dir($dir.'/'.$entry)){
 					$configrows .= '<option value="'.$entry.'"'.(($row['value'] == $entry) ? ' selected' : NULL).'>'.$entry.'</option>';
 				}
 			}
-			$d->close();
+			unset($d);
 
 			$configrows .= '</select>';
 			break;
@@ -188,13 +189,14 @@ foreach ($configlist as $row){
 		case 'Template':
 			$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline">';
 
-			$d = dir("templates");
-			while (false !== ($entry = $d->read())){
-				if ($entry != '.' && $entry != '..'){
+			$dir = 'templates';
+			$d = scandir($dir);
+			foreach ($d as $entry){
+				if ($entry != '.' && $entry != '..' && is_dir($dir.'/'.$entry)){
 					$configrows .= '<option value="'.$entry.'"'.(($row['value'] == $entry) ? ' selected' : NULL).'>'.$entry.'</option>';
 				}
 			}
-			$d->close();
+			unset($d);
 
 			$configrows .= '</select>';
 			break;

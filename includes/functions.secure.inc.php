@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.3 2005/06/30 19:04:42 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.4 2005/07/01 15:34:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -342,5 +342,22 @@ limit 0,1';
 		early_error('{TEXT_FORUMTYPE_COMBI_ERROR}');
 	}
 	return($forumsettings);
+}
+
+if (!function_exists('scandir')){
+	function scandir($dir, $order=0){
+		$dh  = opendir($dir);
+		while (false !== ($filename = readdir($dh))) {
+		   $files[] = $filename;
+		}
+
+		if ($order == 0){
+			sort($files);
+		}
+		elseif($order == 1){
+			rsort($files);
+		}
+		return($files);
+	}
 }
 ?>

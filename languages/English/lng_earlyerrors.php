@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_earlyerrors.php,v 1.11 2005/06/30 19:40:05 SC Kruiper Exp $
+ *   $Id: lng_earlyerrors.php,v 1.12 2005/07/01 15:34:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -45,8 +45,7 @@ Please go back and fill in the correct information.',
 '{TEXT_SETTINGFORM_ERROR}' => 'There is a bug in the settings form. Please inform the webmaster.',
 '{TEXT_DB_CONNECT_FAILED}' => 'Database server connection failed.',
 '{TEXT_DB_DISCONNECT_FAILED}' => 'Database server close connection failed.',
-'{TEXT_DB_SELECT_FAILED}' => 'Database selection failed.',
-'{TEXT_NODB_UPGRADE}' => 'To preserve all of your modifications to dbsettings.inc.php SLG will not rewrite the file as nothing has changed. The only thing that has changed is the version number. Which is now v2.1.2. This can be done manually. In future versions this process will be automated aswell.'
+'{TEXT_DB_SELECT_FAILED}' => 'Database selection failed.'
 );
 
 $this->text_adv += array(

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.40 2005/06/30 19:40:05 SC Kruiper Exp $
+ *   $Id: install.php,v 1.41 2005/07/01 15:34:54 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -53,7 +53,7 @@ if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 }
 
 // lets fill some default values which will be used as default values
-$tssettings['SLG version'] = 'v2.1.2';
+$tssettings['SLG version'] = 'v2.1.3';
 $tssettings['Page title'] = 'SLG Comms '.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
 
 //If a language has been selected lets switch to that language instead of the default
@@ -65,6 +65,8 @@ if (isset($_POST['variable']['Template'])){
 	$tssettings['Template'] = $_POST['variable']['Template'];
 }
 include_once('includes/header.inc.php');
+
+include('includes/functions.secure.inc.php');
 
 // initialise the template class
 $install = new template;
@@ -123,9 +125,11 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	elseif ($_GET['step'] == 3 || ($_GET['step'] == 2 && $_POST['variable']['Database'] == 0)){
 		if ($_GET['step'] == 2){
 			if ($_POST['variable']['install_type'] == 'upgrade'){
-				early_error('{TEXT_NODB_UPGRADE}');
+				$_GET['step'] = 6;
 			}
-			$_GET['step'] = 3;
+			else{
+				$_GET['step'] = 3;
+			}
 		}
 	  	// lets fill the requirements list
 		$required_version = (($_POST['variable']['Database'] == 1 && $_POST['variable']['db_type'] == 'mysql') ? '4.2.0' : '4.1.0');
@@ -211,7 +215,6 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 
 		// check whether the selected forum is correct
 		if ((($_POST['variable']['Forum type'] == 'ipb131' || $_POST['variable']['Forum type'] == 'ipb204') && file_exists($_POST['variable']['Forum relative path'].'conf_global.php')) || ($_POST['variable']['Forum type'] == 'phpbb2015' && file_exists($_POST['variable']['Forum relative path'].'config.php')) || (($_POST['variable']['Forum type'] == 'smf103' || $_POST['variable']['Forum type'] == 'smf110') && file_exists($_POST['variable']['Forum relative path'].'Settings.php')) || ($_POST['variable']['Forum type'] == 'vb307' && file_exists($_POST['variable']['Forum relative path'].'includes/config.php'))){
-			include('includes/functions.secure.inc.php');
 			// retrieve needed forum information
 			$forumsettings = retrieve_forumsettings($_POST['variable']);
 		}
@@ -269,6 +272,9 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	}
 	elseif ($_GET['step'] == 4){
 		$nextstep = '5';
+	}
+	elseif ($_GET['step'] == 6){
+		$nextstep = '6';
 	}
 	else{
 		early_error('{TEXT_SETTINGFORM_ERROR}');
@@ -347,13 +353,14 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			case 'Language':
 				$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline">';
 
-				$d = dir("languages");
-				while (false !== ($entry = $d->read())){
-					if ($entry != '.' && $entry != '..'){
+				$dir = 'languages';
+				$d = scandir($dir);
+				foreach ($d as $entry){
+					if ($entry != '.' && $entry != '..' && is_dir($dir.'/'.$entry)){
 						$configrows .= '<option value="'.$entry.'"'.(($row['value'] == $entry) ? ' selected' : NULL).'>'.$entry.'</option>';
 					}
 				}
-				$d->close();
+				unset($d);
 
 				$configrows .= '</select>';
 				break;
@@ -372,13 +379,14 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			case 'Template':
 				$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline">';
 
-				$d = dir("templates");
-				while (false !== ($entry = $d->read())){
-					if ($entry != '.' && $entry != '..'){
+				$dir = 'templates';
+				$d = scandir($dir);
+				foreach ($d as $entry){
+					if ($entry != '.' && $entry != '..' && is_dir($dir.'/'.$entry)){
 						$configrows .= '<option value="'.$entry.'"'.(($row['value'] == $entry) ? ' selected' : NULL).'>'.$entry.'</option>';
 					}
 				}
-				$d->close();
+				unset($d);
 
 				$configrows .= '</select>';
 				break;
@@ -518,7 +526,7 @@ elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
 	if ($_POST['variable']['install_type'] == 'upgrade'){
 		$sql = 'UPDATE `slg_settings`
 SET
-  `value` = "v2.1.2"
+  `value` = '.$tssettings['SLG version'].'
 WHERE
   `variable` = "SLG version"
 LIMIT 1';
@@ -571,6 +579,10 @@ $tssettings[\'table_prefix\'] = \''.((isset($_POST['variable']['table_prefix']))
 /* Don\'t change anything below this line unless you know what youre doing. */
 ?>
 ';
+	}
+	elseif ($_POST['variable']['install_type'] == 'upgrade'){
+		$content = file_get_contents($filename);
+		$content = str_replace(array('v2.1.1', 'v2.1.2'), 'v2.1.3', $content);
 	}
 	else{
 		$content = '<?php
