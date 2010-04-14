@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.ts.inc.php,v 1.3 2005/06/21 19:15:29 SC Kruiper Exp $
+ *   $Id: functions.ts.inc.php,v 1.4 2005/10/03 10:55:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -47,31 +47,25 @@ function prepare_sort_name($name){
 	return(preg_replace('/[^a-z0-9]/i', '', $name));
 }
 
-function SORT_PLAYERS($a, $b){
-	$a['pprivs'] = breakdown_rights($a['pprivs']);
-	$b['pprivs'] = breakdown_rights($b['pprivs']);
-
-	$a['cprivs'] = breakdown_rights($a['cprivs']);
-	$b['cprivs'] = breakdown_rights($b['cprivs']);
-
-	$a['nick'] = prepare_sort_name($a['nick']);
-	$b['nick'] = prepare_sort_name($b['nick']);
+function SORT_PLAYERS(&$a, &$b){
+	$a_nick = prepare_sort_name($a['nick']);
+	$b_nick = prepare_sort_name($b['nick']);
 
 	if (in_array(1, $a['pprivs']) && in_array(1, $b['pprivs'])){
-		if (strcasecmp($a['nick'], $b['nick']) == 0){
+		if (strcasecmp($a_nick, $b_nick) == 0){
 			return(0);
 		}
 		else{
-			return((strcasecmp($a['nick'], $b['nick']) < 0) ? -1 : 1);
+			return((strcasecmp($a_nick, $b_nick) < 0) ? -1 : 1);
 		}
 	}
 	elseif (!in_array(1, $a['pprivs']) && !in_array(1, $b['pprivs'])){
 		if ((in_array(1, $a['cprivs']) && in_array(1, $b['cprivs'])) || (!in_array(1, $a['cprivs']) && !in_array(1, $b['cprivs']))){
-			if (strcasecmp($a['nick'], $b['nick']) == 0){
+			if (strcasecmp($a_nick, $b_nick) == 0){
 				return(0);
 			}
 			else{
-				return((strcasecmp($a['nick'], $b['nick']) < 0) ? -1 : 1);
+				return((strcasecmp($a_nick, $b_nick) < 0) ? -1 : 1);
 			}
 		}
 		else{
@@ -83,7 +77,7 @@ function SORT_PLAYERS($a, $b){
 	}
 }
 
-function SORT_CHANNELS($a, $b){
+function SORT_CHANNELS(&$a, &$b){
 	if ($a['order'] == $b['order']){
 		if (strcasecmp($a['name'], $b['name']) == 0){
 			return(0);
@@ -97,11 +91,8 @@ function SORT_CHANNELS($a, $b){
 	}
 }
 
-function pl_flags($pl_flags,$ch_flags)
+function pl_flags(&$pl_flags, &$ch_flags)
 {
-	$pl_flags = breakdown_rights($pl_flags);
-	$ch_flags = breakdown_rights($ch_flags);
-
 	if(in_array(4, $pl_flags)){
 		$output = 'R';
 	}
@@ -133,49 +124,52 @@ function pl_flags($pl_flags,$ch_flags)
 		$output .= ' V';
 	}
 
-	return(trim($output));
+	return($output);
 }
 
 function pl_img(&$pflags)
 {
-	$pflags = breakdown_rights($pflags);
+/*
+IGNORED LIST - No special picture used by TeamSpeak
+2 - Voice Request
+4 - Doesnt Accept Whispers
+64 - Recording
+*/
+	$tmparr = array(8,32,16,1);
+	foreach ($tmparr as $flag){
+		if(in_array($flag, $pflags)){
+			return($flag);
+		}
+	}
 
-	if(in_array(8, $pflags)){
-		$output = '8';
-	}
-	elseif(in_array(32, $pflags)){
-		$output = '32';
-	}
-	elseif(in_array(16, $pflags)){
-		$output = '16';
-	}
-	elseif(in_array(1, $pflags)){
-		$output = '1';
-	}
-	elseif(in_array(2, $pflags)){
-		$output = '0';
-	}
-	elseif(in_array(4, $pflags)){
-		$output = '0';
-	}
-	elseif(in_array(64, $pflags)){
-		$output = '0';
-	}
-	elseif(in_array(0, $pflags)){
-		$output = '0';
+	return(0); // incase no return was executed above
+}
+
+function pl_status(&$pflags)
+{
+	$output = NULL;
+	
+	$tmparr = array(8,1,4,16,64,32,2);
+	if (in_array(0, $pflags)){
+		$output = '{TEXT_PL_STATUS_0}';
 	}
 	else{
-		$output = '0';
+		foreach ($tmparr as $flag){
+			if(in_array($flag, $pflags)){
+				if (!empty($output) && $flag != 8){
+					$output .= '<br />';
+				}
+				$output .= '{TEXT_PL_STATUS_'.$flag.'}';
+			}
+		}
 	}
 
 	return($output);
 }
  
 //Channel Flags
-function ch_flags($chflags)
+function ch_flags(&$chflags)
 {
-	$chflags = breakdown_rights($chflags);
-
 	if(in_array(1, $chflags)){
 		$output = 'U';
 	}
@@ -201,79 +195,47 @@ function ch_flags($chflags)
 
 function formatcodec($codec){
 	switch ($codec){
-		case 0:
-			$codectext = 'CELP 5.2';
-			break;
-		case 1:
-			$codectext = 'CELP 6.3';
-			break;
-		case 2:
-			$codectext = 'GSM 14.8';
-			break;
-		case 3:
-			$codectext = 'GSM 16.4';
-			break;
-		case 4:
-			$codectext = 'Windows CELP 5.2';
-			break;
-		case 5:
-			$codectext = 'Speex 3.4';
-			break;
-		case 6:
-			$codectext = 'Speex 5.2';
-			break;
-		case 7:
-			$codectext = 'Speex 7.2';
-			break;
-		case 8:
-			$codectext = 'Speex 9.3';
-			break;
-		case 9:
-			$codectext = 'Speex 12.3';
-
-			break;
-		case 10:
-			$codectext = 'Speex 16.3';
-			break;
-		case 11:
-			$codectext = 'Speex 19.5';
-			break;
-		case 12:
-			$codectext = 'Speex 25.9';
-			break;
-		default: $codectext = '{TEXT_UNKNOWN_CODEC}';
+		case 0: return('CELP 5.2');
+		case 1: return('CELP 6.3');
+		case 2: return('GSM 14.8');
+		case 3: return('GSM 16.4');
+		case 4: return('Windows CELP 5.2');
+		case 5: return('Speex 3.4');
+		case 6: return('Speex 5.2');
+		case 7: return('Speex 7.2');
+		case 8: return('Speex 9.3');
+		case 9: return('Speex 12.3');
+		case 10: return('Speex 16.3');
+		case 11: return('Speex 19.5');
+		case 12: return('Speex 25.9');
+		default: return('{TEXT_UNKNOWN_CODEC}');
 	}
-	return($codectext);
 }
 
-function savecache($cacheddata){
-	global $table, $ts;
-
-	$rtime = explode(" ",microtime());
-	$sql = 'UPDATE '.$table['cache'].'
-SET
-  data = "'.addslashes($cacheddata).'",
-  timestamp = "'.$rtime[1].'"
-WHERE
-  cache_id = "'.$ts['id'].'"
-LIMIT 1';
-
-	return($sql);
-}
-
-if (!function_exists('str_split')){
-	function str_split($string, $max_length = 1){
-		for($i = 0, $cur_length = 0, $cur_array = 0, $spl_string = array(0 => NULL); isset($string{$i}); $i++, $cur_length++){
-			if ($cur_length >= $max_length){
-				$cur_length = 0;
-				$cur_array++;
-				$spl_string[$cur_array] = $string{$i};
-			}
-			else{
-				$spl_string[$cur_array] .= $string{$i};
-			}
+function prepare_email_addr($address, $text=NULL, $hyperlink=true){
+	if (preg_match("#([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#i", $address)){
+		$search = array('@', '.');
+		if (empty($text)){
+			$replace2 = array(' [at] ', ' [dot] ');
+			$text = str_replace($search, $replace2, $address);
 		}
-		return($spl_string);
+		if ($hyperlink){
+			$replace1 = array('&#64;', '&#46;');
+			$address = str_replace($search, $replace1, $address);
+		}
+		return( (($hyperlink) ? '<a href="&#109;&#097;&#105;&#108;&#116;&#111;&#58;'.$address.'">' : NULL ) . $text . (($hyperlink) ? '</a>' : NULL ) );
 	}
+	return(NULL);
+}
+
+function prepare_http_link($url, $text=NULL, $hyperlink=true){
+	if (preg_match("#([\w]+?://[^ \"\n\r\t<]*)#is", $url) || preg_match("#((www)\.[^ \"\t\n\r<]*)#is", $url)){
+		$checkurl = parse_url($url);
+		if (!isset($checkurl['scheme'])){
+			$url = 'http://'.$url;
+		}
+		return( (($hyperlink) ? '<a href="'.$url.'" target="_blank">' : NULL ) . ((empty($text)) ? $url : $text ) . (($hyperlink) ? '</a>' : NULL ) );
+	}
+	return(NULL);
 }
 ?>

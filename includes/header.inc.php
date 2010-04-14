@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: header.inc.php,v 1.13 2005/06/20 15:25:39 SC Kruiper Exp $
+ *   $Id: header.inc.php,v 1.14 2005/10/03 10:55:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -22,6 +22,10 @@
 
 if (!defined("IN_SLG")){ 
 	die("Hacking attempt.");
+}
+
+if (!empty($_POST)){
+	processincomingdata($_POST, true);
 }
 
 $header = new template;

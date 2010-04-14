@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.33 2005/09/20 22:33:47 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.34 2005/10/03 10:55:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,6 +24,10 @@ if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
+if (!$tssettings['Ventrilo support']){
+	early_error('{TEXT_SUPPORT_VENT_DISABLED}');
+}
+
 $ventrilo = new template;
 $template = 'ventrilo';
 
@@ -34,14 +38,18 @@ $ventchannels = array();
 $ventclients = array();
 $ventchannelindex = array();
 $ventclientindex = array();
+$calc_values = array();
 
 //Connection with server...
-$ipstring = $ts['ip'].':'.$ts['port'].((isset($ts['queryport'])) ? ':'.$ts['queryport'] : NULL);
 if (!$usecached){
-	exec($tssettings['Ventrilo status program'].' -a2 -c2 -t'.$ipstring .' 2>&1', $routput, $execcmd);
+	if (empty($tssettings['Ventrilo status program'])){
+		early_error('{TEXT_NOVENTRILO}');
+	}
+	$ipstring = $tssettings['Ventrilo status program'].' -a2 -c2 -t'. escapeshellcmd($ts['ip'].':'.$ts['port'].((isset($ts['queryport'])) ? ':'.$ts['queryport'] : NULL)) .' 2>&1';
+	exec(escapeshellarg($ipstring), $routput, $execcmd);
 }
 else{
-	$routput = explode('/%/', $cache['data']);
+	$routput = explode("\n", $cache['data']);
 	unset($cache['data']);
 }
 
@@ -54,7 +62,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 		$venterror = true;
 		if (!empty($cache['data'])){
 			$usecached = true;
-			$routput = explode("/%/", $cache['data']);
+			$routput = explode("\n", $cache['data']);
 			unset($cache['data']);
 			$ventrilo->displaymessage($pre_error.'<br /><br />{TEXT_CACHED_LOADED}');
 			$tuntilrefresh = ($refreshtime + $cache['refreshcache']) - $cache['timestamp'];
@@ -65,13 +73,14 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 	}
 
 	/*if ($usecached || !isset($venterror))*/{
+		$calc_values['ADMIN'] = 0;
 		foreach($routput as $line1){
 			$ext_line1 = explode(':', $line1, 2);
 			$ext_line1[0] = trim($ext_line1[0]);
 			$ext_line1[1] = trim($ext_line1[1]);
 
 			if (trim($ext_line1[0]) == 'CHANNELFIELDS'){
-				$ext_line1[1] = strdecode($ext_line1[1]);
+				$ext_line1[1] = rawurldecode($ext_line1[1]);
 				$ventchannelindex = explode(",",$ext_line1[1]);
 			}
 
@@ -80,10 +89,13 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 				foreach($loutput as $line2){
 					$ext_line2 = explode('=', $line2, 2);
 					$ext_line2[0] = trim($ext_line2[0]);
-					$ext_line2[1] = strdecode(trim($ext_line2[1]));
+					$ext_line2[1] = rawurldecode(trim($ext_line2[1]));
 					$ventdata[$ext_line2[0]] = $ext_line2[1];
 				}
 				if (trim($ext_line1[0]) == 'CLIENT'){
+					if ($ventdata['ADMIN']){
+						$calc_values['ADMIN'] += 1;
+					}
 					$ventclients[$ventdata['CID']][] = $ventdata;
 				}
 				elseif (trim($ext_line1[0]) == 'CHANNEL'){
@@ -92,18 +104,18 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 			}
 
 			elseif (trim($ext_line1[0]) == 'CLIENTFIELDS'){
-				$ext_line1[1] = strdecode($ext_line1[1]);
+				$ext_line1[1] = rawurldecode($ext_line1[1]);
 				$ventclientindex = explode(",",$ext_line1[1]);
 			}
 			else{
-				$ext_line1[1] = strdecode($ext_line1[1]);
+				$ext_line1[1] = rawurldecode($ext_line1[1]);
 				$ventserver[$ext_line1[0]] = $ext_line1[1];
 			}
 		}
 
 		if (!$usecached){
 			if (isset($ts['id']) && $cache['refreshcache'] != 0){
-				$db->execquery('updatecachedata',savecache($routput));
+				$db->execquery('updatecachedata',savecache(implode("\n", $routput)));
 			}
 		}
 		unset($routput);
@@ -113,6 +125,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 //		print_r($ventclients);
 //		print_r($ventchannelindex);
 //		print_r($ventclientindex);
+//		print_r($calc_values);
 
 		$ventrilo->insert_display('{DATA_STATUS}', $tssettings['Retrieved data status']);
 		if ($tssettings['Retrieved data status']){
@@ -136,6 +149,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 			$ventrilo->insert_text('{UDPPORT}', $ts['port']);
 			$ventrilo->insert_text('{MAXCLIENTS}', $ventserver['MAXCLIENTS']);
 			$ventrilo->insert_text('{CLIENTS_CON}', $ventserver['CLIENTCOUNT']);
+			$ventrilo->insert_text('{ADMINS_CON}', $calc_values['ADMIN']);
 			$ventrilo->insert_text('{CHANNEL_COUNT}', $ventserver['CHANNELCOUNT']);
 			$ventrilo->insert_text('{VOICECODEC}', $ventserver['VOICECODEC'][1]);
 			$ventrilo->insert_text('{VOICEFORMAT}', $ventserver['VOICEFORMAT'][1]);
@@ -157,6 +171,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_UDPPORT}:&amp;nbsp;</td><td>'.prep_tooltip($ts['port']).'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_MAXCLIENTS}:&amp;nbsp;</td><td>'.$ventserver['MAXCLIENTS'].'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_CLIENTS_CON}:&amp;nbsp;</td><td>'.$ventserver['CLIENTCOUNT'].'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_ADMINS_CON}:&amp;nbsp;</td><td>'.$calc_values['ADMIN'].'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_CHANNEL_COUNT}:&amp;nbsp;</td><td>'.$ventserver['CHANNELCOUNT'].'</td></tr>
 <tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_VOICECODEC}:&amp;nbsp;</td><td>'.prep_tooltip($ventserver['VOICECODEC'][1]).'</td></tr>
@@ -193,7 +208,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 //				$div_content = prep_tooltip($div_content);
 				$div_content = str_replace("\n", '', $div_content);
 
-				$server_content .= '    <tr class="'.((isset($player['PHAN']) && $player['PHAN']) ? 'ventclient_phantom_row' : 'client_row').'">
+				$server_content .= '    <tr class="client_row'.((isset($player['PHAN']) && $player['PHAN']) ? ' ventclient_phantom_row' : NULL ).((isset($player['ADMIN']) && $player['ADMIN']) ? ' ventclient_admin_row' : NULL ).'">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
 <img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? '&nbsp;&nbsp;&nbsp;(<span class="ventcomment">'.htmlentities(linewrap($player['COMM'], 30)).'</span>)' : NULL ).'
       </p></td>

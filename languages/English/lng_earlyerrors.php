@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_earlyerrors.php,v 1.12 2005/07/01 15:34:55 SC Kruiper Exp $
+ *   $Id: lng_earlyerrors.php,v 1.13 2005/10/03 10:55:56 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -45,7 +45,12 @@ Please go back and fill in the correct information.',
 '{TEXT_SETTINGFORM_ERROR}' => 'There is a bug in the settings form. Please inform the webmaster.',
 '{TEXT_DB_CONNECT_FAILED}' => 'Database server connection failed.',
 '{TEXT_DB_DISCONNECT_FAILED}' => 'Database server close connection failed.',
-'{TEXT_DB_SELECT_FAILED}' => 'Database selection failed.'
+'{TEXT_DB_SELECT_FAILED}' => 'Database selection failed.',
+'{TEXT_SUPPORT_VENT_DISABLED}' => 'Support for Ventrilo has been disabled.',
+'{TEXT_SUPPORT_TS_DISABLED}' => 'Support for TeamSpeak has been disabled.',
+'{TEXT_SAMEVERSIONUPDATE}' => 'Update cancelled because SLG Comms has allready been updated with this version.',
+'{TEXT_NOVENTRILO}' => 'You havn\'t defined a Ventrilo status program yet. Because of that support for ventrilo is not yet available.',
+'{TEXT_OLDVERSION_UNAVAILABLE}' => 'SLG Comms tried to perform a update of an earlier version of SLG Comms but couldn\'t find the old version number. It\'s highly probable that you do not have a earlier version installed yet.'
 );
 
 $this->text_adv += array(

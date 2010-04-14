@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resadd.inc.php,v 1.4 2005/06/30 19:04:42 SC Kruiper Exp $
+ *   $Id: resadd.inc.php,v 1.5 2005/10/03 10:55:53 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -28,16 +28,15 @@ if (!defined("IN_SLG") || !checkaccess($tssettings['Forum group'])){
 // this file manages the resource add pages
 if (isset($_POST['baddres'])) {
 	if (!empty($_POST['resname']) && !empty($_POST['restype'])){
-		processincomingdata($_POST);
 		$sql = 'INSERT INTO '.$table['resources'].'
 ( `res_name` , `res_data` , `res_type` )
 VALUES (
-"'.$_POST['resname'].'", ';
+"'.$db->escape_string($_POST['resname']).'", ';
 		if (empty($_POST['resdata'])){
 			$sql .= 'NULL';
 		}
 		else{
-			$sql .= '"'.$_POST['resdata'].'"';
+			$sql .= '"'.$db->escape_string($_POST['resdata']).'"';
 		}
 		$sql .= ', "'.$_POST['restype'].'")';
 		$queryinsertres = $db->execquery('queryinsertres',$sql);
@@ -51,16 +50,15 @@ VALUES (
 }
 elseif (isset($_POST['beditres'])) {
 	if (!empty($_POST['resname']) && !empty($_POST['restype'])) {
-		processincomingdata($_POST);
 		$sql = 'UPDATE '.$table['resources'].' SET
-  res_name = "'.$_POST['resname'].'",';
+  res_name = "'.$db->escape_string($_POST['resname']).'",';
 		if (empty($_POST['resdata'])){
 			$sql .= 'res_data = NULL,';
 		}
 		else{
-			$sql .= 'res_data = "'.$_POST['resdata'].'",';
+			$sql .= 'res_data = "'.$db->escape_string($_POST['resdata']).'",';
 		}
-		$sql .= 'res_type = "'.$_POST['restype'].'"
+		$sql .= 'res_type = "'.$db->escape_string($_POST['restype']).'"
 WHERE
   (res_id = '.$_GET['edit'].')';
 		$queryupdateres = $db->execquery('queryupdateres',$sql);
@@ -78,7 +76,7 @@ if ($_GET['resources'] == 'resman' && isset($_GET['edit'])) {
 SELECT res_name, res_data, res_type 
 FROM `'.$table['resources'].'`
 WHERE
-  res_id = '.$_GET['edit']);
+  res_id = '.$db->escape_string($_GET['edit']));
 	$roweditres = $db->getrow($queryeditres);
 	$db->freeresult('queryeditres',$queryeditres);
 }

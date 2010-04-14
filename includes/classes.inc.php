@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.20 2005/09/12 23:13:45 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.21 2005/10/03 10:55:54 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -53,13 +53,6 @@ class template{
 	var $display = array();
 	
 	function load_template($filename){
-		if(!function_exists('file_get_contents')){
-			function file_get_contents($filename){
-				$file = file($filename);
-				return(implode('', $file));
-			}
-		}
-
 		if (!isset($this->template)){
 			global $tssettings;
 

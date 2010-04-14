@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: rescache.inc.php,v 1.5 2005/09/12 23:13:45 SC Kruiper Exp $
+ *   $Id: rescache.inc.php,v 1.6 2005/10/03 10:55:53 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -33,13 +33,13 @@ if (isset($_POST['updsetting'])) {
 				$sql = 'INSERT INTO '.$table['cache'].'
   ( `cache_id`, `refreshcache` )
 VALUES (
-  "'.$variable.'", "'.$value.'")';
+  "'.$db->escape_string($variable).'", "'.$db->escape_string($value).'")';
 			}
 			else{
 				$sql = 'UPDATE `'.$table['cache'].'`
 SET
-  `refreshcache` = "'.$value.'"
-WHERE `cache_id` = "'.$variable.'" LIMIT 1;';
+  `refreshcache` = "'.$db->escape_string($value).'"
+WHERE `cache_id` = "'.$db->escape_string($variable).'" LIMIT 1;';
 			}
 			$updatecache = $db->execquery('updatecachesetting', $sql);
 			if ($updatecache == true && (!isset($updatecacheall) || $updatecacheall == true)){

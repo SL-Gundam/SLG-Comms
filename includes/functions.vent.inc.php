@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.vent.inc.php,v 1.6 2005/09/20 22:33:47 SC Kruiper Exp $
+ *   $Id: functions.vent.inc.php,v 1.7 2005/10/03 10:55:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,28 +24,13 @@ if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
-function SORT_VENTCHANNELS($a, $b){
+function SORT_VENTCHANNELS(&$a, &$b){
 	if (strcasecmp($a['NAME'], $b['NAME']) == 0){
 		return(0);
 	}
 	else{
 		return((strcasecmp($a['NAME'], $b['NAME']) < 0) ? -1 : 1);
 	}
-}
-
-function savecache(&$cacheddata){
-	global $table, $ts;
-
-	$rtime = explode(" ",microtime());
-	$sql = 'UPDATE '.$table['cache'].'
-SET
-  data = "'.addslashes(implode('/%/', $cacheddata)).'",
-  timestamp = "'.$rtime[1].'"
-WHERE
-  cache_id = "'.$ts['id'].'"
-LIMIT 1';
-
-	return($sql);
 }
 
 function vent_channels(&$channels, &$clients, $cid=0, $level=0){
@@ -90,9 +75,9 @@ function vent_channels(&$channels, &$clients, $cid=0, $level=0){
 //				$div_content = prep_tooltip($div_content);
 				$div_content = str_replace("\n", '', $div_content);
 
-				$server_content .= '    <tr class="'.((isset($player['PHAN']) && $player['PHAN']) ? 'ventclient_phantom_row' : 'client_row').'">
+				$server_content .= '    <tr class="client_row'.((isset($player['PHAN']) && $player['PHAN']) ? ' ventclient_phantom_row' : NULL ).((isset($player['ADMIN']) && $player['ADMIN']) ? ' ventclient_admin_row' : NULL ).'">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', $level).'<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? '&nbsp;&nbsp;&nbsp;(<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', $level).'<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? '&nbsp;&nbsp;&nbsp;(<span class="ventcomment">'.htmlentities(linewrap($player['COMM'], 30)).'</span>)' : NULL ).'
       </p></td>
 	  <td nowrap><p>'.$player['PING'].'ms</p></td>
 	</tr>
@@ -105,17 +90,5 @@ function vent_channels(&$channels, &$clients, $cid=0, $level=0){
 	}
 
 	return($server_content);
-}
-
-function strdecode( $str ){
-	for ($start = 0; strpos ($str, "%", $start) !== false; $start = $pos+1){
-		$pos = strpos ($str, "%", $start);
-		$decode[substr( $str, $pos, 3 )] = sprintf( "%c", intval( substr( $str, $pos + 1, 2 ), 16 ) );
-	}
-	if (isset($decode)){
-		$str = str_replace(array_keys($decode), $decode, $str);
-	}
-	
-	return($str);
 }
 ?>

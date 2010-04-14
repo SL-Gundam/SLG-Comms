@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.5 2005/09/20 22:33:47 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.6 2005/10/03 10:55:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -48,10 +48,8 @@ function md5_hmac($data, $key)
 }
 
 function retrieve_forumsettings(&$tssettings, $action_login=false){
+	global $db;
 	if ((($tssettings['Forum type'] == 'ipb131' || $tssettings['Forum type'] == 'ipb204') && file_exists($tssettings['Forum relative path'].'conf_global.php')) || ($tssettings['Forum type'] == 'phpbb2015' && file_exists($tssettings['Forum relative path'].'config.php')) || (($tssettings['Forum type'] == 'smf103' || $tssettings['Forum type'] == 'smf110') && file_exists($tssettings['Forum relative path'].'Settings.php')) || ($tssettings['Forum type'] == 'vb307' && file_exists($tssettings['Forum relative path'].'includes/config.php'))){
-		if ($action_login){
-			processincomingdata($_POST);
-		}
 		switch ($tssettings['Forum type']){
 /* START - IPB131 */
 			case 'ipb131':
@@ -91,7 +89,7 @@ SELECT
 FROM
   `'.$table['members'].'`
 WHERE
-  `name` = "'.$_POST['fusername'].'" AND
+  `name` = "'.$db->escape_string($_POST['fusername']).'" AND
   `mgroup` = '.$tssettings['Forum group'].' AND
   `password` = "'.md5($_POST['fpasswd']).'"
 limit 0,1';
@@ -139,7 +137,7 @@ FROM
   `'.$table['memconverge'].'` CON
 WHERE
   MEM.`id` = CON.`converge_id` AND
-  MEM.`name` = "'.$_POST['fusername'].'" AND
+  MEM.`name` = "'.$db->escape_string($_POST['fusername']).'" AND
   CON.`converge_pass_hash` = md5(CONCAT(md5(CON.`converge_pass_salt`), "'.md5($_POST['fpasswd']).'")) AND
   ((TRIM(BOTH "," FROM MEM.`mgroup`) = '.$tssettings['Forum group'].') OR 
   ('.$tssettings['Forum group'].' IN (TRIM(BOTH "," FROM MEM.`mgroup_others`))))
@@ -190,7 +188,7 @@ FROM
 WHERE
   MEM.`user_id` = GRM.`user_id` AND
   MEM.`user_active` = 1 AND
-  MEM.`username` = "'.$_POST['fusername'].'" AND
+  MEM.`username` = "'.$db->escape_string($_POST['fusername']).'" AND
   MEM.`user_password` = "'.md5($_POST['fpasswd']).'"';
 				}
 				break;
@@ -235,7 +233,7 @@ SELECT
 FROM
   `'.$table['members'].'` 
 WHERE
-  `memberName` = "'.$_POST['fusername'].'" AND
+  `memberName` = "'.$db->escape_string($_POST['fusername']).'" AND
   `passwd` = "'.md5_hmac($_POST['fpasswd'], strtolower($_POST['fusername'])).'" AND
   `is_activated` = 1 AND
   ((ID_GROUP = '.$tssettings['Forum group'].') OR 
@@ -284,7 +282,7 @@ SELECT
 FROM
   `'.$table['members'].'` 
 WHERE
-  `memberName` = "'.$_POST['fusername'].'" AND
+  `memberName` = "'.$db->escape_string($_POST['fusername']).'" AND
   `passwd` = "'.sha1(strtolower($_POST['fusername']).($_POST['fpasswd'])).'" AND
   `is_activated` = 1 AND
   ((ID_GROUP = '.$tssettings['Forum group'].') OR 
@@ -333,7 +331,7 @@ SELECT
 FROM
   `'.$table['members'].'` 
 WHERE
-  `username` = "'.$_POST['fusername'].'" AND
+  `username` = "'.$db->escape_string($_POST['fusername']).'" AND
   `password` = md5(CONCAT("'.md5($_POST['fpasswd']).'", `salt`)) AND
   ((usergroupid = '.$tssettings['Forum group'].') OR 
   ('.$tssettings['Forum group'].' IN (membergroupids)))
@@ -356,6 +354,7 @@ if (!function_exists('scandir')){
 		while (false !== ($filename = readdir($dh))) {
 		   $files[] = $filename;
 		}
+		closedir($dh);
 
 		if ($order == 0){
 			sort($files);

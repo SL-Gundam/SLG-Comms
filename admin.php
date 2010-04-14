@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: admin.php,v 1.21 2005/06/30 19:04:42 SC Kruiper Exp $
+ *   $Id: admin.php,v 1.22 2005/10/03 10:55:53 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -32,7 +32,7 @@ $page_title = $tssettings['Page title']; // backup of name before modification b
 $tssettings['Page title'] .= ' - {TEXT_ADMIN}';
 include_once('includes/header.inc.php');
 $template = 'admin'; //the include_once for header.inc.php resetted this variable to another value so we set it back to the correct one for further use in this script. this can not be any other order because secure.inc.php requires to be within a template but before any output to the client. So it should be before header.inc.php but after the start of the template of the main working file.
-$tssettings['Page title'] = $page_title; // settings.inc.php checks this value for changes so we need to set it back to the value in the database. This is only neccasary in the admin pages. more precise it's only needed for the settings page within the admin pages.
+$tssettings['Page title'] = $page_title; // settings.inc.php checks this value for changes so we need to set it back to the value in the database. This is only necassary in the admin pages. more precise it's only needed for the settings page within the admin pages.
 
 // disable thid page if NO_DATABASE mode is activated
 if (defined("NO_DATABASE")){
@@ -78,7 +78,7 @@ if (isset($_SESSION['username'])){
 				'subitems' => NULL
 			),
 			array(
-				'name' => '{TEXT_LOGOUT}', 
+				'name' => '{TEXT_LOGOUT} (<i>'.$_SESSION['realname'].'</i>)', 
 				'url' => 'logout',
 				'seclevel' => NULL,
 				'subitems' => NULL

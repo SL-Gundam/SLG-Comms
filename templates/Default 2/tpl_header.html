@@ -65,6 +65,7 @@ offsetX = 10;
 offsetY = 10;
 var toolTipmain=null;
 var toolTipIEfix=null;
+var initrun=false;
 var reswidth=0;
 var resheight=0;
 var width=null;
@@ -74,6 +75,7 @@ var scrollY=0;
 function initToolTips()
 {
 //	if(ns4||ns6||ie4)
+	if (!initrun)
 	{
 		toolTipmain = document.getElementById("toolTipLayer");
 		if (ie4) toolTipIEfix = document.getElementById("toolTipIEfix");
@@ -91,6 +93,7 @@ function initToolTips()
 		document.onmousemove = moveToMouseLoc;
 
 		get_window_parameters();
+		initrun = true;
 	}
 }
 function hidetoolTip()
@@ -115,6 +118,9 @@ function toolTip(msg, nwidth/*, nheight*/)
 	}
 	else // show
 	{
+		if (!initrun){
+			initToolTips();
+		}
 		if (timer_hidetoolTip){
 			hidetoolTip();
 		}

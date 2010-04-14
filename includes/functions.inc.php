@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.22 2005/09/20 22:33:47 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.23 2005/10/03 10:55:54 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -162,14 +162,14 @@ function print_check_cache_lifetime(){
 	return($cachelive);
 }
 
-function echobig($string, $bufferSize = 4096){
+function echobig($string, $bufferSize=4096){
 	for ($i = 0, $chars = strlen($string), $current = 0; $current < $chars; $current += $bufferSize) {
 		echo substr($string, $current, $bufferSize);
 		$i++;
 	}
 	if (defined("DEBUG")){
-		// Because this is the function that actually outputs the template, it can not be integrated into one. This means no multi language support. Not really neccasary anyway since the echo below is only executed in DEBUG mode which should never be used in public sites.
-		echo '<table border="0" align="center"><tr><td><p class="error">DEBUG: echobig required '.$i.' loop(s) to output the data.</p></td></tr></table><p></p>';
+		// Because this is the function that actually outputs the template, it can not be integrated into one. This means no multi language support. Not really necassary anyway since the echo below is only executed in DEBUG mode which should never be used in public sites.
+		echo '<table border="0" align="center"><tr><td><p class="error">DEBUG: echobig() required '.$i.' loop(s) to output the data.</p></td></tr></table><p></p>';
 	}
 }
 
@@ -177,5 +177,27 @@ function checkfilelock($files){
 	$path_parts1 = pathinfo($_SERVER['PHP_SELF']);
 	$files = explode(',', $files);
 	return(in_array($path_parts1['basename'], $files));
+}
+
+function savecache(&$cacheddata){
+	global $table, $ts, $db;
+
+	$rtime = explode(" ",microtime());
+	$sql = 'UPDATE '.$table['cache'].'
+SET
+  data = "'.$db->escape_string($cacheddata).'",
+  timestamp = "'.$rtime[1].'"
+WHERE
+  cache_id = "'.$ts['id'].'"
+LIMIT 1';
+
+	return($sql);
+}
+
+if(!function_exists('file_get_contents')){
+	function file_get_contents($filename){
+		$file = file($filename);
+		return(implode('', $file));
+	}
 }
 ?>

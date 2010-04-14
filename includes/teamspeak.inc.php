@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.27 2005/09/20 22:33:47 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.28 2005/10/03 10:55:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,6 +24,10 @@ if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
+if (!$tssettings['TeamSpeak support']){
+	early_error('{TEXT_SUPPORT_TS_DISABLED}');
+}
+
 $teamspeak = new template;
 $template = 'teamspeak';
 
@@ -34,6 +38,7 @@ $subchannels = array();
 $players = array();
 $vserver = array();
 $gserver = array();
+$calc_values = array();
 
 //Connection with server...
 if (!$usecached){
@@ -74,13 +79,14 @@ if (!$connection){
 	$type = array('select','channels','players','vserver','gserver');
 	reset($type);
 	$counter = 0;
+	$calc_values['SA'] = 0;
 	while((!$usecached && ($userdata = fgets($connection, 4096))) || ($usecached && ($userdata = current($cachedata)))){
 //		print $userdata;
 		if (!$usecached && isset($ts['id']) && $cache['refreshcache'] != 0){
 			$cacheuserdata .= $userdata;
 		}
 		$userdata = trim($userdata);
-//		$userdatamerge[] = explode("	", $userdata);
+//		$userdatamerge[] = explode("\t", $userdata);
 //		print $userdata;
 		if ($userdata == 'OK'){
 			next($type);
@@ -96,11 +102,11 @@ if (!$connection){
 				case 'channels':
 					{
 						if ($counter == 0){
-							$indexchannel = explode("	", $userdata);
+							$indexchannel = explode("\t", $userdata);
 							$counter++;
 						}
 						else{
-							$channeldata = explode("	", $userdata);
+							$channeldata = explode("\t", $userdata);
 							reset($channeldata);
 							reset($indexchannel);
 							while (current($indexchannel)){
@@ -111,6 +117,7 @@ if (!$connection){
 							}
 							$channel['name'] = trim($channel['name'], "\x22\x27");
 							$channel['topic'] = trim($channel['topic'], "\x22\x27");
+							$channel['flags'] = breakdown_rights($channel['flags']);
 							if($channel['parent'] > -1){
 								$subchannels[$channel['parent']][] = $channel;
 							}
@@ -118,17 +125,17 @@ if (!$connection){
 								$channels[] = $channel;
 							}
 						}
-						//$channels[] = explode("	", $userdata);
+						//$channels[] = explode("\t", $userdata);
 					}
 					break;
 				case 'players':
 					{
 						if ($counter == 0){
-							$indexplayer = explode("	", $userdata);
+							$indexplayer = explode("\t", $userdata);
 							$counter++;
 						}
 						else{
-							$playerdata = explode("	", $userdata);
+							$playerdata = explode("\t", $userdata);
 							reset($playerdata);
 							reset($indexplayer);
 							while (current($indexplayer)){
@@ -139,28 +146,29 @@ if (!$connection){
 							}
 							$player['nick'] = htmlspecialchars(trim($player['nick'], "\x22\x27"));
 							$player['loginname'] = htmlspecialchars(trim($player['loginname'], "\x22\x27"));
+							$player['pprivs'] = breakdown_rights($player['pprivs']);
+							$player['cprivs'] = breakdown_rights($player['cprivs']);
+							$player['pflags'] = breakdown_rights($player['pflags']);
+							if (in_array(1, $player['pprivs'])){
+								$calc_values['SA'] += 1;
+							}
 							$players[$player['c_id']][] = $player;
 						}
-						//$players[] = explode("	", $userdata);
+						//$players[] = explode("\t", $userdata);
 					}
 					break;
 				case 'vserver':
 					{
-						$diffisor = strpos($userdata,"=");
-						$start = substr($userdata, 0 , $diffisor);
-						$end = substr($userdata, $diffisor+1);
-						$vserver[$start] = $end;
-						//$vserver[] = explode("	", $userdata);
+						$arrtmp = explode('=', $userdata, 2);
+						$vserver[$arrtmp[0]] = $arrtmp[1];
+						//$vserver[] = explode("\t", $userdata);
 					}
 					break;
 				case 'gserver':
 					{
-
-						$diffisor = strpos($userdata,"=");
-						$start = substr($userdata, 0 , $diffisor);
-						$end = substr($userdata, $diffisor+1);
-						$gserver[$start] = $end;
-						//$gserver[] = explode("	", $userdata);
+						$arrtmp = explode('=', $userdata, 2);
+						$gserver[$arrtmp[0]] = $arrtmp[1];
+						//$gserver[] = explode("\t", $userdata);
 					}
 					break;
 				default:
@@ -188,6 +196,7 @@ if (!$connection){
 //print_r($vserver);
 //print_r($gserver);
 //print_r($userdatamerge);
+//print_r($calc_values);
 
 	$teamspeak->insert_display('{DATA_STATUS}', $tssettings['Retrieved data status']);
 	if ($tssettings['Retrieved data status']){
@@ -210,6 +219,7 @@ if (!$connection){
 		$teamspeak->insert_text('{WELCOME}', htmlentities($vserver['server_welcomemessage']));
 		$teamspeak->insert_text('{MAXCLIENTS}', $vserver['server_maxusers']);
 		$teamspeak->insert_text('{CLIENTS_CON}', $vserver['server_currentusers']);
+		$teamspeak->insert_text('{ADMINS_CON}', $calc_values['SA']);
 		$teamspeak->insert_text('{CHANNEL_COUNT}', $vserver['server_currentchannels']);
 		$teamspeak->insert_text('{UDPPORT}', $vserver['server_udpport']);
 		$teamspeak->insert_content('{UPTIME}', $uptime);
@@ -225,16 +235,14 @@ if (!$connection){
 
 		if (isset($gserver['isp_linkurl']) || isset($vserver['isp_linkurl'])){
 			$isp_linkurl1 = ((isset($vserver['isp_linkurl'])) ? $vserver['isp_linkurl'] : $gserver['isp_linkurl'] );
-			$checkurl = parse_url($isp_linkurl1);
-			if (!isset($checkurl['scheme'])){
-				$isp_linkurl1 = 'http://'.$isp_linkurl1;
-			}
-			$isp_linkurl2 = '<a href="'.$isp_linkurl1.'" target="_blank">'.$isp_linkurl1.'</a>';
+			$isp_linkurl2 = prepare_http_link($isp_linkurl1);
+			$isp_linkurl1 = prepare_http_link($isp_linkurl1, NULL, false);
 		}
 
 		if (isset($gserver['isp_adminemail']) || isset($vserver['isp_adminemail'])){
 			$isp_adminemail1 = ((isset($vserver['isp_adminemail'])) ? $vserver['isp_adminemail'] : $gserver['isp_adminemail'] );
-			$isp_adminemail2 = '<a href="mailto:'.$isp_adminemail1.'">'.$isp_adminemail1.'</a>';
+			$isp_adminemail2 = prepare_email_addr($isp_adminemail1);
+			$isp_adminemail1 = prepare_email_addr($isp_adminemail1, NULL, false);
 		}
 
 		if ($tssettings['Show server information']){
@@ -262,6 +270,7 @@ if (!$connection){
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_DATARECEIVED}:&amp;nbsp;</td><td>'.prep_tooltip($datareceived).'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_MAXCLIENTS}:&amp;nbsp;</td><td>'.$vserver['server_maxusers'].'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_CLIENTS_CON}:&amp;nbsp;</td><td>'.$vserver['server_currentusers'].'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_ADMINS_CON}:&amp;nbsp;</td><td>'.$calc_values['SA'].'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_CHANNEL_COUNT}:&amp;nbsp;</td><td>'.$vserver['server_currentchannels'].'</td></tr>'.((isset($gserver['isp_ispname']) || isset($vserver['isp_ispname'])) ? '
 <tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_PROVIDER}:&amp;nbsp;</td><td>'.((isset($isp_name)) ? prep_tooltip($isp_name).'</td></tr>' : NULL ).'
@@ -293,10 +302,10 @@ if (!$connection){
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_MAXCLIENTS}:&amp;nbsp;</td><td>'.$channel['maxusers'].'</td></tr>
 <tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_EXPLAIN_TSFLAGS_CHANNEL}:&amp;nbsp;</td><td>'.$chflags.'</td></tr>';
-		$exp_flags = str_split($chflags, 1);
+		$exp_flags = explode("\n",trim(chunk_split($chflags, 1, "\n")));
 		foreach ($exp_flags as $flag){
 			$div_content .= '
-<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.prep_tooltip($flag).'}</td></tr>';
+<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.$flag.'}</td></tr>';
 		}
 		$div_content .= '</table>';
 
@@ -353,16 +362,18 @@ if (!$connection){
 						$exp_flags = explode(' ', $plflags);
 						foreach ($exp_flags as $flag){
 							$div_content .= '
-<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.prep_tooltip($flag).'}</td></tr>';
+<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.$flag.'}</td></tr>';
 						}
-						$div_content .= '</table>';
+						$div_content .= '
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_EXPLAIN_TSSTATUS_PLAYER}:&amp;nbsp;</td><td>'.pl_status($player['pflags']).((in_array(2, $player['pprivs'])) ? '<br />{TEXT_PL_RIGHT_2}' : NULL ).'</td></tr></table>';
 
 //						$div_content = prep_tooltip($div_content);
 						$div_content = str_replace("\n", '', $div_content);
 
 						$server_content .= '    <tr class="client_row">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;&nbsp;('. $plflags .')
       </p></td>
 	  <td nowrap><p>'.$player['ping'].'ms</p></td>
 	</tr>
@@ -389,16 +400,18 @@ if (!$connection){
 				$exp_flags = explode(' ', $plflags);
 				foreach ($exp_flags as $flag){
 					$div_content .= '
-<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.prep_tooltip($flag).'}</td></tr>';
+<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.$flag.'}</td></tr>';
 				}
-				$div_content .= '</table>';
+				$div_content .= '
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_EXPLAIN_TSSTATUS_PLAYER}:&amp;nbsp;</td><td>'.pl_status($player['pflags']).((in_array(2, $player['pprivs'])) ? '<br />{TEXT_PL_RIGHT_2}' : NULL ).'</td></tr></table>';
 
 //				$div_content = prep_tooltip($div_content);
 				$div_content = str_replace("\n", '', $div_content);
 
 				$server_content .= '    <tr class="client_row">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
-<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')
+<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;&nbsp;('. $plflags .')
       </p></td>
 	  <td nowrap><p>'.$player['ping'].'ms</p></td>
 	</tr>

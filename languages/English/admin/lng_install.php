@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_install.php,v 1.10 2005/09/10 14:39:30 SC Kruiper Exp $
+ *   $Id: lng_install.php,v 1.11 2005/10/03 10:55:56 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -53,7 +53,10 @@ $this->text += array(
 '{TEXT_UPGRADE_INSTALL}' => 'Upgrade from an older version',
 '{TEXT_RESCUE_INSTALL}' => 'Rescue attempt',
 '{TEXT_DISABLED}' => 'Disabled',
-'{TEXT_UPGRADE_SUCCESS}' => 'Successfully upgraded SLG'
+'{TEXT_UPGRADE_SUCCESS}' => 'Successfully upgraded SLG.
+<a href="index.php">Please continue to the main page</a>.',
+'{TEXT_ADDVARSETTINGS_SUCCESS}' => 'Succesfully added variables for the new settings.',
+'{TEXT_ADDSETTINGS_SUCCESS}' => 'Succesfully added the new settings.'
 );
 
 $this->text_adv += array(
@@ -78,13 +81,15 @@ Don\'t forget to remove install.php after you\'re done.',
 $this->tooltips += array(
 '{TEXT_HELP_DATABASE}' => 'Do you want to use a database with SLG? With a database SLG will be a lot more powerfull. The main reason why its possible to disable the use of a database was to support hosts where there wasn\'t a database available.',
 '{TEXT_HELP_DB_TYPE}' => 'The type of database you want to use. This can be either MySQL or MySQl 4.1.x. MySQL 4.1 support is only available when the MySQLi extension is included in your php installation.',
-'{TEXT_HELP_DB_HOST}' => 'The hostname, ip address or socket of the database server.
+'{TEXT_HELP_DB_HOST}' => 'The hostname, ip address or socket of the database server. Optionally you\'ll also need to add the port number if this is different from the default port "3306"
 
-If you selected MySQL 4.1.x as your database type then this setting MUST be a hostname or ip address. Sockets wont work properly.',
-'{TEXT_HELP_DB_NAME}' => 'The name of the database thats going to be used to store the tables.',
+If you selected MySQL 4.1.x as your database type then this setting MUST be a hostname or ip address with a optional port number. Sockets wont work properly.',
+'{TEXT_HELP_DB_NAME}' => 'The name of the database thats going to be used to store the tables. Make sure this database allready exists.',
 '{TEXT_HELP_DB_USER}' => 'The username with which we will get access to the database server.',
 '{TEXT_HELP_DB_PASSWD}' => 'The password with which we will get access to the database server.',
 '{TEXT_HELP_TABLE_PREFIX}' => 'The prefix that will be placed in front of the table names to avoid conflicts with existing tables.',
-'{TEXT_HELP_INSTALL_TYPE}' => 'Is this a new installation, a upgrade from an older version or an attempt to perform a rescue of the settings table.'
+'{TEXT_HELP_INSTALL_TYPE}' => 'Is this a "new installation", a "upgrade from an older version" or a "Rescue attempt".
+
+"Rescue attempt" is only of use when you use the database supported version of SLG Comms as it used to perform a rescue when you can\'t log-in anymore in the admin section.'
 );
 ?>

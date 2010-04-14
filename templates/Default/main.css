@@ -47,12 +47,14 @@ body {
 	color: black;
 	font-weight: bold;
 }
+/*Please keep in mind that someone can be a admin and a phantom at the same time.
+Every client gets .client_row.
+After that optionally .ventclient_phantom_row is applied
+After that optionally .ventclient_admin_row is applied*/
 .ventclient_phantom_row{
-	background-color: #F4F4F4;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 0.6em;
 	color: #666666;
-	font-weight: bold;
+}
+.ventclient_admin_row{
 }
 .para
 {

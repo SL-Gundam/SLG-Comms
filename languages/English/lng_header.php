@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_header.php,v 1.8 2005/09/10 14:39:30 SC Kruiper Exp $
+ *   $Id: lng_header.php,v 1.9 2005/10/03 10:55:56 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -29,7 +29,7 @@ $this->text += array(
 '{CHARSET}' => 'iso-8859-1',
 '{TEXT_ADMIN}' => 'Administrator',
 '{TEXT_INDEX}' => 'Frontpage',
-'{TEXT_UNKNOWN_TITLE}' => 'SLG - No page title present',
+'{TEXT_UNKNOWN_TITLE}' => 'SLG Comms - No page title present',
 '{TEXT_INSTALLATION}' => 'Installation'
 );
 

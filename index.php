@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.19 2005/09/12 23:13:44 SC Kruiper Exp $
+ *   $Id: index.php,v 1.20 2005/10/03 10:55:53 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -30,24 +30,43 @@ $template = 'index';
 
 // prepare server list incase database support is enabled
 if ( !defined('NO_DATABASE') ){
-	$getservers = $db->execquery('getservers','
+	if ($tssettings['TeamSpeak support'] && !$tssettings['Ventrilo support']){
+		$types = '"TeamSpeak"';
+	}
+	elseif (!$tssettings['TeamSpeak support'] && $tssettings['Ventrilo support']){
+		$types = '"Ventrilo"';
+	}
+	elseif ($tssettings['TeamSpeak support'] && $tssettings['Ventrilo support']){
+		$types = '"TeamSpeak","Ventrilo"';
+	}
+	else{
+		$types = NULL;
+		$servers = array();
+	}
+
+	if (!empty($types)){
+		$getservers = $db->execquery('getservers','
 SELECT res_id, res_name, res_data, res_type
 FROM '.$table['resources'].' 
-WHERE `res_type` IN ("TeamSpeak","Ventrilo")
+WHERE `res_type` IN ('.$types.')
 ORDER BY res_name');
 
-	$servers = array();
-	while($rowts = $db->getrow($getservers)){
-		$servers[] = $rowts;
+		$servers = array();
+		while($rowts = $db->getrow($getservers)){
+			$servers[] = $rowts;
+		}
+		$db->freeresult('getservers',$getservers);
 	}
-	$db->freeresult('getservers',$getservers);
+}
+elseif (!$tssettings['TeamSpeak support'] && !$tssettings['Ventrilo support']){
+	$servers = array();
 }
 
 //whether or not to display the server list table
-$Servertable = (count($servers) > 1) || $tssettings['Custom servers'];
-$index->insert_display('{SELECT_SERVER}', $Servertable);
+$servertable = (count($servers) > 1) || $tssettings['Custom servers'];
+$index->insert_display('{SELECT_SERVER}', $servertable);
 
-if ($Servertable){
+if ($servertable){
 	// building the server list
 	$ipbyname = ($tssettings['Custom servers']) ? '<option value="0">{TEXT_CUSTOM}</option>' : NULL;
 	if ( defined('NO_DATABASE') ){
@@ -55,17 +74,19 @@ if ($Servertable){
 	}
 	reset($servers);
 	foreach($servers as $server){
-		$ipbyname .= '<option value="'.$server['res_id'].'"';
-		if ((isset($_REQUEST['ipbyname']) && $_REQUEST['ipbyname'] == $server['res_id']) || (!isset($_REQUEST['ipbyname']) && $tssettings['Default server'] == $server['res_id'] && !isset($_REQUEST['ipbyname']))){
-			$ipbyname .= ' selected';
-			$pice = explode(':',$server['res_data']);
-			if (isset($pice[2])){
-				$ts['queryport'] = $pice[2];
+		if (($server['res_type'] == 'TeamSpeak' && $tssettings['TeamSpeak support']) || ($server['res_type'] == 'Ventrilo' && $tssettings['Ventrilo support'])){
+			$ipbyname .= '<option value="'.$server['res_id'].'"';
+			if ((isset($_REQUEST['ipbyname']) && $_REQUEST['ipbyname'] == $server['res_id']) || (!isset($_REQUEST['ipbyname']) && $tssettings['Default server'] == $server['res_id'] && !isset($_REQUEST['ipbyname']))){
+				$ipbyname .= ' selected';
+				$pice = explode(':',$server['res_data']);
+				if (isset($pice[2])){
+					$ts['queryport'] = $pice[2];
+				}
+				$res_type = $server['res_type'];
+				$ts['id'] = $server['res_id'];
 			}
-			$res_type = $server['res_type'];
-			$ts['id'] = $server['res_id'];
+			$ipbyname .= '>'.htmlspecialchars($server['res_name']).'</option>';
 		}
-		$ipbyname .= '>'.htmlspecialchars($server['res_name']).'</option>';
 	}
 	// insert the serverlist into the template
 	$index->insert_content('{IPBYNAME_OPTIONS}', $ipbyname);
@@ -73,10 +94,14 @@ if ($Servertable){
 	// whether or to enable the custom server option
 	$index->insert_display('{CUSTOM_SERVER}', $tssettings['Custom servers']);
 	if ($tssettings['Custom servers']){
-		$typeopt = '
-      <option value="TeamSpeak"'.((isset($_POST['type']) && $_POST['type'] == 'TeamSpeak') ? ' selected' : NULL ).'>TeamSpeak</option>
-      <option value="Ventrilo"'.((isset($_POST['type']) && $_POST['type'] == 'Ventrilo') ? ' selected' : NULL ).'>Ventrilo</option>';
-		$index->insert_content('{TYPE_OPTIONS}', $typeopt);
+		$typeopt = NULL;
+		if ($tssettings['TeamSpeak support']){
+			$typeopt .= '<option value="TeamSpeak"'.((isset($_POST['type']) && $_POST['type'] == 'TeamSpeak') ? ' selected' : NULL ).'>TeamSpeak</option>';
+	  	}
+		if ($tssettings['Ventrilo support']){
+			$typeopt .= '<option value="Ventrilo"'.((isset($_POST['type']) && $_POST['type'] == 'Ventrilo') ? ' selected' : NULL ).'>Ventrilo</option>';
+		}
+		$index->insert_text('{TYPE_OPTIONS}', $typeopt);
 		$index->insert_text('{IPPORT_VALUE}', ((isset($_POST['ipport'])) ? $_POST['ipport'] : NULL));
 	}
 }
@@ -159,11 +184,11 @@ $index->output();
 unset($index);
 
 // start the process of retrieving server data for either TeamSpeak or Ventrilo
-if ((isset($res_type) && $res_type == 'TeamSpeak') || (isset($_POST['type']) && $_POST['type'] == 'TeamSpeak' && $_POST['ipbyname'] == 0)){
+if ((isset($res_type) && $res_type == 'TeamSpeak') || (isset($_POST['type']) && $_POST['type'] == 'TeamSpeak' && $_POST['ipbyname'] == 0) && $tssettings['TeamSpeak support']){
 	if (!isset($ts['queryport'])) $ts['queryport'] = $tssettings['Default queryport'];
 	include('includes/teamspeak.inc.php');
 }
-elseif ((isset($res_type) && $res_type == 'Ventrilo') || (isset($_POST['type']) && $_POST['type'] == 'Ventrilo' && $_POST['ipbyname'] == 0)){
+elseif ((isset($res_type) && $res_type == 'Ventrilo') || (isset($_POST['type']) && $_POST['type'] == 'Ventrilo' && $_POST['ipbyname'] == 0) && $tssettings['Ventrilo support']){
 	include('includes/ventrilo.inc.php');
 }
 

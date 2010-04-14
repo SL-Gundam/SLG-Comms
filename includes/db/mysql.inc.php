@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: mysql.inc.php,v 1.12 2005/06/21 19:15:29 SC Kruiper Exp $
+ *   $Id: mysql.inc.php,v 1.13 2005/10/03 10:55:55 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -79,7 +79,7 @@ class db {
 			$this->queries[$queryid] = '[{TEXT_FREE}?]-';
 		}
 
-		if ($result == true && (strncasecmp($sql, "create", 6) == 0 || strncasecmp($sql, "insert", 6) == 0 || strncasecmp($sql, "delete", 6) == 0 || strncasecmp($sql, "update", 6) == 0 || strncasecmp($sql, "drop", 4) == 0)){
+		if ($result == true && (strncasecmp($sql, "create", 6) == 0 || strncasecmp($sql, "insert", 6) == 0 || strncasecmp($sql, "delete", 6) == 0 || strncasecmp($sql, "update", 6) == 0 || strncasecmp($sql, "drop", 4) == 0 || strncasecmp($sql, "alter", 5) == 0)){
 			$this->num_nofreequeries++;
 			$this->queries[$queryid] .= '[{TEXT_NONEED}]';
 		}
@@ -128,6 +128,16 @@ class db {
 		@mysql_data_seek($resultset, $position) OR early_error('{TEXT_DB_DATASEEK_FAILED;'.$resultset.';}');
 
 		$this->sqltime->endtimecount();
+	}
+
+	function escape_string($str){
+		$this->sqltime->starttimecount();
+
+		$str = mysql_real_escape_string($str, $this->sqlconnectid);
+
+		$this->sqltime->endtimecount();
+
+		return($str);
 	}
 
 	function geterror(){

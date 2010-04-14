@@ -7,3 +7,9 @@ At the moment i can't think of anything that should go mayorly wrong and you wou
 on a side note: The difference with the 2 templates delivered with this package is very small. The only difference is how the admin menu is setup. More of an example if anyone ever wants to create his or her own templates for SLG.
 
 I'd like to thank the men and women who made Emule (www.emule-project.net) because the web interface they created gave me good ideas for some enhancements to the script.
+
+Since v2.2.0 the way Ventrilo server data is saved has changed a bit which makes earlier cached server data invalid. This is not a problem. You only have to wait for the server data to be updated for the first time. It depends on your caching settings when this happens on a per server basis.
+
+I noticed that step 3 in the installation is kinda useless when you're just updating SLG Comms from an earlier version. This has been fixed in v2.2.0
+
+In earlier versions (Earlier then v2.2.0) there was a bug in the updating procedure from earlier versions when using a database with SLG Comms. I'm sorry i didn't find this bug earlier. It couldn't have caused any problems besides you worrying about whats gone wrong because in all earlier versions the updating scripts only purpose and goal was to update the version number.

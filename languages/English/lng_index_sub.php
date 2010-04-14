@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index_sub.php,v 1.10 2005/09/20 22:33:48 SC Kruiper Exp $
+ *   $Id: lng_index_sub.php,v 1.11 2005/10/03 10:55:57 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -66,6 +66,7 @@ $this->text += array(
 '{TEXT_SERVER_PHONETIC}' => 'Server phonetic',
 '{TEXT_COMMENT}' => 'Comment',
 '{TEXT_UNKNOWN_CODEC}' => 'Unknown codec',
+'{TEXT_ADMINS_CON}' => 'Server Admins present',
 '{TEXT_DAY}' => 'Day',
 '{TEXT_DAYS}' => 'Days',
 '{TEXT_HOUR}' => 'Hour',
@@ -79,21 +80,7 @@ $this->text += array(
 '{TEXT_KB}' => 'KB',
 '{TEXT_MB}' => 'MB',
 '{TEXT_GB}' => 'GB',
-'{TEXT_TB}' => 'TB',
-'{TEXT_EXPLAIN_TSFLAG_U}' => 'Unregistered',
-'{TEXT_EXPLAIN_TSFLAG_R}' => 'Registered',
-'{TEXT_EXPLAIN_TSFLAG_M}' => 'Moderated',
-'{TEXT_EXPLAIN_TSFLAG_P}' => 'Password Protected',
-'{TEXT_EXPLAIN_TSFLAG_S}' => 'Sub-channels enabled',
-'{TEXT_EXPLAIN_TSFLAG_D}' => 'Default channel',
-'{TEXT_EXPLAIN_TSFLAG_SA}' => 'Server Administrator',
-'{TEXT_EXPLAIN_TSFLAG_CA}' => 'Channel Administrator',
-'{TEXT_EXPLAIN_TSFLAG_AO}' => 'Auto-Op',
-'{TEXT_EXPLAIN_TSFLAG_AV}' => 'Auto-Voice',
-'{TEXT_EXPLAIN_TSFLAG_O}' => 'Op',
-'{TEXT_EXPLAIN_TSFLAG_V}' => 'Voice',
-'{TEXT_EXPLAIN_TSFLAGS_CHANNEL}' => 'Channel settings',
-'{TEXT_EXPLAIN_TSFLAGS_PLAYER}' => 'Client rights'
+'{TEXT_TB}' => 'TB'
 );
 
 $this->text_adv += array(
@@ -102,4 +89,30 @@ $this->text_adv += array(
 '{TEXT_DATAREFRESHED}' => 'Data is refreshed every $1.'
 );
 
+$this->tooltips += array(
+'{TEXT_EXPLAIN_TSFLAG_U}' => 'Unregistered',
+'{TEXT_EXPLAIN_TSFLAG_R}' => 'Registered',
+'{TEXT_EXPLAIN_TSFLAG_M}' => 'Moderated',
+'{TEXT_EXPLAIN_TSFLAG_P}' => 'Password Protected',
+'{TEXT_EXPLAIN_TSFLAG_S}' => 'Sub-channels enabled',
+'{TEXT_EXPLAIN_TSFLAG_D}' => 'Default channel',
+'{TEXT_EXPLAIN_TSFLAG_SA}' => 'Server Administrator',
+'{TEXT_EXPLAIN_TSFLAG_CA}' => 'Channel Administrator',
+'{TEXT_EXPLAIN_TSFLAG_AO}' => 'Auto-Operator',
+'{TEXT_EXPLAIN_TSFLAG_AV}' => 'Auto-Voice',
+'{TEXT_EXPLAIN_TSFLAG_O}' => 'Operator',
+'{TEXT_EXPLAIN_TSFLAG_V}' => 'Voice',
+'{TEXT_EXPLAIN_TSFLAGS_CHANNEL}' => 'Channel settings',
+'{TEXT_EXPLAIN_TSFLAGS_PLAYER}' => 'Client rights',
+'{TEXT_EXPLAIN_TSSTATUS_PLAYER}' => 'Client status',
+'{TEXT_PL_STATUS_8}' => 'Away',
+'{TEXT_PL_STATUS_1}' => 'Channel commander',
+'{TEXT_PL_STATUS_4}' => 'Doesn\'t accept whispers',
+'{TEXT_PL_STATUS_16}' => 'Microphone muted',
+'{TEXT_PL_STATUS_64}' => 'Recording',
+'{TEXT_PL_STATUS_32}' => 'Sound muted',
+'{TEXT_PL_STATUS_2}' => 'Requests for voice',
+'{TEXT_PL_STATUS_0}' => 'Normal',
+'{TEXT_PL_RIGHT_2}' => 'Allow registration'
+);
 ?>

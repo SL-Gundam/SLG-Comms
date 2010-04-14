@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin.php,v 1.6 2005/06/30 19:04:43 SC Kruiper Exp $
+ *   $Id: lng_admin.php,v 1.7 2005/10/03 10:55:56 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -37,7 +37,7 @@ Please try again.',
 '{TEXT_INSTALL_FILE_PRESENT}' => 'WARNING: You havn\'t removed install.php yet.
 Its highly advised to remove it as its a mayor security risk.',
 '{TEXT_SESSION_VIOLATION}' => 'Your session has been terminated because a security rule has been violated.
-Don\'t worry just continue what you were doing. If neccasary you can login again.',
+Don\'t worry just continue what you were doing. If necassary you can login again.',
 '{TEXT_MISSING_MENUTYPE}' => 'Couldn\'t find a menu placeholder in the template.',
 '{TEXT_RESOURCES}' => 'Resources',
 '{TEXT_SETTINGS}' => 'Settings',

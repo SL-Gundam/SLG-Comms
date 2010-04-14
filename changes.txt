@@ -1,3 +1,35 @@
+v2.2.0
+- Fixed a problem with html characters in the dropdown box "Default server" in the admin settings page and install page.
+- Merged 2 savecache functions, one for teamspeak (functions.ts.inc.php) and one for ventrilo (functions.vent.inc.php), to one function within functions.inc.php.
+- Added some extra protection against characters in the server data retrieved from ventrilo and teamspeak servers which could contain sql injection code.
+- Added a new function to the MySQL and MySQLi classes called "escape_string".
+- Added extra protection to the exec function used by ventrilo.inc.php.
+- Added a check whether the Ventrilo status program file you selected exists (only applicable for the admin settings page, this has not been implemented in the install page). It doesn't check whether its the right file though.
+- Removed the str_split() function as it was only used by teamspeak.inc.php ones and nowhere else. I found a better supported and faster way to perform the task that was needed.
+- Fixed a comment glitch for clients within ventrilo channels with html special characters.
+- Small update to the db classes for a before unused query type.
+- Changed the Ventrilo server cached data separator. This will cause the old cached data to be invalid. Please wait untill the amount of seconds have passed so that new data will be retrieved from the servers.
+- Changed the way some of the TeamSpeak functions received their variables. Hopefully this new way takes less memory and is a bit faster
+- Improved the TeamSpeak server data parser a bit.
+- Added a calculated value which counts the amount of Server Admins on the server.
+- Improved installation interface for step 3 when you're updating from an earlier version.
+- Fixed a bug which was present in all earlier releases, when used with database support, at the moment the script wanted to update the version number of SLG Comms.
+- Support for SMF 1.1 RC1
+- Added a better displayal of a TeamSpeak clients status besides the small picture next to his name.
+- Moved the TeamSpeak explanation language items from the text array to the tooltips array within the language file "lng_index_sub.php"
+- Added new language items to "lng_index_sub.php" for the TeamSpeak statusses.
+- Added a new language item to "lng_admin_settings.php" called "{TEXT_VENTRILO_STAT_PROG_CHECK}".
+- Fixed a typo in the english language files.
+- Added a Setting that enabled the ability to show or hide the Processing time stuff at the bottom of the pages.
+- Changed the TeamSpeak provider info to be more resistant against spam engines looking for email addresses.
+- Removed the strdecode function because php seems to have a builtin faster alternative, namely: rawurldecode().
+- Added some protection against email spam catchers for the email address which could be present in the the TeamSpeak server data.
+- Improved the url checker for TeamSpeak provider url field
+
+v2.2.0 template changes
+- Inserted a small fix in "tpl_header.html" which prevents a javascript error to be generated when the function initooltips() wasn't run in time.
+- Added the CSS class ".ventclient_admin_row".
+
 v2.1.8
 - Changed the Teamspeak server connection timeout from 1 second to 2 seconds.
 - Improved the layout of the Ventrilo server connection errors a tiny bit.
@@ -8,17 +40,17 @@ v2.1.8
 - Fixed a problem with the strdecode function applied to the ventrilo server data.
 - Ventrilo Channel and Server comments are now displayed the same way Ventrilo client comments are displayed.
 - Improved the linewrap function.
+- Added the necassary voicecodec and voiceformat language variables to "lng_index_sub.php" + adjusted some texts in the same file.
 
 v2.1.8 template changes
 - Added the CSS class ".ventclient_phantom_row".
 - Added tooltip CSS class for table html tags used within the tooltips called: "table.tooltip".
 - Added a underline for hyperlinks within the CSS class ".para".
 - Added a mozilla browser fix to prevent overflow of the div overlay in "tpl_header.html".
-- Added a hide tooltip timer of 1 second in "tpl_header.html" to avoid flashing of the tooltip when hovering from text to table cell but still within the same tooltip.
+- Added a hide tooltip timer of 1 millisecond in "tpl_header.html" to avoid flashing of the tooltip when hovering from text to table cell but still within the same tooltip.
 - Removed some obsolete javascript code for the refresh page timer from "tpl_header.html"
 - Removed duplicate align tag within the html img tag used for displaying the refresh page timer image.
-- Added the neccasary voicecodec and voiceformat table rows to "tpl_ventrilo.html".
-- Added the neccasary voicecodec and voiceformat language variables to "lng_index_sub.php" + adjusted some texts in the same file.
+- Added the necassary voicecodec and voiceformat table rows to "tpl_ventrilo.html".
 
 v2.1.7
 - Fixed problem with html tag chars in server / resource names.
@@ -41,9 +73,9 @@ v2.1.6
 
 v2.1.6 template changes
 - Changed to max length value from 21 to 50 of the Custom server ip field in the form used at the top of index page.
-- Changed the track color of the scroll bar from light grey to white to match the backgound color of the website.
+- Changed the track color of the scroll bar from light grey to white to match the backgound color of the main page.
 - Added new item to the Stylesheet: div.tooltip
-- Removed and added javascripts to the tpl_header.html template file.
+- Removed and added javascript functions to the tpl_header.html template file.
 - Added an onload tag to the html body tag in tpl_header.html for the new javascripts.
 - Added hidden div layer and iframe for the new javascripts in tpl_header.html.
 
@@ -67,7 +99,7 @@ v2.1.3
 - added auto update for client using the NO_DATABASE feature
 
 v2.1.3 template changes
-- {TEXT_ADMIN_WELCOME} missed some layout code in tpl_admin
+- {TEXT_ADMIN_WELCOME} missed some layout code in tpl_admin.html
 
 v2.1.2
 - Glitch with mozilla browser javascript popups fixed
@@ -80,8 +112,8 @@ v2.1.2
 - changed filenames of file in includes/admin/ folder to correct ones (forgot the .inc in the filename)
 
 v2.1.2 template changes
-- tpl_footer needed 'target="_blank"' added to the hyperlink in the copyright notice.
-- tpl_admin got an extra language item, {TEXT_ADMIN_WELCOME}
+- tpl_footer needed 'target="_blank"' added to the hyperlink in the copyright notice in tpl_footer.html.
+- tpl_admin.html got an extra language item called "{TEXT_ADMIN_WELCOME}"
 
 v2.1.1
 - first public release

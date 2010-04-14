@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_common.php,v 1.10 2005/09/10 14:39:30 SC Kruiper Exp $
+ *   $Id: lng_common.php,v 1.11 2005/10/03 10:55:56 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -48,7 +48,10 @@ $this->text += array(
 '{TEXT_FORUM_GROUPS_ERROR}' => 'The forum groups couldn\'t be retrieved. Please inform the webmaster.',
 '{TEXT_MISSING_GROUP_QUERY_ERROR}' => 'SLG couldn\'t find a required query. Please inform the webmaster.',
 '{TEXT_PAGEREFRESHTIMER}' => 'Page refresh timer',
-'{TEXT_GZIPCOMPRESSION}' => 'GZIP Compression'
+'{TEXT_GZIPCOMPRESSION}' => 'GZIP compression',
+'{TEXT_TEAMSPEAKSUPPORT}' => 'TeamSpeak support',
+'{TEXT_VENTRILOSUPPORT}' => 'Ventrilo support',
+'{TEXT_PAGEGENERATIONTIME}' => 'Page generation time'
 );
 
 $this->tooltips += array(
@@ -80,7 +83,7 @@ If you would like to see support for a forum that is still unsupported either ad
 '{TEXT_HELP_RETRIEVEDDATASTATUS}' => 'This enables or disables the ability to display whether the current information that is displayed is cached or live data.',
 '{TEXT_HELP_SHOWSERVERINFORMATION}' => 'This enables or disables the ability to display the server information pane.
 
-This information is allways available by clicking in the Channel information pane on the server name.',
+This information is allways available by hovering over the Channel information pane on the server name.',
 
 '{TEXT_HELP_VENTRILOSTATUSPROGRAM}' => 'This is the relative path (meaning you must work from the current directory and to go up a directory you must use "../" or "..\") to the Ventrilo status program which is needed for retrieving data from a Ventrilo server.
 
@@ -100,10 +103,12 @@ This setting is case sensitive.',
 
 '{TEXT_HELP_FORUMGROUP}' => 'This is the forum group that has access to the administrator section of SLG.',
 '{TEXT_HELP_LANGUAGE}' => 'Here you can select what language you would like to use with SLG.',
-'{TEXT_HELP_TEMPLATE}' => 'Here you can select which template you would like to use with SLG. The 2 templates delivered with this release, "Default" and "Default 2" are allmost exactly the same except for the menu in the admin pages. So select the version with the menu you like best.',
+'{TEXT_HELP_TEMPLATE}' => 'Here you can select which template you would like to use with SLG. The 2 templates delivered with this release, "Default" and "Default 2" are allmost exactly the same except for the menu in the admin pages. So select the version with the menu you like best.
+
+"Default 2" though has as only purpose to show that it\'s possible to create a template with a vertical menu instead of the horizontal one in the "Default" template. Because of this is not perfect sometimes.',
 '{TEXT_HELP_DEFAULTSERVER}' => 'The default server to be loaded if the client hasn\'t selected a server yet.',
 '{TEXT_HELP_SLGVERSION}' => 'This is the current version of SLG. This setting can not be changed.',
-'{TEXT_HELP_PAGEREFRESHTIMER}' => 'Here you can define a amount of seconds after which the index page should be automatically refreshed. Set this setting to zero to disable this feature and hide the clock. if you enabled this feature, you can allways start and stop this timer while your viewing the page by clicking on the clock in the top right corner of the page.',
+'{TEXT_HELP_PAGEREFRESHTIMER}' => 'Here you can define a amount of seconds after which the index page should be automatically refreshed. Set this setting to zero to disable this feature and hide the clock. If you enable this feature, you can allways start and stop this timer while you\'re viewing the page by clicking on the clock in the top right corner of the page.',
 '{TEXT_HELP_GZIPCOMPRESSION}' => 'This setting enables or disabled this script GZIP compression engine. This makes the pages outputted to clients smaller.
 
 Personally i advise you to enable GZIP compression. Allthough enabling it this way should be the last option.
@@ -116,6 +121,9 @@ Configure PHP to automatically use GZIP compression through the "zlib.output_com
 
 If all of the above is out of the question enable this setting.
 
-The footer at the bottom of every page checks whether or not GZIP compression is working, not whether or not it is enabled. This means that even if you disabled this setting that it can say "GZIP enabled". This is because SLG might detect that one of the above mentioned alternate options is active.'
+The footer at the bottom of every page checks whether or not GZIP compression is working, not whether or not it is enabled. This means that even if you disabled this setting that it can say "GZIP enabled". This is because SLG might detect that one of the above mentioned alternate options is active.',
+'{TEXT_HELP_TEAMSPEAKSUPPORT}' => 'This enables or disables support for TeamSpeak servers.',
+'{TEXT_HELP_VENTRILOSUPPORT}' => 'This enables or disables support for Ventrilo servers.',
+'{TEXT_HELP_PAGEGENERATIONTIME}' => 'This enables or disables the "Page generation time" text at the bottom of the pages.'
 );
 ?>

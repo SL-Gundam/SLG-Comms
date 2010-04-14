@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.16 2005/06/27 20:34:31 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.17 2005/10/03 10:55:54 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -99,7 +99,7 @@ else{
 
 $footer->insert_content('{BUG_FINDER}', $divbugfound);
 
-if (isset($starttime)){
+if (isset($starttime) && (!isset($tssettings['Page generation time']) || $tssettings['Page generation time'])){
 	$mtime = explode(" ",microtime());
 	$endtime = $mtime[1] + $mtime[0];
 
