@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: mysql41.inc.php,v 1.30 2006/06/14 15:58:21 SC Kruiper Exp $
+ *   $Id: mysql41.inc.php,v 1.31 2007/01/28 17:50:43 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -284,7 +284,7 @@ class database
 
 		$this->sqltime->starttimecount();
 		
-		$result = @mysqli_error( $this->sqlconnectid ) . ' (' . @mysqli_errno( $this->sqlconnectid ) . ')';
+		$result = mysqli_error( $this->sqlconnectid ) . ' (' . mysqli_errno( $this->sqlconnectid ) . ')';
 
 		$this->sqltime->endtimecount();
 
@@ -295,7 +295,7 @@ class database
 	{
 		$this->sqltime->starttimecount();
 		
-		$result = @mysqli_connect_error() . ' (' . @mysqli_connect_errno() . ')';
+		$result = mysqli_connect_error() . ' (' . mysqli_connect_errno() . ')';
 
 		$this->sqltime->endtimecount();
 

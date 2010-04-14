@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.59 2006/06/04 20:41:13 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.61 2007/01/30 16:16:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -115,7 +115,7 @@ $div_content = '<table class=\'tooltip\' cellspacing=\'1\' cellpadding=\'0\'>
 
 unset( $password_prot, $uptime );
 
-$div_content = prep_tooltip( str_replace( "\n", '', $div_content ) );
+$div_content = prep_tooltip( removechars( $div_content, array( "\r", "\n" ) ) );
 
 $server_content = '
 	<tr class="server_row">
@@ -141,8 +141,8 @@ $ventrilo->insert_content( '{CHANNEL_INFO_CONTENT}', $server_content );
 
 unset( $server_content, $comms );
 
-$ventrilo->insert_text( '{BASE_URL}', ( isset( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
-$ventrilo->insert_text( '{TEMPLATE}', ( isset( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
+$ventrilo->insert_text( '{BASE_URL}', ( !empty( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
+$ventrilo->insert_text( '{TEMPLATE}', ( !empty( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
 $ventrilo->load_language( 'lng_index_sub' );
 $ventrilo->load_language( 'lng_index_vent' );
 $ventrilo->load_template( 'tpl_ventrilo' );

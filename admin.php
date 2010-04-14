@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: admin.php,v 1.41 2006/06/12 14:24:01 SC Kruiper Exp $
+ *   $Id: admin.php,v 1.42 2007/01/30 16:16:46 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -118,8 +118,8 @@ else
 }
 
 // process template
-$admin->insert_text( '{BASE_URL}', ( isset( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
-$admin->insert_text( '{TEMPLATE}', ( isset( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
+$admin->insert_text( '{BASE_URL}', ( !empty( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
+$admin->insert_text( '{TEMPLATE}', ( !empty( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
 $admin->load_language( 'admin/lng_admin' );
 $admin->process();
 $admin->output();

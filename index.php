@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.48 2006/06/12 12:43:07 SC Kruiper Exp $
+ *   $Id: index.php,v 1.50 2007/01/30 16:16:46 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -140,21 +140,20 @@ elseif( $tssettings['Custom_servers'] && isset($_POST['ipport']) && (int) $_POST
 	$server['ventsort'] = $_POST['ventsort'];
 }
 
-// Let's check whether the selected server (custom or predefined) is acceptable (ip / hostname, port and the optional queryport) - minimum amount of data available. More elaborate format check will be performed on a later stage.
-if ( isset($server['res_id']) && ( empty($server['res_data']) || empty($server['res_type']) ) )
-{
-	$index->displaymessage( '{TEXT_IP_PORT_COMB_ERROR}' );
-	unset( $server );
-}
-
 //process the template
-$index->insert_text( '{BASE_URL}', ( isset( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
-$index->insert_text( '{TEMPLATE}', ( isset( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
+$index->insert_text( '{BASE_URL}', ( !empty( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
+$index->insert_text( '{TEMPLATE}', ( !empty( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
 $index->load_language( 'lng_index' );
 $index->load_template( 'tpl_index' );
 $index->process();
 $index->output();
 unset( $index, $template );
+
+// Let's check whether the selected server (custom or predefined) is acceptable (ip / hostname, port and the optional queryport) - minimum amount of data available. More elaborate format check will be performed on a later stage.
+if ( isset($server['res_id']) && ( empty($server['res_data']) || empty($server['res_type']) ) )
+{
+	early_error( '{TEXT_IP_PORT_COMB_ERROR}' );
+}
 
 // start the process of retrieving server data for either TeamSpeak or Ventrilo
 if ( isset($server['res_type']) && $server['res_type'] === 'TeamSpeak' && $tssettings['TeamSpeak_support'] )

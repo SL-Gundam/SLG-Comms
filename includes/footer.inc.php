@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.41 2006/06/24 18:28:18 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.43 2007/01/30 16:16:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -50,7 +50,7 @@ if ( isset($GLOBALS['dbforum']) )
 	$fdb_disc_ok = ( ( isset($GLOBALS['dbforum']->sqlconnectid) ) ? true : false );
 }
 
-if ( defined("DEBUG") && ( ( $free_queries + $nofree_queries ) !== $executed_queries || $db_disc_ok || ( isset($fdb_disc_ok) && $fdb_disc_ok ) ) )
+if ( defined("SLG_DEBUG") && ( ( $free_queries + $nofree_queries ) !== $executed_queries || $db_disc_ok || ( isset($fdb_disc_ok) && $fdb_disc_ok ) ) )
 {
 	$divbugfound = '
 <script language="JavaScript" type="text/JavaScript">
@@ -146,8 +146,8 @@ elseif ( isset($GLOBALS['forumdatabase']) )
 $footer->insert_content( '{BUG_FINDER}', $divbugfound );
 unset( $divbugfound, $db_disc_ok, $fdb_disc_ok );
 
-$footer->insert_text( '{BASE_URL}', ( isset( $GLOBALS['tssettings']['Base_url'] ) ? 'http://' . $GLOBALS['tssettings']['Base_url'] : NULL ) );
-$footer->insert_text( '{TEMPLATE}', ( isset( $GLOBALS['tssettings']['Template'] ) ? $GLOBALS['tssettings']['Template'] : 'Default' ) );
+$footer->insert_text( '{BASE_URL}', ( !empty( $GLOBALS['tssettings']['Base_url'] ) ? 'http://' . $GLOBALS['tssettings']['Base_url'] : NULL ) );
+$footer->insert_text( '{TEMPLATE}', ( !empty( $GLOBALS['tssettings']['Template'] ) ? $GLOBALS['tssettings']['Template'] : 'Default' ) );
 $footer->load_language( 'lng_footer' );
 $footer->load_template( 'tpl_footer' );
 $footer->process();
@@ -175,7 +175,7 @@ if ( isset($GLOBALS['starttime']) && ( !isset($GLOBALS['tssettings']['Page_gener
 
 	unset( $gzipmod, $gzipheaders );
 
-	$debug_text = ( defined("DEBUG") ) ? 'Debug on' : 'Debug off';
+	$debug_text = ( defined("SLG_DEBUG") ) ? 'Debug on' : 'Debug off';
 
 	$mtime = explode( ' ',microtime() );
 	$endtime = $mtime[1] + $mtime[0];
@@ -185,14 +185,14 @@ if ( isset($GLOBALS['starttime']) && ( !isset($GLOBALS['tssettings']['Page_gener
 	$sql_part = (int) round( ( $sql_time / $gentime * 100 ), 0 );
 
 	echo '
-<div class="pagegen">Page generation time: ' . round( $gentime, 4 ) . 's (PHP: ' . ( 100 - $sql_part ) . '% - SQL: ' . $sql_part . '%) - SQL queries: ' . $executed_queries . ( ( defined("DEBUG") ) ? ' (' . $free_queries . ' + ' . $nofree_queries . ')' : NULL ) . ' - ' . $gzip_text . ' - ' . $debug_text . '</div>';
+<div class="pagegen">Page generation time: ' . round( $gentime, 4 ) . 's (PHP: ' . ( 100 - $sql_part ) . '% - SQL: ' . $sql_part . '%) - SQL queries: ' . $executed_queries . ( ( defined("SLG_DEBUG") ) ? ' (' . $free_queries . ' + ' . $nofree_queries . ')' : NULL ) . ' - ' . $gzip_text . ' - ' . $debug_text . '</div>';
 
 	unset( $gentime, $sql_part, $gzip_text, $debug_text, $mtime, $GLOBALS['starttime'], $endtime );
 }
 
 unset( $executed_queries, $free_queries, $nofree_queries, $sql_time, $GLOBALS['tssettings'] );
 
-/*if ( defined("DEBUG") ) // This is a debug only feature but because of the implications of showing this data it will also be outcommented.
+/*if ( defined("SLG_DEBUG") ) // This is a debug only feature but because of the implications of showing this data it will also be outcommented.
 {
 	echo '<p>DEBUG information: Still open variables.</p>';
 	var_dump( $GLOBALS );

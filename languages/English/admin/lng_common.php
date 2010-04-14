@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_common.php,v 1.28 2006/06/11 20:32:45 SC Kruiper Exp $
+ *   $Id: lng_common.php,v 1.31 2007/01/29 22:49:17 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -101,9 +101,9 @@ For the best cross platform support use only slashes for the directory separator
 
 This setting is case sensitive.',
 
-'{TEXT_HELP_FORUM_TYPE}'                   => 'This defines the forum SLG Comms will use as a backbone for user managing. Currently SLG Comms will only work with 5 types ( 8 profiles because of different versions ) of forums and its not possible to run it standalone unless you decided not to use a database. Also the forums supported have version numbers because SLG Comms has been tested on those versions. Using SLG Comms with other versions is unsupported so proceed at your own risk.
+'{TEXT_HELP_FORUM_TYPE}'                   => 'This defines the forum SLG Comms will use as a backbone for user managing. Currently SLG Comms supports a limited amount of forums ( Some have multiple profiles because of different versions ) and its not possible to run it standalone unless you decided not to use a database. Also the forums supported have version numbers because SLG Comms has been tested on those versions. Using SLG Comms with other versions is unsupported so proceed at your own risk.
 
-If you would like to see support for a forum that is still unsupported either add support yourself or add a feature request on the website of SLG Comms. The URL is in the copyright notice.',
+If you would like to see support for a forum that is still unsupported either add support yourself or add a feature request on the website of SLG Comms. The URL is in the copyright notice at the bottom of every page.',
 
 '{TEXT_HELP_GZIP_COMPRESSION}'             => 'This setting enables or disabled PHP\'s GZIP compression engine. This makes the files sent to clients smaller in exchange for a tiny bit of processing time.
 

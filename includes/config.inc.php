@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: config.inc.php,v 1.32 2006/06/24 18:46:11 SC Kruiper Exp $
+ *   $Id: config.inc.php,v 1.37 2007/01/30 16:16:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -30,7 +30,7 @@ $mtime = explode( ' ', microtime() );
 $starttime = $mtime[1] + $mtime[0];
 unset( $mtime );
 
-//define( "DEBUG", 10 ); /*whether or not to enable debug features. disable by adding 2 backslashes in front of this line and enable by removing them again. This should NEVER be activated on a live website as it might expose you database username, database password and possibly other information which could compromise your webserver to outside attacks.*/
+//define( "SLG_DEBUG", 10 ); /*whether or not to enable debug features. disable by adding 2 backslashes in front of this line and enable by removing them again. This should NEVER be activated on a live website as it might expose you database username, database password and possibly other information which could compromise your webserver to outside attacks.*/
 
 require( $tssettings['Root_path'] . 'includes/functions.inc.php' );
 require( $tssettings['Root_path'] . 'includes/classes.inc.php' );
@@ -42,13 +42,26 @@ if ( !empty($_POST) )
 	processincomingdata( $_POST, true );
 }
 
-if ( !defined('NO_DATABASE') )
+if ( !defined('NO_DATABASE') || ( isset($_POST['variable']['table_prefix']) && checkfilelock('install.php') ) )
 {
+	if ( isset($_POST['variable']['table_prefix']) && checkfilelock('install.php') )
+	{
+		$tssettings['table_prefix'] = $_POST['variable']['table_prefix'];
+	}
+
+	if ( preg_replace( '/[^a-z0-9_]/i', '', $tssettings['table_prefix'] ) !== $tssettings['table_prefix'] )
+	{
+		early_error( '{TEXT_UNACCEPTABLE_TABLEPREFIX}' );
+	}
+
 	$table['cache'] = $tssettings['table_prefix'] . 'cache';
 	$table['resources'] = $tssettings['table_prefix'] . 'resources';
 	$table['sessions'] = $tssettings['table_prefix'] . 'sessions';
 	$table['settings'] = $tssettings['table_prefix'] . 'settings';
+}
 
+if ( !defined('NO_DATABASE') )
+{
 	$tssettings['db_type'] = ( ( $tssettings['db_type'] === 'mysql' || $tssettings['db_type'] === 'mysql41' ) ? $tssettings['db_type'] : ( ( extension_loaded('mysqli') ) ? 'mysql41' : 'mysql' ) );
 	require( $tssettings['Root_path'] . 'includes/db/' . $tssettings['db_type'] . '.inc.php' );
 
@@ -74,7 +87,7 @@ FROM
 }
 
 // checks whether file and installed version differ
-$new_version = 'v3.0.1';
+$new_version = 'v3.1.0';
 if ( !checkfilelock('install.php') )
 {
 	if ( !isset($tssettings['SLG_version']) || $new_version !== $tssettings['SLG_version'] )

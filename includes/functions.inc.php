@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.52 2006/06/24 18:28:18 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.55 2007/01/29 17:16:24 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -250,7 +250,7 @@ function linewrap( $str, $maxlength )
 // expects htmlentities() to be performed on $msg
 function prep_tooltip( $msg )
 {
-	return( str_replace( "\n", '<br />', addslashes( str_replace( '&', '&amp;', $msg ) ) ) );
+	return( str_replace( array( "\r\n", "\r", "\n" ), '<br />', addslashes( str_replace( '&', '&amp;', $msg ) ) ) );
 }
 
 // this function checks which file is currently being run (index.php, admin.php or install.php)
@@ -285,7 +285,7 @@ function check_ip_port( $ip, $port, $queryport=NULL )
 // this function prepares a email address
 function prepare_email_addr( $address, $text=NULL, $hyperlink=true )
 {
-	if ( preg_match("#([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#i", $address) )
+	if ( preg_match("#([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#is", $address) )
 	{
 		$search = array( '@', '.' );
 		if ( empty($text) )
@@ -315,6 +315,352 @@ function prepare_http_link( $url, $text=NULL, $hyperlink=true )
 		return( ( ( (bool) $hyperlink ) ? '<a href="' . $url . '" target="_blank">' : NULL ) . ( ( empty( $text ) ) ? $url : $text ) . ( ( (bool) $hyperlink ) ? '</a>' : NULL ) );
 	}
 	return( NULL );
+}
+
+// function compares a full directory string + file name against another full directory string + file name.
+// Returns true when dir strings matched.
+// The length match is allways taken from the $dir2 variable so make sure you place the dir strings in the right parameter on function call
+function compare_dir_string( $dir1, $dir2 )
+{
+	$dir1 = realpath( str_replace( '\\', '/', $dir1 ) );
+	$dir2 = realpath( str_replace( '\\', '/', $dir2 ) );
+	if ( $dir1 !== false && $dir2 !== false && strncmp($dir1, $dir2, strlen($dir2)) === 0 )
+	{
+		return( true );
+	}
+	else
+	{
+		return( false );
+	}
+}
+
+// javascript code which will be placed in the header of the html pages
+function insert_javascript_code( $check_pagerefreshtimer, $check_customserver )
+{
+	return( '' . ( ( $check_pagerefreshtimer ) ? '
+//REFRESHSCRIPT_BEGIN
+/* BEGIN page refresh time javascript - Code copied from Emule 0.46c web interface template. */
+var timeoutID=null;
+var timeout = {REFRESH_SECS}000;
+
+function RefreshPage()
+{
+	location.href = "{REFRESH_URI}";
+}
+
+function ToggleTimer()
+{
+	if (timeoutID)
+	{
+		clearTimeout(timeoutID);
+		timeoutID = null;
+		document.images[\'ImgToggleTimer\'].src = \'{BASE_URL}templates/{TEMPLATE}/images/l_timer_off.gif\';
+	}
+	else
+	{
+		SetTimer();
+		if (timeoutID)
+			document.images[\'ImgToggleTimer\'].src = \'{BASE_URL}templates/{TEMPLATE}/images/l_timer.gif\';
+		else
+			document.images[\'ImgToggleTimer\'].src = \'{BASE_URL}templates/{TEMPLATE}/images/l_timer_off.gif\';
+	}
+}
+
+function SetTimer()
+{
+	if (timeout != 0)
+		timeoutID = setTimeout("RefreshPage()", timeout);
+}
+
+if (document.all||document.getElementById)
+	SetTimer();
+else
+	window.onload=SetTimer;
+/* END page refresh time javascript - Code copied from Emule 0.46c web interface template. */
+//REFRESHSCRIPT_END
+' : NULL ) . '
+
+/* browser detection */
+var ns4 = document.layers;
+var ns6 = document.getElementById && !document.all;
+
+var userAgent = navigator.userAgent;
+if (userAgent.indexOf(\'MSIE\') != -1 && userAgent.indexOf(\'Opera\') == -1) var ie4 = document.all;
+
+' . ( ( $check_customserver ) ? '
+//CUSTOM_SERVER_BEGIN
+/* BEGIN show hide custom server form fields */
+var customserverrow = new Array();
+
+function showhidecustom(id)
+{
+	if ( id == "servertype" ){
+		start = 4;
+		end = 4;
+		value = "Ventrilo";
+		indexvalue = servertype.options[servertype.selectedIndex].value;
+	}
+	else{
+		start = 1;
+		value = 0;
+		indexvalue = customserver.options[customserver.selectedIndex].value;
+		if ( indexvalue == value && servertype.options[servertype.selectedIndex].value != "Ventrilo" )
+			end = 3;
+		else
+			end = 4;
+	}
+		
+	for ( i=start; i<=end; i=i+1 )
+	{
+		if ( indexvalue == value ){
+			if (ie4)
+				customserverrow[i].style.display = "block";
+			else
+				customserverrow[i].style.display = "table-row";
+
+			customserverrow[i].style.visibility = "visible";
+		}
+		else{
+			customserverrow[i].style.display = "none";
+			customserverrow[i].style.visibility = "hidden";
+		}
+	}
+}
+/* END show hide custom server form fields */
+//CUSTOM_SERVER_END
+' : NULL ) . '
+
+/* BEGIN tooltips javascript */
+var timer_hidetoolTip=null;
+
+var offsetX = 10;
+var offsetY = 10;
+var toolTipmain=null;
+var toolTipIEfix=null;
+var initrun=false;
+var reswidth=0;
+var resheight=0;
+var width=null;
+var height=null;
+var scrollX=0;
+var scrollY=0;
+
+function initToolTips()
+{
+//	if(ns4||ns6||ie4)
+	if (!initrun)
+	{
+' . ( ( $check_customserver ) ? '
+//CUSTOM_SERVER_BEGIN
+		customserverrow[1] = document.getElementById("customserverrow1");
+		customserverrow[2] = document.getElementById("customserverrow2");
+		customserverrow[3] = document.getElementById("customserverrow3");
+		customserverrow[4] = document.getElementById("customserverrow4");
+
+		servertype = document.getElementById("servertype");
+
+		customserver = document.getElementById("customserver");
+
+		showhidecustom(\'servertype\');
+		showhidecustom(\'all\');
+//CUSTOM_SERVER_END
+' : NULL ) . '
+
+		toolTipmain = document.getElementById("toolTipLayer");
+		if (ie4)
+			toolTipIEfix = document.getElementById("toolTipIEfix");
+
+		if(ns4)
+			document.captureEvents(Event.MOUSEMOVE);
+		else
+		{
+			toolTipmain.style.visibility = "visible";
+			toolTipmain.style.display = "none";
+			if (ie4){
+				toolTipIEfix.style.visibility = "visible";
+				toolTipIEfix.style.display = "none";
+			}
+		}
+		document.onmousemove = moveToMouseLoc;
+
+		get_window_parameters();
+		initrun = true;
+	}
+}
+
+function hidetoolTip()
+{
+	reswidth=0;
+	resheight=0;
+/*	toolTipSTYLE.height="";*/
+	toolTipmain.style.width="";
+	if(ns4)
+		toolTipmain.style.visibility = "hidden";
+	else{
+		toolTipmain.style.display = "none";
+		if (ie4)
+			toolTipIEfix.style.display = "none";
+	}
+	clearTimeout(timer_hidetoolTip);
+	timer_hidetoolTip = null;
+}
+
+function toolTip(msg, nwidth/*, nheight*/)
+{
+	if(toolTip.arguments.length < 1) // hide
+	{
+		timer_hidetoolTip = setTimeout("hidetoolTip()", 1);
+	}
+	else // show
+	{
+		if (!initrun)
+			initToolTips();
+
+		if (timer_hidetoolTip)
+			hidetoolTip();
+
+		toolTipmain.style.left = 0;
+//		toolTipmain.style.top = 0;
+
+		var content = \'<table id="sizecheck_table" cellspacing="0" cellpadding="0" class="tooltip"><tr><td>\' + msg + \'</td></tr></table>\';
+		if(ns4)
+		{
+			toolTipmain.style.document.write(content);
+			toolTipmain.style.document.close();
+			toolTipmain.style.visibility = "visible";
+		}
+		else
+		{
+			toolTipmain.innerHTML = content;
+			toolTipmain.style.display=\'block\'
+			if (ie4)
+				toolTipIEfix.style.display=\'block\'
+		}
+
+		toolTipsizefix = document.getElementById("sizecheck_table");
+
+		get_window_parameters();
+
+/*		if (nheight) toolTipSTYLE.height = nheight;*/
+
+		if (!nwidth)
+			nwidth = 400;
+		
+		if ( nwidth > toolTipmain.offsetWidth ){
+			if ( window.minsize ){
+				if ( minsize > toolTipmain.offsetWidth ){
+					nwidth = minsize;
+				}
+				else{
+					nwidth = toolTipmain.offsetWidth;
+				}
+			}
+			else{
+				nwidth = toolTipmain.offsetWidth;
+
+				if ( width < nwidth )
+					nwidth = "";
+			}
+		}
+
+		toolTipmain.style.width = nwidth;
+
+		if (toolTipmain.offsetWidth < toolTipsizefix.offsetWidth)
+			toolTipmain.style.width = toolTipsizefix.offsetWidth;
+
+		if (ie4){
+			toolTipIEfix.style.width = toolTipmain.offsetWidth;
+			toolTipIEfix.style.height = toolTipmain.offsetHeight;
+		}
+
+		reswidth = toolTipmain.offsetWidth;
+		resheight = toolTipmain.offsetHeight;
+		
+		moveToMouseLoc();
+	}
+}
+
+function moveToMouseLoc(e)
+{
+	if(ns4||ns6)
+	{
+		x = e.pageX;
+		y = e.pageY;
+	}
+	else
+	{
+		x = event.x + document.body.scrollLeft;
+		y = event.y + document.body.scrollTop;
+	}
+
+	if(x + offsetX + reswidth > width + scrollX)
+		if (x - offsetX - reswidth - scrollX < 0)
+			if (y != 0)
+				x = 0 + scrollX;
+			else
+				x = x + offsetX;
+		else
+			x = x - offsetX - reswidth;
+	else
+		x = x + offsetX;
+
+	if(y + offsetY + resheight > height + scrollY)
+		if (y - offsetY - resheight - scrollY < 0)
+			if (x != 0)
+				y = 0 + scrollY;
+			else
+				y = y + offsetY;
+		else
+			y = y - offsetY - resheight;
+	else
+		y = y + offsetY;
+
+	toolTipmain.style.left = x;
+	toolTipmain.style.top = y;
+	if (ie4){
+		toolTipIEfix.style.left = x;
+		toolTipIEfix.style.top = y;
+	}
+	return true;
+}
+
+function get_window_parameters()
+{
+	width = 0;
+	if (window.innerWidth) width = window.innerWidth - 18;
+	else if (document.documentElement && document.documentElement.clientWidth) 
+		width = document.documentElement.clientWidth;
+	else if (document.body && document.body.clientWidth) 
+		width = document.body.clientWidth;
+	width = width - 1;
+
+	scrollX = 0;
+	if (typeof window.pageXOffset == "number") scrollX = window.pageXOffset;
+	else if (document.documentElement && document.documentElement.scrollLeft)
+		scrollX = document.documentElement.scrollLeft;
+	else if (document.body && document.body.scrollLeft) 
+		scrollX = document.body.scrollLeft; 
+	else if (window.scrollX) scrollX = window.scrollX;
+
+
+	height = 0;
+	if (window.innerHeight) height = window.innerHeight - 18;
+	else if (document.documentElement && document.documentElement.clientHeight) 
+		height = document.documentElement.clientHeight;
+	else if (document.body && document.body.clientHeight) 
+		height = document.body.clientHeight;
+	height = height - 1;
+
+	scrollY = 0;    
+	if (typeof window.pageYOffset == "number") scrollY = window.pageYOffset;
+	else if (document.documentElement && document.documentElement.scrollTop)
+		scrollY = document.documentElement.scrollTop;
+	else if (document.body && document.body.scrollTop) 
+		scrollY = document.body.scrollTop; 
+	else if (window.scrollY) scrollY = window.scrollY;
+}
+/* END tooltips javascript */
+' );
 }
 
 // incase you don't use PHP5 this function doesn't exist.

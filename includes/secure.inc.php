@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.36 2006/06/24 18:28:18 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.38 2007/01/29 22:49:17 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -62,8 +62,8 @@ if ( checkfilelock('admin.php') )
 			while ( $authrow = $GLOBALS[ $GLOBALS['forumdatabase'] ]->getrow($authresult) )
 			{
 				if (
-					( $tssettings['Forum_type'] !== 'phpbb2015' && $tssettings['Forum_type'] !== 'xoops_cbb' && $tssettings['Forum_type'] !== 'phpnuke78_phpbb207' ) || 
-					( ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' ) && $authrow['groupid'] == $tssettings['Forum_group'] )
+					( $tssettings['Forum_type'] !== 'phpbb2015' && $tssettings['Forum_type'] !== 'phpbb3' && $tssettings['Forum_type'] !== 'xoops_cbb' && $tssettings['Forum_type'] !== 'phpnuke78_phpbb207' ) || 
+					( ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'phpbb3' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' ) && $authrow['groupid'] == $tssettings['Forum_group'] )
 				)
 				{
 					$sql = '
@@ -118,7 +118,7 @@ VALUES
 						$_SESSION['group_id'] = array( (int) $authrow['groupid'] );
 					}
 				}
-				if ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' )
+				if ( $tssettings['Forum_type'] === 'phpbb2015' || $tssettings['Forum_type'] === 'phpbb3' || $tssettings['Forum_type'] === 'xoops_cbb' || $tssettings['Forum_type'] === 'phpnuke78_phpbb207' )
 				{
 					$_SESSION['group_id'][] = (int) $authrow['groupid'];
 				}
@@ -156,18 +156,13 @@ FROM `%1$s`
 WHERE 
   `session_id` = "%2$s" AND 
   `session_user_id` = %3$u AND
-  (`session_ip` = "%4$s" OR
-  ("%5$s" = "GET" AND
-  "%6$s" = "%4$s" AND
-  `session_ip` = "%7$s"))'; 
+  `session_ip` = "%4$s"';
+
 		$authtestresult = $db->execquery( 'annualcheckup', $sql, array(
 			$table['sessions'],
 			md5( session_id() ),
 			$_SESSION['user_id'],
-			md5( $_SERVER['REMOTE_ADDR'] ),
-			$db->escape_string( $_SERVER['REQUEST_METHOD'] ),
-			$db->escape_string( $_SESSION['prerecorded_ip'] ),
-			( ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) ? md5( $_SERVER['HTTP_X_FORWARDED_FOR'] ) : 'false' )
+			( ( $_SESSION['prerecorded_ip'] = $_SERVER['REMOTE_ADDR'] && $_SERVER['REQUEST_METHOD'] = "GET" && isset($_SERVER['HTTP_X_FORWARDED_FOR']) ) ? md5( $_SERVER['HTTP_X_FORWARDED_FOR'] ) : md5( $_SERVER['REMOTE_ADDR'] ) )
 		) );
 
 		if ( $db->numrows($authtestresult) < 1 )

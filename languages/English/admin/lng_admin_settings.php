@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_settings.php,v 1.12 2006/06/11 20:32:44 SC Kruiper Exp $
+ *   $Id: lng_admin_settings.php,v 1.14 2007/01/29 22:49:17 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -38,7 +38,7 @@ $this->text += array(
 '{TEXT_UPDATE_SETTINGS}'            => 'Update settings',
 
 '{TEXT_NEW_FORUM_INVALID}'          => 'The new forum settings are invalid and therefore will not be saved.',
-'{TEXT_NOGROUP}'                    => 'No suitable groups found.',
+'{TEXT_NOGROUP}'                    => 'No suitable groups found. Please create one.',
 );
 
 $this->text_adv += array(

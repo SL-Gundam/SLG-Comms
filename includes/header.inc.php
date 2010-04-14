@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: header.inc.php,v 1.29 2006/06/10 14:05:37 SC Kruiper Exp $
+ *   $Id: header.inc.php,v 1.31 2007/01/30 16:16:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -28,7 +28,6 @@ if ( !defined("IN_SLG") )
 $header = new template;
 $template = 'header';
 
-$header->insert_display( '{CUSTOM_SERVER}', ( isset($GLOBALS['tssettings']['Custom_servers']) && $GLOBALS['tssettings']['Custom_servers'] && checkfilelock('index.php') ) );
 
 $header->insert_content( '{PAGE_TITLE}', ( ( isset($GLOBALS['tssettings']['Page_title']) ) ? $GLOBALS['tssettings']['Page_title'] : '{TEXT_UNKNOWN_TITLE}' ) );
 
@@ -43,21 +42,21 @@ else
 $header->insert_content( '{LINK_ADMIN_INDEX}', $header_link );
 unset( $header_link );
 
-if ( !isset($GLOBALS['tssettings']['Page_refresh_timer']) )
-{
-	$GLOBALS['tssettings']['Page_refresh_timer'] = false;
-}
-
 $curfile = (
 	checkfilelock('index.php') && 
 	(
 		!isset($_REQUEST['ipbyname']) || 
 		$_REQUEST['ipbyname'] != 0
 	) && 
+	isset($GLOBALS['tssettings']['Page_refresh_timer']) &&
 	is_numeric($GLOBALS['tssettings']['Page_refresh_timer']) && 
 	$GLOBALS['tssettings']['Page_refresh_timer'] != 0
 );
+
+$header->insert_content( '{CONTENT_JAVASCRIPT}', insert_javascript_code( $curfile, ( isset($GLOBALS['tssettings']['Custom_servers']) && $GLOBALS['tssettings']['Custom_servers'] && checkfilelock('index.php') ) ) );
+
 $header->insert_display( '{REFRESHSCRIPT}', $curfile );
+
 if ( $curfile )
 {
 	$header->insert_text( '{REFRESH_URI}', 'index.php' . ( ( isset($_REQUEST['ipbyname']) ) ? '?ipbyname=' . $_REQUEST['ipbyname'] : '' ) );
@@ -65,8 +64,8 @@ if ( $curfile )
 }
 unset( $curfile );
 
-$header->insert_text( '{BASE_URL}', ( isset( $GLOBALS['tssettings']['Base_url'] ) ? 'http://' . $GLOBALS['tssettings']['Base_url'] : NULL ) );
-$header->insert_text( '{TEMPLATE}', ( isset( $GLOBALS['tssettings']['Template'] ) ? $GLOBALS['tssettings']['Template'] : 'Default' ) );
+$header->insert_text( '{BASE_URL}', ( !empty( $GLOBALS['tssettings']['Base_url'] ) ? 'http://' . $GLOBALS['tssettings']['Base_url'] : NULL ) );
+$header->insert_text( '{TEMPLATE}', ( !empty( $GLOBALS['tssettings']['Template'] ) ? $GLOBALS['tssettings']['Template'] : 'Default' ) );
 $header->load_language( 'lng_header' );
 $header->load_template( 'tpl_header' );
 $header->process();

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_earlyerrors.php,v 1.38 2006/06/11 20:32:45 SC Kruiper Exp $
+ *   $Id: lng_earlyerrors.php,v 1.40 2007/01/30 16:16:48 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -47,7 +47,7 @@ Please fill in the correct information and try again.',
 Please inform the webmaster.',
 '{TEXT_INVALID_CONF_FILE}'          => 'Invalid forum configuration file.',
 '{TEXT_MISSING_GROUP_QUERY_ERROR}'  => 'SLG Comms couldn\'t find the required query to retrieve the forum groups. Please inform the webmaster.',
-'{TEXT_NOGROUP}'                    => 'It seems the forum you selected doesn\'t have any groups. Please create one containing the user accounts which are allowed to access the administrator section of SLG Comms.',
+'{TEXT_NOGROUP_INSTALL}'            => 'It seems the forum you selected doesn\'t have any groups. Please create one containing the user accounts which are allowed to access the administrator section of SLG Comms.',
 '{TEXT_UNKNOWN_FORUMTYPE_ERROR}'    => 'An unknown forum type was encountered in the settings.
 Please inform the webmaster.',
 
@@ -75,6 +75,7 @@ Please update SLG Comms by running <a href="install.php">install.php</a>.',
 '{TEXT_DB_DISCONNECT_ERROR}'        => 'Failed to close the database server connection. Most likely the given connection didn\'t exist because of prior errors.',
 '{TEXT_DIFFERENT_DB_INFO}'          => 'Different database information filled in compared to stored information in "dbsettings.inc.php". This information has to be exactly the same to continue.',
 '{TEXT_NO_CONNECT_AVAILABLE}'       => 'The "Database::connect()" function needs to be called before the other functions can be used.',
+'{TEXT_UNACCEPTABLE_TABLEPREFIX}'   => 'Unacceptable table prefix discovered',
 
 '{TEXT_IP_PORT_COMB_ERROR}'         => 'The filled in ip port combination is invalid.',
 

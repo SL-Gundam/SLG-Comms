@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.42 2006/06/24 18:28:18 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.48 2007/01/29 22:49:17 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -61,6 +61,7 @@ function forum_existence_check( $forumtype, $forumpath )
 			break;
 
 		case 'phpbb2015':
+		case 'phpbb3':
 		case 'phpnuke78_phpbb207':
 			$conf_file .= 'config.php';
 			break;
@@ -83,13 +84,18 @@ function forum_existence_check( $forumtype, $forumpath )
 			early_error( '{TEXT_UNKNOWN_FORUMTYPE_ERROR}' );
 	}
 
-	$realpath = realpath( $conf_file );
-	if ( $realpath !== false && strncmp($_SERVER['DOCUMENT_ROOT'], str_replace('\\', '/',$realpath), strlen($_SERVER['DOCUMENT_ROOT']))!== 0 )
+	if ( realpath($conf_file) === false )
+	{
+		return( false );
+	}
+	elseif ( compare_dir_string( $conf_file, $_SERVER['DOCUMENT_ROOT'] ) )
+	{
+		return( true );
+	}
+	else
 	{
 		early_error( '{TEXT_CONF_FILE_NOT_IN_DOCROOT}' );
 	}
-
-	return( $realpath !== false );
 }
 
 // this function retrieves the forum information and prepares query's
@@ -389,6 +395,64 @@ WHERE
   MEM.`username` = "%3$s" AND
   MEM.`user_password` = "%4$s" AND
   MEM.`user_active` = 1';
+
+					$forumsettings['authchecksql_params'] = array(
+						$table['members'],
+						$table['groupsmembers'],
+						$GLOBALS['db']->escape_string( $action_login['fusername'] ),
+						md5( $action_login['fpasswd'] )
+					);
+				}
+				break;
+
+/* START - PHPBB3 */
+			case 'phpbb3':
+				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'config.php' );
+
+				if ( !isset($table_prefix, $dbhost, $dbport, $dbname, $dbuser, $dbpasswd) )
+				{
+					early_error( '{TEXT_INVALID_CONF_FILE}' );
+				}
+
+				$forumsettings['alt_db_host'] = $dbhost . ( ( !empty($dbport) ) ? ':' . $dbport : NULL );
+				$forumsettings['alt_db_name'] = $dbname;
+				$forumsettings['alt_db_user'] = $dbuser;
+				$forumsettings['alt_db_passwd'] = $dbpasswd;
+
+				if ( $action_login === false )
+				{
+					$table['groups'] = $table_prefix . 'groups';
+
+					$forumsettings['groups_sql'] = '
+SELECT
+  `group_id` AS groupid,
+  `group_name` AS groupname
+FROM
+  `%1$s`
+ORDER BY
+  `groupname`';
+
+					$forumsettings['groups_sql_params'] = $table['groups'];
+				}
+				else
+				{
+					$table['members'] = $table_prefix . 'users';
+					$table['groupsmembers'] = $table_prefix . 'user_group';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  MEM.`user_id` AS userid,
+  MEM.`username` AS username,
+  MEM.`username` AS realname,
+  GRM.`group_id` AS groupid
+FROM
+  `%1$s` AS MEM,
+  `%2$s` AS GRM
+WHERE
+  MEM.`user_id` = GRM.`user_id` AND
+  MEM.`username` = "%3$s" AND
+  MEM.`user_password` = "%4$s" AND
+  MEM.`user_type` != 2';
 
 					$forumsettings['authchecksql_params'] = array(
 						$table['members'],
@@ -1004,7 +1068,12 @@ ORDER BY `res_name`';
 					}
 					else
 					{
-						$settingslist .= '<span class="red">{TEXT_NOGROUP}</span>';
+						if ( checkfilelock('install.php') )
+						{
+							early_error( '{TEXT_NOGROUP_INSTALL}' );
+						}
+
+						$settingslist .= '<span class="error">{TEXT_NOGROUP}</span>';
 					}
 					$GLOBALS[ $GLOBALS['forumdatabase'] ]->freeresult( 'getforumgroups', $groupsquery );
 					unset( $groupsquery );
@@ -1025,16 +1094,17 @@ ORDER BY `res_name`';
 			case 'Forum_type':
 				$settingslist .= '<select id="set_value_' . $setting['variable'] . '" name="variable[' . $setting['variable'] . ']" class="textline">
 <option value="bboardlite102"' . ( ( $setting['value'] === 'bboardlite102' ) ? ' selected' : NULL ) . '>Burning Board Lite 1.0.2</option>
-<option value="bboardfull234"' . ( ( $setting['value'] === 'bboardfull234' ) ? ' selected' : NULL ) . '>Burning Board 2.3.4</option>
+<option value="bboardfull234"' . ( ( $setting['value'] === 'bboardfull234' ) ? ' selected' : NULL ) . '>Burning Board 2.3.4-2.3.6</option>
 <option value="ipb131"' . ( ( $setting['value'] === 'ipb131' ) ? ' selected' : NULL ) . '>Invision Power Board 1.3.1</option>
-<option value="ipb204"' . ( ( $setting['value'] === 'ipb204' ) ? ' selected' : NULL ) . '>Invision Power Board 2.0.3-2.1.5</option>
-<option value="phpbb2015"' . ( ( $setting['value'] === 'phpbb2015' ) ? ' selected' : NULL ) . '>PhpBB 2.0.9-2.0.21</option>
-<option value="phpnuke78_phpbb207"' . ( ( $setting['value'] === 'phpnuke78_phpbb207' ) ? ' selected' : NULL ) . '>PHP-Nuke 7.8 + PhpBB 2.0.7</option>
-<option value="smf103"' . ( ( $setting['value'] === 'smf103' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.0.3-1.0.7</option>
-<option value="smf110"' . ( ( $setting['value'] === 'smf110' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.1 RC1-RC2</option>
+<option value="ipb204"' . ( ( $setting['value'] === 'ipb204' ) ? ' selected' : NULL ) . '>Invision Power Board 2.0.3-2.2.1</option>
+<option value="phpbb2015"' . ( ( $setting['value'] === 'phpbb2015' ) ? ' selected' : NULL ) . '>PhpBB 2.0.9-2.0.22</option>
+<option value="phpbb3"' . ( ( $setting['value'] === 'phpbb3' ) ? ' selected' : NULL ) . '>PhpBB 3 Beta 4-Beta 5</option>
+<option value="phpnuke78_phpbb207"' . ( ( $setting['value'] === 'phpnuke78_phpbb207' ) ? ' selected' : NULL ) . '>PHP-Nuke 7.8-8.0 + PhpBB 2.0.7</option>
+<option value="smf103"' . ( ( $setting['value'] === 'smf103' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.0.3-1.0.10</option>
+<option value="smf110"' . ( ( $setting['value'] === 'smf110' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.1.0-1.1.1</option>
 <option value="vb307"' . ( ( $setting['value'] === 'vb307' ) ? ' selected' : NULL ) . '>vBulletin v3.0.7</option>
-<option value="vb350"' . ( ( $setting['value'] === 'vb350' ) ? ' selected' : NULL ) . '>vBulletin v3.5.0-3.5.4</option>
-<option value="xoops_cbb"' . ( ( $setting['value'] === 'xoops_cbb' ) ? ' selected' : NULL ) . '>XOOPS 2.2.3-2.2.4 + CBB 2.32-3.04</option>
+<option value="vb350"' . ( ( $setting['value'] === 'vb350' ) ? ' selected' : NULL ) . '>vBulletin v3.5.0-3.6.4</option>
+<option value="xoops_cbb"' . ( ( $setting['value'] === 'xoops_cbb' ) ? ' selected' : NULL ) . '>XOOPS 2.2.3a-2.2.5 RC2 + CBB 2.32-3.07</option>
 </select>';
 				break;
 

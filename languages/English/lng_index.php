@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index.php,v 1.13 2006/06/11 20:32:45 SC Kruiper Exp $
+ *   $Id: lng_index.php,v 1.15 2006/08/24 20:10:19 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -34,8 +34,6 @@ $this->text += array(
 '{TEXT_SERVER}'                    => 'Server',
 '{TEXT_SUBMIT_SERVERFORM}'         => 'Submit',
 
-'{TEXT_IP_PORT_COMB_ERROR}'        => 'The filled in ip port combination is invalid.',
-
 '{TEXT_ALPHABETICALLY}'            => 'Alphabetically',
 '{TEXT_MANUALLY}'                  => 'No sorting',
 );
@@ -49,7 +47,7 @@ The third value is optional but sometimes required to make sure the data is retr
 
 In case of an Teamspeak connection we need the TCP queryport. The default is 51234 so this value is only required when it\'s different from the default value.
 
-For Ventrilo, if the status protocol is password protected you need to fill it in here. Keep in mind that this is not necessarily the same password used to join the server. The information entered in this field is not stored anywhere in the original unmodified version of SLG Comms. The person who hosts this script might have changed the behaviour in question though.
+For Ventrilo, if the status protocol is password protected you need to fill it in here. Keep in mind that this is not necessarily the same password used to join the server. The information entered in this field is not stored anywhere in the original unmodified version of SLG Comms (only applicable for the custom server ability on the frontpage). The person who hosts this script might have changed the behaviour in question though.
 
 So basically we get this format for Ventrilo:
 With password: "192.168.120.250:3784:1g2a34d5"

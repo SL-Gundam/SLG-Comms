@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.50 2006/06/04 20:41:13 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.52 2007/01/30 16:16:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -105,7 +105,7 @@ $div_content = '<table class=\'tooltip\' cellspacing=\'1\' cellpadding=\'0\'>
 <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 <tr><td nowrap valign=\'top\'>{TEXT_WELCOME}:&nbsp;</td><td>' . htmlentities( $comms->serverinfo['server_welcomemessage'] ) . '</td></tr>' : NULL ) . '</table>';
 
-$div_content = prep_tooltip( str_replace( "\n", '', $div_content ) );
+$div_content = prep_tooltip( removechars( $div_content, array( "\r", "\n" ) ) );
 
 $server_content = '
 	<tr class="server_row">
@@ -122,8 +122,8 @@ $teamspeak->insert_content( '{CHANNEL_INFO_CONTENT}', $server_content );
 
 unset( $comms, $server_content );
 
-$teamspeak->insert_text( '{BASE_URL}', ( isset( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
-$teamspeak->insert_text( '{TEMPLATE}', ( isset( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
+$teamspeak->insert_text( '{BASE_URL}', ( !empty( $tssettings['Base_url'] ) ? 'http://' . $tssettings['Base_url'] : NULL ) );
+$teamspeak->insert_text( '{TEMPLATE}', ( !empty( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
 $teamspeak->load_language( 'lng_index_sub' );
 $teamspeak->load_language( 'lng_index_ts' );
 $teamspeak->load_template( 'tpl_teamspeak' );

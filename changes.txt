@@ -1,3 +1,45 @@
+v3.1.0
+- Removed language item from lng_index.php: "{TEXT_IP_PORT_COMB_ERROR}" (still present in lng_earlyerrors.php)
+- Renamed the language item "{TEXT_NOGROUP}" in lng_earlyerrors.php to "{TEXT_NOGROUP_INSTALL}"
+- Added new language items called: {TEXT_GZIPEXT}, {TEXT_UNACCEPTABLE_TABLEPREFIX}
+- Fixed sentence incase install.php hasn't been deleted in lng_admin.php ({TEXT_INSTALL_FILE_PRESENT})
+- Updated the language item {TEXT_HELP_FORUM_TYPE} with correct text
+- Moved some of the TeamSpeak tooltips language placeholder to another variable in lng_index_ts.php for improved processing
+- Improved code in the processing of custom server ip:port fields
+- Fixed a bug in the function forum_existence_check().
+- Created a new function which should handle the comparing of directory strings.
+- Fixed some problems which backslashes and forward slashes in server variables.
+- Fixed a problem during installation with the dirname function.
+- Modified a english language line in lng_index.php
+- Adjusted name of Xoops forum support from Xoops 2.2.3 -> Xoops 2.2.3a because it's a unstable alpha release
+- TeamSpeak server data retrieval timeout set from 15 to 20 secs
+- Changed required php version to 4.2.3 due to changes in the code which required this version or higher.
+- Fixed a bug where SLG Comms didn't display a proper error in some situations when selecting a forum group during installation of SLG Comms
+- Changed the DEBUG constant name from "DEBUG" to "SLG_DEBUG"
+- Small improvements in the db classes concerning error handling
+- Improved break line checks. This should enable the script to work better with mac and windows line endings in files. (files delivered with original SLG Comms package use unix line endings)
+- Optimized the query for checking whether you use a valid session a bit.
+- Added gzip compression to the requirements list. This will be used to compress rawdata retrieved from servers.
+- Moved all table name decisions to config.inc.php (the same decisions were also present in install.php)
+- Dropped the unique index in the resources table. This resulted in some needed modifications in the code but overall SLG Comms improved.
+- Changed the field type where the rawdata is stored from TEXT to BLOB to better support compressed rawdata
+- Table prefix is now limited to a-z, A-Z, 0-9 and _ characters. All other characters are removed
+- Added support for Burning Board 2.3.6
+- Added support for Invision Board 2.1.7
+- Added support for Invision Board 2.2.1
+- Added support for PhpBB 2.0.22
+- Added support for PhpBB3 Beta 4 and Beta 5
+- Added support for PhpNuke 8.0 + PhpBB 2.0.7
+- Added support for SMF (Simple Machines Forum) 1.0.10
+- Added support for SMF (Simple Machines Forum) 1.1.1
+- Added support for vBulletin 3.6.4
+- Added support for XOOPS 2.2.5 RC2 + CBB 3.07
+
+v3.1.0 - template changes
+- Added a minimum size to the onmouseover popups for the "Default compact" template as this template could be used in iframes. Which makes the minimum size detection not work properly and would have made the size to small.
+- Javascripts in template have been moved to hardcoded content. This improves updates of the javascript code.
+- It's now possible to define a minimum size for the tooltips at the top of the javascripts in tpl_header.html template file.
+
 v3.0.1
 - Fixed a bug in the check_cache_status() function
 - Changed example ip addresses to 127.0.0.1 and localhost in new installations

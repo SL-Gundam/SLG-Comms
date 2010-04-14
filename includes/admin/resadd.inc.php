@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resadd.inc.php,v 1.18 2006/06/24 18:28:17 SC Kruiper Exp $
+ *   $Id: resadd.inc.php,v 1.19 2007/01/29 22:49:16 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -43,29 +43,6 @@ VALUES
 			( ( empty($_POST['resdata']) ) ? 'NULL' : '"' . $db->escape_string( $_POST['resdata'] ) . '"' ),
 			$db->escape_string( $_POST['restype'] )
 		) );
-
-		if ( $_POST['restype'] === 'TeamSpeak' || $_POST['restype'] === 'Ventrilo' )
-		{
-			$sql = '
-INSERT INTO `%1$s`
-( `res_id` )
-  SELECT `res_id`
-  FROM `%2$s`
-  WHERE
-    `res_name` = "%3$s" AND
-    `res_data` = %4$s AND
-    `res_type` = "%5$s"
-  LIMIT 0,1
-';// number %4 not quoted because we need to be able to set that one to NULL
-
-			$db->execquery( 'queryinsertrescache', $sql, array(
-				$table['cache'],
-				$table['resources'],
-				$db->escape_string( $_POST['resname'] ),
-				( ( empty($_POST['resdata']) ) ? 'NULL' : '"' . $db->escape_string( $_POST['resdata'] ) . '"' ),
-				$db->escape_string( $_POST['restype'] )
-			) );
-		}
 
 		$admin->displaymessage( '{TEXT_RESOURCE_ADD_SUCCESS}' );
 	}

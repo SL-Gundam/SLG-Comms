@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin.php,v 1.15 2006/06/11 20:32:44 SC Kruiper Exp $
+ *   $Id: lng_admin.php,v 1.16 2007/01/27 22:45:56 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -47,7 +47,7 @@ Please try again.',
 
 '{TEXT_ADMIN_WELCOME}'         => 'Welcome to the admin section.',
 
-'{TEXT_INSTALL_FILE_PRESENT}'  => 'WARNING: You havn\'t removed install.php yet.
+'{TEXT_INSTALL_FILE_PRESENT}'  => 'WARNING: The file install.php is still present in the install directory.
 Its highly advised to remove it as its a mayor security risk.',
 
 '{TEXT_SESSION_VIOLATION}'     => 'Your session has been terminated because a security rule has been violated.

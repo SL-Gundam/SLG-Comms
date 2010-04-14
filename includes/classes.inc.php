@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.65 2006/06/24 18:46:10 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.70 2007/01/29 22:49:16 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -75,9 +75,9 @@ class template
 			early_error( '{TEXT_LOADTEMPLATE_ERROR}' );
 		}
 
-		$file = str_replace( '\\', '/', realpath( $GLOBALS['tssettings']['Root_path'] . 'templates/' . ( ( !empty($GLOBALS['tssettings']['Template']) ) ? $GLOBALS['tssettings']['Template'] : 'Default' ) . '/' . $filename . '.html' ) );
+		$file = $GLOBALS['tssettings']['Root_path'] . 'templates/' . ( ( !empty($GLOBALS['tssettings']['Template']) ) ? $GLOBALS['tssettings']['Template'] : 'Default' ) . '/' . $filename . '.html';
 
-		if ( strncmp($file, $GLOBALS['tssettings']['Root_path'] . 'templates/', strlen($GLOBALS['tssettings']['Root_path'] . 'templates/')) !== 0 )
+		if ( !compare_dir_string( $file, $GLOBALS['tssettings']['Root_path'] . 'templates/' ) )
 		{
 			$file = $GLOBALS['tssettings']['Root_path'] . 'templates/Default/' . $filename . '.html';
 		}
@@ -88,9 +88,9 @@ class template
 	// This function loads a language file. the parameter is relative to the language directory
 	function load_language( $filename )
 	{
-		$file = str_replace( '\\', '/', realpath( $GLOBALS['tssettings']['Root_path'] . 'languages/' . ( ( !empty($GLOBALS['tssettings']['Language']) ) ? $GLOBALS['tssettings']['Language'] : 'English' ) . '/' . $filename . '.php' ) );
+		$file = $GLOBALS['tssettings']['Root_path'] . 'languages/' . ( ( !empty($GLOBALS['tssettings']['Language']) ) ? $GLOBALS['tssettings']['Language'] : 'English' ) . '/' . $filename . '.php';
 
-		if ( strncmp($file, $GLOBALS['tssettings']['Root_path'] . 'languages/', strlen($GLOBALS['tssettings']['Root_path'] . 'languages/')) !== 0 )
+		if ( !compare_dir_string( $file, $GLOBALS['tssettings']['Root_path'] . 'languages/' ) )
 		{
 			$file = $GLOBALS['tssettings']['Root_path'] . 'languages/English/' . $filename . '.php';
 		}
@@ -106,10 +106,10 @@ class template
 		if ( isset($sql) || isset($sqlerror) )
 		{
 			$error .= '<tr><td class="error2"><p>';
-			if ( defined("DEBUG") )
+			if ( defined("SLG_DEBUG") )
 			{
 				$error .= nl2br( '{TEXT_QUERY}:
-' . str_replace( array( ' ', "\t" ), array( '&nbsp;', '&nbsp;&nbsp;&nbsp;' ), htmlentities( $sql ) ) . '
+' . str_replace( array( ' ', "\t" ), array( '&nbsp;', '&nbsp;&nbsp;' ), htmlentities( $sql ) ) . '
 
 ' );
 			}
@@ -275,7 +275,7 @@ class template
 	// process all the placeholders
 	function process()
 	{
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			if ( is_null($this->tpl_time) )
 			{
@@ -336,7 +336,7 @@ class template
 		$this->template = str_replace( array_keys( $this->text ), $this->text, $this->template );
 		$this->text = array();
 
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			$this->tpl_time->endtimecount();
 		}
@@ -349,7 +349,7 @@ class template
 		{
 			echo substr( $this->template, $i, $bufferSize );
 		}
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			// Because this is the function that actually outputs the template, it can not be integrated into one. This means no multi language support. Not really necessary anyway since the echo below is only executed in DEBUG mode which should never be used in public sites.
 			echo '<table border="0" align="center"><tr><td class="error"><p>DEBUG: echobig() required ' . $loops . ' loop(s) to output the data.</p></td></tr><tr><td class="error"><p>DEBUG: Processing time required for this part of the template was: ' . round( $this->tpl_time->tottime, 4 ) . 's.</p></td></tr></table><p></p>';
@@ -391,7 +391,7 @@ array(
 	'ventsort' => ("alpha" or "manual")
 )
 */
-	// ventsort is optional and not required
+	// ventsort is optional and not required. Also the ventsort here is only used when SLG Comms is operating in NO_DATABASE mode.
 	function insert_server( $server )
 	{
 		$tmp = explode( ':', $server['res_data'], 3 );
@@ -468,8 +468,8 @@ SELECT
   `timestamp`,
   `update_attempt`,
   `refreshcache`,
-  `con_attempts`,
-  `ventsort`
+  `con_attempts`' . ( ( $this->server['res_type'] === 'Ventrilo' ) ? ',
+  `ventsort`' : NULL ) . '
 FROM
   `%1$s`
 WHERE
@@ -484,6 +484,26 @@ LIMIT 0,1';
 			if ( $GLOBALS['db']->numrows( $getserverinfo ) > 0 )
 			{
 				$this->server += $GLOBALS['db']->getrow( $getserverinfo );
+			}
+			else
+			{
+				$this->server += array(
+					'timestamp' => 0,
+					'update_attempt' => 0,
+					'refreshcache' => 0,
+					'con_attempts' => 0
+				);
+
+				$sql = '
+INSERT INTO `%1$s`
+( `res_id` )
+VALUES
+( %2$u )';
+
+				$GLOBALS['db']->execquery( 'preparenewcacherecord', $sql, array(
+					$GLOBALS['table']['cache'],
+					$this->server['res_id']
+				) );
 			}
 
 			$GLOBALS['db']->freeresult( 'getserverinfo', $getserverinfo );
@@ -548,9 +568,10 @@ WHERE
   `res_id` = %4$u
 LIMIT 1';
 
+		/*compress and store the data*/
 		$GLOBALS['db']->execquery( 'updatecachedata', $sql, array(
 			$GLOBALS['table']['cache'],
-			$GLOBALS['db']->escape_string( implode( "\r\n", $this->rawdata ) ),
+			$GLOBALS['db']->escape_string( gzcompress( implode( "\r\n", $this->rawdata ), 1 ) ),
 			$this->time_now,
 			$this->server['res_id']
 		) );
@@ -577,6 +598,9 @@ LIMIT 0,1';
 			$this->rawdata = $GLOBALS['db']->getrow( $cache );
 
 			$GLOBALS['db']->freeresult( 'getcache', $cache );
+
+			/*uncompress here -  TODO still needs a check whether the data is actually compressed data before trying to uncompress*/
+			$this->rawdata['data'] = gzuncompress( $this->rawdata['data'] );
 
 			if ( !empty($this->rawdata['data']) )
 			{
@@ -699,12 +723,13 @@ cl
 pl
 gi
 si
-quit\n";
+quit
+";
 
 		$errno = NULL;
 		$errstr = NULL;
 
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			$cnt_time = new timecount;
 			$cnt_time->starttimecount();
@@ -721,7 +746,7 @@ quit\n";
 		}
 		ob_end_clean();
 
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			$cnt_time->endtimecount();
 		}
@@ -759,7 +784,7 @@ quit\n";
 		{
 			unset( $errno, $errstr );
 			
-			if ( defined("DEBUG") )
+			if ( defined("SLG_DEBUG") )
 			{
 				$cnt_time = new timecount;
 				$cnt_time->starttimecount();
@@ -767,7 +792,7 @@ quit\n";
 
 			if ( function_exists('stream_set_timeout') )
 			{
-				stream_set_timeout ( $connection, 15 );
+				stream_set_timeout ( $connection, 20 );
 			}
 
 			fwrite( $connection, $cmd, strlen($cmd) );
@@ -781,7 +806,7 @@ quit\n";
 			}
 			fclose( $connection );
 
-			if ( defined("DEBUG") )
+			if ( defined("SLG_DEBUG") )
 			{
 				$cnt_time->endtimecount();
 			}
@@ -794,7 +819,7 @@ quit\n";
 			$this->rawdata = explode( "\r\n", trim( $this->rawdata ) );
 		}
 
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			// Because this is DEBUG only output it will be outputted outside of the template class.
 			echo '<table border="0" align="center"><tr><td class="error"><p>DEBUG: Processing time required for retrieving the live server data: ' . round( $cnt_time->tottime, 4 ) . 's.</p></td></tr></table><p></p>';
@@ -1161,7 +1186,7 @@ quit\n";
 			}
 			$div_content .= '</table>';
 
-			$div_content = prep_tooltip( str_replace( "\n", '', $div_content ) );
+			$div_content = prep_tooltip( removechars( $div_content, array( "\r", "\n" ) ) );
 
 			$content .= '
 	<tr class="channel_row">
@@ -1219,7 +1244,7 @@ quit\n";
 			}
 			$div_content .= '</table>';
 
-			$div_content = prep_tooltip( str_replace( "\n", '', $div_content ) );
+			$div_content = prep_tooltip( removechars( $div_content, array( "\r", "\n" ) ) );
 
 			$content .= '
 	<tr class="client_row">
@@ -1249,7 +1274,7 @@ class vent_commsdata extends commsdata
 			early_error( '{TEXT_DEFINED_VENT_PROG_INVALID}' );
 		}
 
-		if ( strncmp($GLOBALS['tssettings']['Root_path'], str_replace( '\\', '/', $program ), strlen($GLOBALS['tssettings']['Root_path'])) !== 0 )
+		if ( !compare_dir_string( $program, $GLOBALS['tssettings']['Root_path'] ) )
 		{
 			early_error( '{TEXT_VENTRILO_NOT_IN_SLG_DIR}' );
 		}
@@ -1258,7 +1283,7 @@ class vent_commsdata extends commsdata
 
 		$execcmd = NULL;
 
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			$cnt_time = new timecount;
 			$cnt_time->starttimecount();
@@ -1275,7 +1300,7 @@ class vent_commsdata extends commsdata
 		}
 		ob_end_clean();
 
-		if ( defined("DEBUG") )
+		if ( defined("SLG_DEBUG") )
 		{
 			$cnt_time->endtimecount();
 			// Because this is DEBUG only output it will be outputted outside of the template class.
@@ -1420,7 +1445,7 @@ class vent_commsdata extends commsdata
 <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 <tr><td nowrap valign=\'top\'>{TEXT_COMMENT}:&nbsp;</td><td>' . htmlentities( $channel['COMM'] ) . '</td></tr>' : NULL ) . '</table>';
 
-			$div_content = prep_tooltip( str_replace( "\n", '', $div_content ) );
+			$div_content = prep_tooltip( removechars( $div_content, array( "\r", "\n" ) ) );
 
 			$content .= '
 	<tr class="channel_row">
@@ -1461,7 +1486,7 @@ class vent_commsdata extends commsdata
 <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 <tr><td nowrap valign=\'top\'>{TEXT_COMMENT}:&nbsp;</td><td>' . htmlentities( $client['COMM'] ) . '</td></tr>' : NULL ) . '</table>';
 
-			$div_content = prep_tooltip( str_replace( "\n", '', $div_content ) );
+			$div_content = prep_tooltip( removechars( $div_content, array( "\r", "\n" ) ) );
 
 			$content .= '
 	<tr class="client_row' . ( ( isset( $client['PHAN'] ) && $client['PHAN'] ) ? ' ventclient_phantom_row' : NULL ) . ( ( isset( $client['ADMIN'] ) && $client['ADMIN'] ) ? ' ventclient_admin_row' : NULL ) . '">

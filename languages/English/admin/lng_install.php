@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_install.php,v 1.32 2006/06/12 14:24:04 SC Kruiper Exp $
+ *   $Id: lng_install.php,v 1.34 2007/01/30 16:16:48 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -47,9 +47,10 @@ $this->text += array(
 '{TEXT_PCREEXT}'                   => 'PCRE extension',
 '{TEXT_PHPVERSION}'                => 'PHP Version',
 '{TEXT_REQUIREMENTS}'              => 'Requirements',
-'{TEXT_SELECTFORUM}'               => 'Please select one of the supported forums from the drop down box.',
+'{TEXT_SELECTFORUM}'               => 'Please select one of the supported forums from the drop down box',
 '{TEXT_UPDATEPHP}'                 => 'please update PHP',
 '{TEXT_WORKINGFORUM}'              => 'Working forum',
+'{TEXT_GZIPEXT}'                   => 'ZLib extension',
 
 '{TEXT_SELECTDB_SUCCESS}'          => 'Successfully selected the database.',
 '{TEXT_INSTALL_SUCCESS}'           => 'Installation successfully completed.',

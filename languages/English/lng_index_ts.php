@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index_ts.php,v 1.8 2006/06/11 20:32:45 SC Kruiper Exp $
+ *   $Id: lng_index_ts.php,v 1.9 2007/01/27 22:45:57 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -48,6 +48,11 @@ $this->text += array(
 '{TEXT_GB}'                      => 'GB',
 '{TEXT_TB}'                      => 'TB',
 
+'{TEXT_TS_RAWDATA_FLAW}'         => 'Corrupted TeamSpeak server data detected.
+Because of a flaw within the layout of the TeamSpeak server data, usage of a combination of tabs and double-quotes make it literally impossible to process it properly. SLG Comms tried the fix the data in question to the best of its abilities. If you see channels and / or clients with incorrect information this will probably be because of this flaw.',
+);
+
+$this->tooltips += array(
 '{TEXT_EXPLAIN_TSFLAG_U}'        => 'Unregistered',
 '{TEXT_EXPLAIN_TSFLAG_R}'        => 'Registered',
 '{TEXT_EXPLAIN_TSFLAG_M}'        => 'Moderated',
@@ -71,8 +76,5 @@ $this->text += array(
 '{TEXT_PL_STATUS_32}'            => 'Sound muted',
 '{TEXT_PL_STATUS_2}'             => 'Requests for voice',
 '{TEXT_PL_RIGHT_2}'              => 'Allowed to register',
-
-'{TEXT_TS_RAWDATA_FLAW}'         => 'Corrupted TeamSpeak server data detected.
-Because of a flaw within the layout of the TeamSpeak server data, usage of a combination of tabs and double-quotes make it literally impossible to process it properly. SLG Comms tried the fix the data in question to the best of its abilities. If you see channels and / or clients with incorrect information this will probably be because of this flaw.',
 );
 ?>

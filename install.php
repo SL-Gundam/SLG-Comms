@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.96 2006/06/24 22:01:03 SC Kruiper Exp $
+ *   $Id: install.php,v 1.104 2007/01/30 17:40:45 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -56,6 +56,7 @@ require( $tssettings['Root_path'] . 'includes/config.inc.php' );
 // it's possible that when SLG Comms has allready been installed and you run install.php that this value will be overwritten with the value from the database. Which incase these values are wrong could deny the use of the "restore settings" functionality. So let's set them correctly again just to be sure.
 $tssettings['Root_path'] = './';
 
+// There was a variable name change when SLG Comms v3.0.0 was created.
 if ( !isset($tssettings['SLG_version']) && isset($tssettings['SLG version']) )
 {
 	$tmparr = $tssettings;
@@ -213,9 +214,11 @@ if (
 		if ( $_GET['step'] < 5 )
 		{
 			// lets fill the requirements list
-			$required_version = '4.2.0';
-			$requirements = '{TEXT_PHPVERSION} >= ' . $required_version . ': <span class="' . ( ( version_compare(phpversion(), $required_version, '>=') ) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}, {TEXT_UPDATEPHP}' ) . '</span>.<br />
-	{TEXT_PCREEXT}: <span class="' . ( ( extension_loaded('pcre') ) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}' ) . '</span>.<br />';
+			$required_version = '4.2.3';
+			$requirements = '
+	{TEXT_PHPVERSION} >= ' . $required_version . ': <span class="' . ( ( version_compare(phpversion(), $required_version, '>=') ) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}, {TEXT_UPDATEPHP}' ) . '</span>.<br />
+	{TEXT_PCREEXT}: <span class="' . ( ( extension_loaded('pcre') ) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}' ) . '</span>.<br />
+	{TEXT_GZIPEXT}: <span class="' . ( ( extension_loaded('zlib') ) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}' ) . '</span>.<br /><br />';
 			if ( $_POST['variable']['Database'] )
 			{
 				if ( defined('NO_DATABASE') )
@@ -252,7 +255,7 @@ if (
 			$configlist = array(
 				array(
 					'variable' => 'Base_url',
-					'value'    => $_SERVER["HTTP_HOST"] . $base_url['dirname'] . '/'
+					'value'    => $_SERVER["HTTP_HOST"] . ( ( str_replace( '\\', '/', $base_url['dirname'] ) !== '/' ) ? $base_url['dirname'] : NULL ) . '/'
 				),
 			);
 		
@@ -450,14 +453,9 @@ if ( $_GET['step'] == 5 && isset($_POST['updsetting']) )
 		{
 			require( $tssettings['Root_path'] . 'includes/db/' . $_POST['variable']['db_type'] . '.inc.php' );
 	
-			$table['cache'] = $_POST['variable']['table_prefix'] . 'cache';
-			$table['resources'] = $_POST['variable']['table_prefix'] . 'resources';
-			$table['sessions'] = $_POST['variable']['table_prefix'] . 'sessions';
-			$table['settings'] = $_POST['variable']['table_prefix'] . 'settings';
-	
-		/* Connect to mysql and database */
-		$db = new database;
-		$db->connect( 'pzinstallserverconnect', $_POST['variable']['db_host'], $_POST['variable']['db_user'], $_POST['variable']['db_passwd'], $_POST['variable']['db_name'] );
+			/* Connect to mysql and database */
+			$db = new database;
+			$db->connect( 'pzinstallserverconnect', $_POST['variable']['db_host'], $_POST['variable']['db_user'], $_POST['variable']['db_passwd'], $_POST['variable']['db_name'] );
 		}
 		$install->displaymessage( '{TEXT_SELECTDB_SUCCESS}' );
 	}
@@ -473,7 +471,6 @@ CREATE TABLE `%1$s` (
   `res_data` VARCHAR(100) DEFAULT NULL,
   `res_type` ENUM("TeamSpeak","Ventrilo") NOT NULL DEFAULT "TeamSpeak",
   PRIMARY KEY (`res_id`),
-  UNIQUE KEY `res_name` (`res_name`,`res_data`,`res_type`),
   KEY `res_type` (`res_type`)
 )';
 
@@ -482,8 +479,8 @@ CREATE TABLE `%1$s` (
 
 		$sql = '
 INSERT INTO `%1$s` VALUES
-(NULL, "Example TeamSpeak", "127.0.0.1:6464:51234", "TeamSpeak"),
-(NULL, "Example Ventrilo", "localhost:8767:45t8hg4", "Ventrilo")';
+(1, "Example TeamSpeak", "127.0.0.1:6464:51234", "TeamSpeak"),
+(2, "Example Ventrilo", "localhost:8767:45t8hg4", "Ventrilo")';
 		$db->execquery( 'insertresdata', $sql, $table['resources'] );
 		$install->displaymessage( '{TEXT_INSERT_DATA_SUCCESS;' . $table['resources'] . ';}' );
 
@@ -503,7 +500,7 @@ CREATE TABLE `%1$s` (
 		$sql = '
 CREATE TABLE `%1$s` (
   `res_id` SMALLINT(5) UNSIGNED NOT NULL DEFAULT "0",
-  `data` TEXT,
+  `data` BLOB NULL DEFAULT NULL,
   `timestamp` INT(10) UNSIGNED NOT NULL DEFAULT "0",
   `update_attempt` INT(10) UNSIGNED NOT NULL DEFAULT "0",
   `refreshcache` SMALLINT(5) UNSIGNED NOT NULL DEFAULT "0",
@@ -582,7 +579,7 @@ INSERT INTO `%1$s` VALUES
 			$db->escape_string( ltrim( prep_dir_string( $_POST['variable']['Forum_relative_path'] ), '/' ) ),
 			$db->escape_string( $_POST['variable']['Forum_type'] ),
 			(bool) $_POST['variable']['GZIP_Compression'],
-			$db->escape_string( $_POST['variable']['Language'] ),
+			$db->escape_string( ( ( !empty($_POST['variable']['Language']) ) ? $_POST['variable']['Language'] : $tssettings['Language'] ) ),
 			(bool) $_POST['variable']['Page_generation_time'],
 			$_POST['variable']['Page_refresh_timer'],
 			$db->escape_string( $_POST['variable']['Page_title'] ),
@@ -590,7 +587,7 @@ INSERT INTO `%1$s` VALUES
 			$db->escape_string( prep_dir_string( $_POST['variable']['Root_path'] ) ),
 			$db->escape_string( $new_version ),
 			(bool) $_POST['variable']['TeamSpeak_support'],
-			$db->escape_string( $_POST['variable']['Template'] ),
+			$db->escape_string( ( ( !empty($_POST['variable']['Template']) ) ? $_POST['variable']['Template'] : $tssettings['Template'] ) ),
 			$db->escape_string( trim( str_replace( '\\', '/', $_POST['variable']['Ventrilo_status_program'] ), '/' ) ),
 			(bool) $_POST['variable']['Ventrilo_support']
 		) );
@@ -656,23 +653,6 @@ DROP INDEX `refreshcache`';
 			$install->displaymessage( '{TEXT_CHANGE_SUCCESS;' . $table['cache'] . ';}' );
 			
 			$sql = '
-INSERT INTO `%1$s`
-( `res_id` )
-  SELECT RES.`res_id`
-  FROM
-    `%2$s` AS RES
-    LEFT OUTER JOIN `%1$s` AS CAC ON (RES.res_id = CAC.res_id)
-  WHERE
-    CAC.`res_id` IS NULL AND
-	RES.`res_type` IN ("TeamSpeak", "Ventrilo")
-';
-			$db->execquery( 'insertcacdata', $sql, array(
-				$table['cache'],
-				$table['resources']
-			) );
-			$install->displaymessage( '{TEXT_INSERT_DATA_SUCCESS;' . $table['cache'] . ';}' );
-
-			$sql = '
 SELECT
   `variable`,
   `value`
@@ -726,7 +706,7 @@ INSERT INTO `%1$s` VALUES
 			$base_url = pathinfo( $_SERVER['PHP_SELF'] );
 			$db->execquery( 'insertsetdata', $sql, array(
 				$table['settings'],
-				$db->escape_string( $_SERVER["HTTP_HOST"] . $base_url['dirname'] . '/' ),
+				$db->escape_string( $_SERVER["HTTP_HOST"] . ( ( str_replace( '\\', '/', $base_url['dirname'] ) !== '/' ) ? $base_url['dirname'] : NULL ) . '/' ),
 				(bool) $tmpsettings['Cache hits'],
 				(bool) $tmpsettings['Custom servers'],
 				$tmpsettings['Default queryport'],
@@ -753,6 +733,53 @@ INSERT INTO `%1$s` VALUES
 			$install->displaymessage( '{TEXT_CHANGE_SUCCESS;' . $table['settings'] . ';}' );
 
 			$install->displaymessage( '<span class="errorbig">{TEXT_VERSION_SUCCESS;v3.0.0;}</span>' );
+		}
+
+		/* SLG Comms versions before v3.1.0 */
+		if ( version_compare($old_version, 'v3.1.0', '<') )
+		{
+			$sql = '
+ALTER TABLE `%1$s`
+CHANGE `data` `data` BLOB NULL DEFAULT NULL';
+
+			$db->execquery( 'cachedatafieldchange', $sql, $table['cache'] );
+
+			$install->displaymessage( '{TEXT_CHANGE_SUCCESS;' . $table['cache'] . ';}' );
+
+			$sql = '
+SELECT
+  `res_id`,
+  `data`
+FROM
+  `%1$s`
+WHERE
+  `data` IS NOT NULL';
+			$rawdata_update = $db->execquery( 'getrawdata', $sql, $table['cache'] );
+
+			while ( $rawdata = $db->getrow($rawdata_update) ){
+				$sql = '
+UPDATE `%1$s`
+SET `data` = "%2$s"
+WHERE `res_id` = %3$u';
+				$db->execquery( 'updatecachedrawdata', $sql, array(
+					$table['cache'],
+					$db->escape_string( gzcompress( $rawdata['data'] ) ),
+					$rawdata['res_id']
+				) );
+			}
+			$db->freeresult( 'getrawdata', $rawdata_update );
+			unset( $rawdata_update, $rawdata );
+
+			$install->displaymessage( '{TEXT_UPDATE_SUCCESS;' . $table['cache'] . ';}' );
+
+			$sql = '
+ALTER TABLE `%1$s`
+DROP INDEX `res_name`';
+			$db->execquery( 'dropindexresname', $sql, $table['resources'] );
+
+			$install->displaymessage( '{TEXT_CHANGE_SUCCESS;' . $table['resources'] . ';}' );
+
+			$install->displaymessage( '<span class="errorbig">{TEXT_VERSION_SUCCESS;v3.1.0;}</span>' );
 		}
 
 		$sql = '
@@ -885,7 +912,7 @@ $tssettings[\'Base_url\']  = \'%1$s\';		/* This is the complete url where SLG Co
 $tssettings[\'Display_ping\'] = true;		/*Whether or not to show the ping of clients behind the name in the channel information pane*/
 $tssettings[\'Root_path\'] = \'%2$s\';		/* This is the complete path where SLG Comms is located on the server. If this setting is wrong please correct it. */
 ?>
-', $_SERVER["HTTP_HOST"] . $base_url['dirname'] . '/', $rootpath['dirname'] . '/' );
+', $_SERVER["HTTP_HOST"] . ( ( str_replace( '\\', '/', $base_url['dirname'] ) !== '/' ) ? $base_url['dirname'] : NULL ) . '/', $rootpath['dirname'] . '/' );
 			unset( $replace_array, $rootpath, $base_url );
 
 			$install->displaymessage( '{TEXT_MODDEDNEWSETTINGS}' );
@@ -1033,7 +1060,7 @@ elseif (
 
 // process template
 $install->insert_text( '{BASE_URL}', NULL );
-$install->insert_text( '{TEMPLATE}', ( isset( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
+$install->insert_text( '{TEMPLATE}', ( !empty( $tssettings['Template'] ) ? $tssettings['Template'] : 'Default' ) );
 $install->load_language( 'admin/lng_install' );
 $install->load_language( 'admin/lng_common' );
 $install->process();
