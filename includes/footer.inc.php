@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.15 2005/06/20 15:25:38 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.16 2005/06/27 20:34:31 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -126,4 +126,6 @@ $footer->load_template('tpl_footer');
 $footer->process();
 $footer->output();
 unset($footer);
+
+exit;
 ?>

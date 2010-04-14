@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.16 2005/06/22 01:22:37 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.17 2005/06/30 19:40:04 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 
-if (!defined("IN_SLG")){ 
+if (!defined("IN_SLG")){
 	die("Hacking attempt.");
 }
 
@@ -121,10 +121,12 @@ Query: '.wordwrap($sql, 125).'
 		$this->display_replace[] = (($replace) ? '$1' : NULL);
 	}
 
+	// content is when the string includes more translation items
 	function insert_content($search, $replace){
 		$this->text_search[$search] = $replace;
 	}
 
+	// text is when the string doesn't include translation items
 	function insert_text($search, $replace){
 		$this->text[$search] = $replace;
 	}

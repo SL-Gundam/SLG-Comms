@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.2 2005/06/21 19:15:29 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.3 2005/06/30 19:04:42 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -41,21 +41,17 @@ function checkaccess($checkvalue){
 }
 
 // MD5 Encryption of the smf forum.
-function md5_hmac($data, $key){
-	if (strlen($key) > 64){
-		$key = pack('H*', md5($key));
-	}
-
-	$key  = str_pad($key, 64, chr(0x00));
-
-	$k_ipad = $key ^ str_repeat(chr(0x36), 64);
-	$k_opad = $key ^ str_repeat(chr(0x5c), 64);
-
-	return(md5($k_opad . pack('H*', md5($k_ipad . $data))));
+function md5_hmac($data, $key)
+{
+	$key = str_pad(strlen($key) <= 64 ? $key : pack('H*', md5($key)), 64, chr(0x00));
+	return(md5(($key ^ str_repeat(chr(0x5c), 64)) . pack('H*', md5(($key ^ str_repeat(chr(0x36), 64)). $data))));
 }
 
 function retrieve_forumsettings(&$tssettings, $action_login=false){
-	if ((($tssettings['Forum type'] == 'ipb131' || $tssettings['Forum type'] == 'ipb204') && file_exists($tssettings['Forum relative path'].'conf_global.php')) || ($tssettings['Forum type'] == 'phpbb2015' && file_exists($tssettings['Forum relative path'].'config.php')) || ($tssettings['Forum type'] == 'smf103' && file_exists($tssettings['Forum relative path'].'Settings.php')) || ($tssettings['Forum type'] == 'vb307' && file_exists($tssettings['Forum relative path'].'includes/config.php'))){
+	if ((($tssettings['Forum type'] == 'ipb131' || $tssettings['Forum type'] == 'ipb204') && file_exists($tssettings['Forum relative path'].'conf_global.php')) || ($tssettings['Forum type'] == 'phpbb2015' && file_exists($tssettings['Forum relative path'].'config.php')) || (($tssettings['Forum type'] == 'smf103' || $tssettings['Forum type'] == 'smf110') && file_exists($tssettings['Forum relative path'].'Settings.php')) || ($tssettings['Forum type'] == 'vb307' && file_exists($tssettings['Forum relative path'].'includes/config.php'))){
+		if ($action_login){
+			processincomingdata($_POST);
+		}
 		switch ($tssettings['Forum type']){
 			case 'ipb131':
 				include($tssettings['Forum relative path'].'conf_global.php');
@@ -237,6 +233,54 @@ FROM
 WHERE
   `memberName` = "'.$_POST['fusername'].'" AND
   `passwd` = "'.md5_hmac($_POST['fpasswd'], strtolower($_POST['fusername'])).'" AND
+  `is_activated` = 1 AND
+  ((ID_GROUP = '.$tssettings['Forum group'].') OR 
+  ('.$tssettings['Forum group'].' IN (additionalGroups)))
+limit 0,1';
+				}
+				break;
+			case 'smf110':
+				include($tssettings['Forum relative path'].'Settings.php');
+
+				$table['groups'] = $db_prefix.'membergroups';
+
+				if ($db_name != $tssettings['db_name']){
+					$forumsettings['otherdatabase'] = true;
+					$forumsettings['alt_db_host'] = $db_server;
+					$forumsettings['alt_db_name'] = $db_name;
+					$forumsettings['alt_db_user'] = $db_user;
+					$forumsettings['alt_db_passwd'] = $db_passwd;
+				}
+				else{
+					$forumsettings['otherdatabase'] = false;
+				}
+
+				$forumsettings['groups_sql'] = '
+SELECT
+  ID_GROUP AS groupid,
+  groupName AS groupname
+FROM
+  '.$table['groups'].'
+WHERE
+  minPosts = -1
+ORDER BY
+  groupname';
+
+				if ($action_login){
+					$table['members'] = $db_prefix.'members';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  `ID_MEMBER` AS userid,
+  `memberName` AS username,
+  `realName` AS realname,
+  `ID_GROUP` AS groupid,
+  `additionalGroups` AS additionalgroups
+FROM
+  `'.$table['members'].'` 
+WHERE
+  `memberName` = "'.$_POST['fusername'].'" AND
+  `passwd` = "'.sha1(strtolower($_POST['fusername']).($_POST['fpasswd'])).'" AND
   `is_activated` = 1 AND
   ((ID_GROUP = '.$tssettings['Forum group'].') OR 
   ('.$tssettings['Forum group'].' IN (additionalGroups)))

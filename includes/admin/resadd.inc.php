@@ -1,12 +1,12 @@
 <?php
 /***************************************************************************
- *                                 resadd.php
+ *                               resadd.inc.php
  *                            -------------------
  *   begin                : Saturday, March 13, 2005
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resadd.php,v 1.2 2005/06/21 19:15:28 SC Kruiper Exp $
+ *   $Id: resadd.inc.php,v 1.4 2005/06/30 19:04:42 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -25,6 +25,7 @@ if (!defined("IN_SLG") || !checkaccess($tssettings['Forum group'])){
 	die("Hacking attempt.");
 }
 
+// this file manages the resource add pages
 if (isset($_POST['baddres'])) {
 	if (!empty($_POST['resname']) && !empty($_POST['restype'])){
 		processincomingdata($_POST);

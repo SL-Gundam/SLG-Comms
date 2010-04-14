@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_install.php,v 1.8 2005/06/20 15:25:40 SC Kruiper Exp $
+ *   $Id: lng_install.php,v 1.9 2005/06/30 19:40:05 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -42,8 +42,8 @@ $this->text += array(
 '{TEXT_DB_PASSWD}' => 'Database password',
 '{TEXT_TABLE_PREFIX}' => 'Table prefix',
 '{TEXT_SELECTDB_SUCCESS}' => 'Succesfully selected the database.',
-'{TEXT_INSTALL_SUCCESS}' => 'Installation succesfully completed.',
-'{TEXT_INSTALL_RESTORE_SUCCESS}' => 'The attempt to regenerate the settings was succesfull. Please remove install.php again.',
+'{TEXT_INSTALL_SUCCESS}' => 'Installation successfully completed.',
+'{TEXT_INSTALL_RESTORE_SUCCESS}' => 'The attempt to regenerate the settings was successfull. Please remove install.php again.',
 '{TEXT_FINISH_INSTALL_LARGE}' => 'Please click on the "Finish installation" button to finish the installation. After you\'re done with install.php please delete it from the web host. If you don\'t delete it you have a mayor security risk on your hands.',
 '{TEXT_FINISH_INSTALL}' => 'Finish installation',
 '{TEXT_NEXT_STEP}' => 'Next step',
@@ -52,14 +52,15 @@ $this->text += array(
 '{TEXT_NEW_INSTALL}' => 'New installation',
 '{TEXT_UPGRADE_INSTALL}' => 'Upgrade from an older version',
 '{TEXT_RESCUE_INSTALL}' => 'Rescue attempt',
-'{TEXT_DISABLED}' => 'Disabled'
+'{TEXT_DISABLED}' => 'Disabled',
+'{TEXT_UPGRADE_SUCCESS}' => 'Successfully upgraded SLG'
 );
 
 $this->text_adv += array(
 '{TEXT_INSTALLATIONSTEP}' => 'Installation step $1',
-'{TEXT_TABLE_CREATE_SUCCESS}' => 'Succesfully created table "$1".',
-'{TEXT_INSERT_DATA_SUCCESS}' => 'Succesfully inserted default data in table "$1".',
-'{TEXT_TABLE_DROP_SUCCESS}' => 'Succesfully removed the table "$1".',
+'{TEXT_TABLE_CREATE_SUCCESS}' => 'Successfully created table "$1".',
+'{TEXT_INSERT_DATA_SUCCESS}' => 'Successfully inserted default data in table "$1".',
+'{TEXT_TABLE_DROP_SUCCESS}' => 'Successfully removed the table "$1".',
 '{TEXT_OPENFILE_ERROR}' => 'Cannot open file "$1".',
 '{TEXT_FILEWRITE_ERROR}' => 'Cannot write to file "$1".',
 '{TEXT_FILEWRITE_SUCCESS}' => 'Succesfully wrote the information to "$1".

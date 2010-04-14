@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.37 2005/06/25 16:25:32 SC Kruiper Exp $
+ *   $Id: install.php,v 1.40 2005/06/30 19:40:05 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,10 +24,12 @@ define("IN_SLG", 10);
 define("NO_DATABASE", 10);
 include('includes/config.inc.php');
 
+// if step doesn't exist step will be 1
 if (!isset($_GET['step'])){
 	$_GET['step'] = 1;
 }
 
+// process $_POST data for addslashes depending upon the magic_gpc setting
 if ($_GET['step'] == 5 && isset($_POST['updsetting'])){
 	processincomingdata($_POST);
 }
@@ -35,6 +37,7 @@ else{
 	processincomingdata($_POST, true);
 }
 
+// download the dbsetings.inc.php file incase in couldn't be auto saved
 if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 	header("Content-type: text/x-plain");
 	header("Pragma: public");
@@ -49,22 +52,32 @@ if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 	exit;
 }
 
-$tssettings['SLG version'] = 'v2.1.1';
-$tssettings['Page title'] = 'SLG Comms'.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
+// lets fill some default values which will be used as default values
+$tssettings['SLG version'] = 'v2.1.2';
+$tssettings['Page title'] = 'SLG Comms '.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
+
+//If a language has been selected lets switch to that language instead of the default
 if (isset($_POST['variable']['Language'])){
 	$tssettings['Language'] = $_POST['variable']['Language'];
 }
+//If a template has been selected lets switch to that template instead of the default
 if (isset($_POST['variable']['Template'])){
 	$tssettings['Template'] = $_POST['variable']['Template'];
 }
 include_once('includes/header.inc.php');
 
+// initialise the template class
 $install = new template;
 $template = 'install';
 
 if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['step'] == 4) && isset($_POST['updsetting']))){
+	// with different $_GET['step'] values we get different variables in $configlist
 	if ($_GET['step'] == 1){
 		$configlist = array(
+        array(
+            'variable' => 'install_type',
+            'value' => 'new'
+        ),
         array(
             'variable' => 'Database',
             'value' => NULL
@@ -81,10 +94,6 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	}
 	elseif ($_GET['step'] == 2 && $_POST['variable']['Database'] == 1){
 		$configlist = array(
-        array(
-            'variable' => 'install_type',
-            'value' => 'new'
-        ),
         array(
             'variable' => 'db_type',
             'value' => 'mysql41'
@@ -113,16 +122,21 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	}
 	elseif ($_GET['step'] == 3 || ($_GET['step'] == 2 && $_POST['variable']['Database'] == 0)){
 		if ($_GET['step'] == 2){
+			if ($_POST['variable']['install_type'] == 'upgrade'){
+				early_error('{TEXT_NODB_UPGRADE}');
+			}
 			$_GET['step'] = 3;
 		}
-	  	$required_version = (($_POST['variable']['Database'] == 1 && $_POST['variable']['db_type'] == 'mysql') ? '4.2.0' : '4.1.0');
+	  	// lets fill the requirements list
+		$required_version = (($_POST['variable']['Database'] == 1 && $_POST['variable']['db_type'] == 'mysql') ? '4.2.0' : '4.1.0');
 		$requirements = '{TEXT_PHPVERSION} >= '.$required_version.': <span class="'.((version_compare(phpversion(), $required_version, '>=')) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}, {TEXT_UPDATEPHP}' ).'</span>.<br />
 {TEXT_PCREEXT}: <span class="'.((extension_loaded('pcre')) ? 'greentext">{TEXT_YES}' : 'redtext">{TEXT_NO}' ).'</span>.<br />';
 		if ($_POST['variable']['Database'] == 1){
+			// lets get our db class
 			require('includes/db/'.$_POST['variable']['db_type'].'.inc.php');
 			$requirements .= '{TEXT_MYSQLDATABASE}: ';
 
-			/* Connect to mysql and database */
+			/* Connect to mysql and database and test given information */
 			$db = new db;
 			$db->connect('pzinstallserverconnect', $_POST['variable']['db_host'], $_POST['variable']['db_user'], $_POST['variable']['db_passwd'], $_POST['variable']['db_name']);
 			if ($_POST['variable']['db_type'] == 'mysql'){
@@ -141,6 +155,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			$requirements .= '<br />{TEXT_IGNOREOPTIONS}';
 		}
 
+		// insert the data into the template
 		$install->insert_content('{SHOW_REQUIREMENTS}', $requirements);
 
 		$configlist = array(
@@ -191,10 +206,13 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	);
 	}
 	elseif($_GET['step'] == 4){
+		// lets get our db class
 		require('includes/db/'.$_POST['variable']['db_type'].'.inc.php');
 
-		if ((($_POST['variable']['Forum type'] == 'ipb131' || $_POST['variable']['Forum type'] == 'ipb204') && file_exists($_POST['variable']['Forum relative path'].'conf_global.php')) || ($_POST['variable']['Forum type'] == 'phpbb2015' && file_exists($_POST['variable']['Forum relative path'].'config.php')) || ($_POST['variable']['Forum type'] == 'smf103' && file_exists($_POST['variable']['Forum relative path'].'Settings.php')) || ($_POST['variable']['Forum type'] == 'vb307' && file_exists($_POST['variable']['Forum relative path'].'includes/config.php'))){
+		// check whether the selected forum is correct
+		if ((($_POST['variable']['Forum type'] == 'ipb131' || $_POST['variable']['Forum type'] == 'ipb204') && file_exists($_POST['variable']['Forum relative path'].'conf_global.php')) || ($_POST['variable']['Forum type'] == 'phpbb2015' && file_exists($_POST['variable']['Forum relative path'].'config.php')) || (($_POST['variable']['Forum type'] == 'smf103' || $_POST['variable']['Forum type'] == 'smf110') && file_exists($_POST['variable']['Forum relative path'].'Settings.php')) || ($_POST['variable']['Forum type'] == 'vb307' && file_exists($_POST['variable']['Forum relative path'].'includes/config.php'))){
 			include('includes/functions.secure.inc.php');
+			// retrieve needed forum information
 			$forumsettings = retrieve_forumsettings($_POST['variable']);
 		}
 		else{
@@ -202,6 +220,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 		}
 
 		if (isset($forumsettings['groups_sql'])){
+			// lets connect to the forum
 			$forumdatabase = 'dbforum';
 			$$forumdatabase = new db;
 			if ($forumsettings['otherdatabase']){
@@ -216,6 +235,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 					$$forumdatabase->selectdb('pzforumdatabaseconnect', $_POST['variable']['db_name']);
 				}
 			}
+			// lets retrieve the forums groups
 			$groupsquery = $$forumdatabase->execquery('getforumgroups',$forumsettings['groups_sql']);
 		}
 		else{
@@ -229,10 +249,12 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
         )
 	);
 	}
+	// whether or not display the requirements table
 	$install->insert_display('{REQUIREMENTS}', $_GET['step'] == 3);
 
 	$install->insert_content('{TEXT_INSTALLATIONSTEP}', '{TEXT_INSTALLATIONSTEP;'.$_GET['step'].';}');
 
+	// decide on the next step to take
 	if ($_GET['step'] == 1){
 		$nextstep = '2';
 	}
@@ -253,6 +275,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	}
 	$install->insert_text('{NEXTSTEP}', $nextstep);
 
+	// parse the configlist array
 	$configrows = NULL;
 	foreach ($configlist as $row){
 		$row['helptext_normal'] = '{TEXT_HELP_'.strtoupper(removechars($row['variable'], ' ')).'_NORMAL}';
@@ -263,7 +286,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
     <td width="60%" nowrap><p class="para">';
 		switch ($row['variable']){
 			case 'install_type':
-				$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline"'.(($_POST['variable']['Database'] == 0) ? ' disabled' : NULL).'>
+				$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline">
 <option value="new">{TEXT_NEW_INSTALL}</option>
 <option value="upgrade">{TEXT_UPGRADE_INSTALL}</option>
 <option value="rescue">{TEXT_RESCUE_INSTALL}</option>
@@ -311,8 +334,9 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 				$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline"'.(($_POST['variable']['Database'] == 0) ? ' disabled' : NULL).'>
 <option value="ipb131">Invision Power Board 1.3.1</option>
 <option value="ipb204">Invision Power Board 2.0.3-2.0.4</option>
-<option value="phpbb2015">PhpBB 2.0.9-2.0.15</option>
-<option value="smf103">SMF (Simple Machines Forum) 1.0.3-1.0.4</option>
+<option value="phpbb2015">PhpBB 2.0.9-2.0.16</option>
+<option value="smf103">SMF (Simple Machines Forum) 1.0.3-1.0.5</option>
+<option value="smf110">SMF (Simple Machines Forum) 1.1 beta 3</option>
 <option value="vb307">vBulletin v3.0.7</option>
 </select>';
 				break;
@@ -364,6 +388,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	  </p></td>
   </tr>';
 	}
+	// put all the variables from previous forms into this form
 	if (isset($_POST['updsetting'])){
 		reset($_POST['variable']);
 		foreach ($_POST['variable'] as $variable => $value){
@@ -373,8 +398,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	$install->insert_content('{SETTINGS}', $configrows);
 }
 elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
-	processincomingdata($_POST);
-
+	// lets insert everything into the database
 	require('includes/db/'.$_POST['variable']['db_type'].'.inc.php');
 
 	$table['cache'] = $_POST['variable']['table_prefix'].'cache';
@@ -490,6 +514,19 @@ elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
 			}
 		}
 	}
+	
+	if ($_POST['variable']['install_type'] == 'upgrade'){
+		$sql = 'UPDATE `slg_settings`
+SET
+  `value` = "v2.1.2"
+WHERE
+  `variable` = "SLG version"
+LIMIT 1';
+		$modifysettings = $db->execquery('modifysettings',$sql);
+		if ($modifysettings == true){
+			$install->displaymessage('{TEXT_UPGRADE_SUCCESS}');
+		}
+	}
 
 	if (isset($createrestable, $insertresdata, $createsestable, $createsestable, $createsettable, $insertsetdata) && ($createrestable && $insertresdata) && $createsestable && $createsertable && ($createsettable && $insertsetdata)){
 		$install->displaymessage('<span class="errorbig">{TEXT_INSTALL_SUCCESS}</span>');
@@ -499,22 +536,23 @@ elseif ($_GET['step'] == 5 && isset($_POST['updsetting'])){
 		$install->displaymessage('<span class="errorbig">{TEXT_INSTALL_RESTORE_SUCCESS}</span>');
 	}
 //-----------------------------
-	processincomingdata($_POST, true);
 }
 
 if ($_GET['step'] == 6 && isset($_POST['updsetting'])){
+	// display the finish installation information
 	reset($_POST['variable']);
 	$hidden_vars = NULL;
 	foreach ($_POST['variable'] as $variable => $value){
 		$hidden_vars .= '<input name="variable['.$variable.']" type="hidden" id="oldset_value" value="'.htmlspecialchars($value).'">';
 	}
-	$install->insert_display('{SHOW_FINISH_INSTALL}', true);
+//	$install->insert_display('{SHOW_FINISH_INSTALL}', true);
 	$install->insert_content('{TEXT_HIDDEN_VARIABLES}', $hidden_vars);
 	$install->insert_content('{TEXT_FINISH_LARGE}', '{TEXT_FINISH_INSTALL_LARGE}');
 	$install->insert_content('{TEXT_FINISH}', '{TEXT_FINISH_INSTALL}');
 	$install->insert_content('{NEXTSTEP}', '7');
 }
 elseif ($_GET['step'] == 7 and isset($_POST['updsetting'])){
+	// lets save dbsettings.inc.php
 	$filename = 'dbsettings.inc.php';
 	
 	if ($_POST['variable']['Database'] == 1){
@@ -571,7 +609,9 @@ $servers = array(
 );
 /* Don\'t change anything below this line unless you know what youre doing. */
 
-define("NO_DATABASE", 10);						/*Disable the use of the database.*/
+if (!defined("NO_DATABASE")){
+	define("NO_DATABASE", 10);						/*Disable the use of the database.*/
+}
 $cache[\'refreshcache\'] = 0;						/*This line disables caching of retrieved server data. As this data normally is stored in a database we must disable it in this situation. Don\'t change this as it will never work the way it should as there is no database.*/
 $tssettings[\'SLG version\'] = \''.$tssettings['SLG version'].'\';			/*The current version of this script. Please don\'t change it unless you have a good reason for it.*/
 ?>
@@ -604,11 +644,12 @@ $tssettings[\'SLG version\'] = \''.$tssettings['SLG version'].'\';			/*The curre
 	}
 
 	if (!$file_save){
+		// auto save failed to lets download the file and let the user upload it himself
 		reset($_POST['variable']);
 		$hidden_vars = '
 <input name="content" type="hidden" id="oldset_value" value="'.htmlspecialchars($content).'">
 <input name="filename" type="hidden" id="oldset_value" value="'.$filename.'">';
-		$install->insert_display('{SHOW_FINISH_INSTALL}', true);
+//		$install->insert_display('{SHOW_FINISH_INSTALL}', true);
 		$install->insert_content('{TEXT_HIDDEN_VARIABLES}', $hidden_vars);
 		$install->insert_content('{TEXT_FINISH_LARGE}', '{TEXT_DOWNLOAD_FILE_LARGE;'.$filename.';}');
 		$install->insert_content('{TEXT_FINISH}', '{TEXT_DOWNLOAD_FILE}');
@@ -619,14 +660,17 @@ $tssettings[\'SLG version\'] = \''.$tssettings['SLG version'].'\';			/*The curre
 	}
 }
 
+// we need to decide on which template is needed
 if ($_GET['step'] >= 5 && isset($_POST['updsetting'])){
-	$install->insert_display('{FINISH}', (!isset($file_save) || !$file_save));
+	// whether or not to display the finish installation information
+	$install->insert_display('{FINISH}', ((isset($file_save) && !$file_save) || ($_GET['step'] == 6 && isset($_POST['updsetting']))));
 	$install->load_template('admin/tpl_install_finish');
 }
 elseif (($_GET['step'] >= 2 && $_GET['step'] < 5 && isset($_POST['updsetting'])) || ($_GET['step'] == 1 && !isset($_POST['updsetting']))){
 	$install->load_template('admin/tpl_install_settings');
 }
 
+// process template
 $install->load_language('admin/lng_install');
 $install->load_language('admin/lng_common');
 $install->process();

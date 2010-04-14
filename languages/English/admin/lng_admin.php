@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin.php,v 1.5 2005/06/20 15:25:39 SC Kruiper Exp $
+ *   $Id: lng_admin.php,v 1.6 2005/06/30 19:04:43 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -44,6 +44,7 @@ Don\'t worry just continue what you were doing. If neccasary you can login again
 '{TEXT_LOGOUT}' => 'Logout',
 '{TEXT_ADD_RESOURCES}' => 'Add resources',
 '{TEXT_MANAGE_RESOURCES}' => 'Manage resources',
-'{TEXT_CACHE_RESOURCES}' => 'Caching servers'
+'{TEXT_CACHE_RESOURCES}' => 'Caching servers',
+'{TEXT_ADMIN_WELCOME}' => 'Welcome to the admin section.'
 );
 ?>

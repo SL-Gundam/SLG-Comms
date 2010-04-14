@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.19 2005/06/21 19:15:28 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.20 2005/06/27 20:34:31 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -70,7 +70,7 @@ function removechars($str, $char){
 }
 
 function convert_jspoptext($str){
-	return(str_replace("\n", '\r', addslashes($str)));
+	return(str_replace("\n", '\r\n', addslashes($str)));
 }
 
 function early_error($message, $sql=NULL, $sqlerror=NULL){

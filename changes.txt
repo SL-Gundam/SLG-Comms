@@ -1,0 +1,16 @@
+v2.1.2
+- Glitch with mozilla browser javascript popups fixed
+- Better security
+- Support for SMF 1.0.5
+- Support for SMF 1.1 beta 3
+- Support for PhpBB 2.0.16
+- Several template bugs in install.php fixed
+- Added some comments
+- changed filenames of file in includes/admin/ folder to correct ones (forgot the .inc in the filename)
+
+v2.1.2 template changes
+- tpl_footer needed 'target="_blank"' added to the hyperlink in the copyright notice.
+- tpl_admin got an extra language item, {TEXT_ADMIN_WELCOME}
+
+v2.1.1
+- first public release

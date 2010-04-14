@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: config.inc.php,v 1.7 2005/06/23 18:53:49 SC Kruiper Exp $
+ *   $Id: config.inc.php,v 1.8 2005/06/30 19:40:04 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -50,6 +50,7 @@ if ( !defined('NO_DATABASE') ){
 		$db->selectdb('pzdatabaseconnect', $tssettings['db_name']);
 	}
 
+	// retrieve settings from the database
 	$getconfig = $db->execquery('getconfig','SELECT
   variable,
   value
@@ -62,6 +63,7 @@ FROM
 	$db->freeresult('getconfig',$getconfig);
 }
 
+// do we enable gzip compression or not?
 $useragent = (isset($HTTP_SERVER_VARS['HTTP_USER_AGENT'])) ? $HTTP_SERVER_VARS['HTTP_USER_AGENT'] : getenv('HTTP_USER_AGENT');
 
 $zlib_status = ini_get('zlib.output_compression');

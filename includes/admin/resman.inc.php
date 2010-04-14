@@ -1,12 +1,12 @@
 <?php
 /***************************************************************************
- *                                 resman.php
+ *                               resman.inc.php
  *                            -------------------
  *   begin                : Saturday, March 13, 2005
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resman.php,v 1.5 2005/06/21 20:24:27 SC Kruiper Exp $
+ *   $Id: resman.inc.php,v 1.7 2005/06/30 19:04:42 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -25,6 +25,7 @@ if (!defined("IN_SLG") || !checkaccess($tssettings['Forum group'])){
 	die("Hacking attempt.");
 }
 
+// this file manages the Resource manager page
 if (isset($_GET['delete'])) {
 	$querydeleteres = $db->execquery('querydeleteres','DELETE
 FROM

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.12 2005/06/20 15:25:39 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.13 2005/06/30 19:04:42 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -34,7 +34,7 @@ if (checkfilelock('admin.php')){
 		$_SESSION['prerecorded_ip'] = encode_ip($_SERVER['REMOTE_ADDR']);
 	}
 
-	if (isset($_POST['login'])){
+	if (isset($_POST['login']) && isset($_POST['fusername']) && isset($_POST['fpasswd'])){
 		$forumsettings = retrieve_forumsettings($tssettings, true);
 
 		if ($forumsettings['otherdatabase']){
@@ -64,7 +64,7 @@ if (checkfilelock('admin.php')){
 					$_SESSION['user_id'] = $authrow['userid'];
 					$_SESSION['username'] = $authrow['username'];
 					$_SESSION['realname'] = $authrow['realname'];
-					if ($tssettings['Forum type'] == 'smf103' || $tssettings['Forum type'] == 'ipb204' || $tssettings['Forum type'] == 'vb307'){
+					if ($tssettings['Forum type'] == 'smf103' || $tssettings['Forum type'] == 'ipb204' || $tssettings['Forum type'] == 'vb307' || $tssettings['Forum type'] == 'smf110'){
 						$group_id = $authrow['groupid'];
 						if (!empty($authrow['additionalgroups'])) $group_id .= ','.$authrow['additionalgroups'];
 						$_SESSION['group_id'] = explode(',',$group_id);

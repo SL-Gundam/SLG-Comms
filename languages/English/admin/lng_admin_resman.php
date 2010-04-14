@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_resman.php,v 1.2 2005/06/21 20:24:27 SC Kruiper Exp $
+ *   $Id: lng_admin_resman.php,v 1.3 2005/06/30 19:40:05 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -31,7 +31,7 @@ $this->text += array(
 '{TEXT_RESOURCE_TYPE}' => 'Resource type',
 '{TEXT_EDIT}' => 'edit',
 '{TEXT_DELETE}' => 'delete',
-'{TEXT_RESOURCE_DELETE}' => 'Resource succesfully deleted.',
-'{TEXT_RESOURCECACHE_DELETE}' => 'Resource cache succesfully deleted.'
+'{TEXT_RESOURCE_DELETE}' => 'Resource successfully deleted.',
+'{TEXT_RESOURCECACHE_DELETE}' => 'Resource cache successfully deleted.'
 );
 ?>

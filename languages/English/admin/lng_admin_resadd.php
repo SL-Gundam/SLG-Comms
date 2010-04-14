@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_resadd.php,v 1.1 2005/06/20 15:25:40 SC Kruiper Exp $
+ *   $Id: lng_admin_resadd.php,v 1.2 2005/06/30 19:40:05 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -26,9 +26,9 @@ if (!defined("IN_SLG")){
 }
 
 $this->text += array(
-'{TEXT_RESOURCE_ADD_SUCCESS}' => 'Resource succesfully added.',
+'{TEXT_RESOURCE_ADD_SUCCESS}' => 'Resource successfully added.',
 '{TEXT_MISSING_FORMDATA}' => 'Not all of the neccasary fields were filled in.',
-'{TEXT_RESOURCE_UPDATE_SUCCESS}' => 'Resource succesfully updated.',
+'{TEXT_RESOURCE_UPDATE_SUCCESS}' => 'Resource successfully updated.',
 '{TEXT_RESOURCE_ADD}' => 'Add resource',
 '{TEXT_RESOURCE_UPDATE}' => 'Update resource',
 '{TEXT_RESOURCE_EDIT}' => 'Modify resource',

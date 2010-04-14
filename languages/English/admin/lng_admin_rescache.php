@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_rescache.php,v 1.2 2005/06/21 17:12:49 SC Kruiper Exp $
+ *   $Id: lng_admin_rescache.php,v 1.3 2005/06/30 19:40:05 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -41,7 +41,7 @@ $this->text += array(
 '{TEXT_SECONDS}' => 'Seconds',
 '{TEXT_AND}' => 'and',
 '{TEXT_UPDATE_CACHESETTINGS}' => 'Update cache settings',
-'{TEXT_CACHESETTINGS_UPDATE_SUCCESS}' => 'All cache settings succesfully updated.',
+'{TEXT_CACHESETTINGS_UPDATE_SUCCESS}' => 'All cache settings successfully updated.',
 '{TEXT_DATA_CACHE_UNAVAILABLE}' => 'Data cache not present.'
 );
 ?>

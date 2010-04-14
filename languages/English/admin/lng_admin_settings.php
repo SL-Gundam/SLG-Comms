@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_settings.php,v 1.1 2005/06/20 15:25:40 SC Kruiper Exp $
+ *   $Id: lng_admin_settings.php,v 1.2 2005/06/30 19:40:05 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -37,6 +37,6 @@ $this->text += array(
 );
 
 $this->text_adv += array(
-'{TEXT_SETTINGUPDATE_SUCCESS}' => 'The setting "$1" was succesfully updated.'
+'{TEXT_SETTINGUPDATE_SUCCESS}' => 'The setting "$1" was successfully updated.'
 );
 ?>

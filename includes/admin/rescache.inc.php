@@ -1,12 +1,12 @@
 <?php
 /***************************************************************************
- *                               rescache.php
+ *                             rescache.inc.php
  *                            -------------------
  *   begin                : Saturday, March 13, 2005
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: rescache.php,v 1.2 2005/06/21 17:12:48 SC Kruiper Exp $
+ *   $Id: rescache.inc.php,v 1.4 2005/06/30 19:04:42 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -25,6 +25,7 @@ if (!defined("IN_SLG") || !checkaccess($tssettings['Forum group'])){
 	die("Hacking attempt.");
 }
 
+// this file manages the resource cache pages
 if (isset($_POST['updsetting'])) {
 	foreach ($_POST['refreshcache'] as $variable => $value){
 		if ($value != $_POST['oldrefreshcache'][$variable] && !($value == 0 && $_POST['oldrefreshcache'][$variable] == '-1')){

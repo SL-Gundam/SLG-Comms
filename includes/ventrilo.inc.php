@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.26 2005/06/22 20:24:43 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.27 2005/06/30 19:04:42 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -47,7 +47,7 @@ else{
 //print_r($execcmd);
 //print_r($routput);
 
-if (!isset($execcmd) || $execcmd == 0/* || $execcmd == 3*/){
+if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went ok OR no response from server. 3 = unable to resolve hostname error.
 	if (isset($routput[0]) && strncasecmp($routput[0], "ERROR", 5) == 0){
 		$pre_error = $routput[0];
 		$venterror = true;

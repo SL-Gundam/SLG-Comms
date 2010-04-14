@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.16 2005/06/20 17:23:39 SC Kruiper Exp $
+ *   $Id: index.php,v 1.17 2005/06/30 19:04:42 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -24,9 +24,11 @@ define("IN_SLG", 10);
 include('includes/config.inc.php');
 include_once('includes/header.inc.php');
 
+// start new template
 $index = new template;
 $template = 'index';
 
+// prepare server list incase database support is enabled
 if ( !defined('NO_DATABASE') ){
 	$getservers = $db->execquery('getservers','
 SELECT res_id, res_name, res_data, res_type
@@ -41,9 +43,12 @@ ORDER BY res_name');
 	$db->freeresult('getservers',$getservers);
 }
 
+//whether or not to display the server list table
 $Servertable = (count($servers) > 1) || $tssettings['Custom servers'];
 $index->insert_display('{SELECT_SERVER}', $Servertable);
+
 if ($Servertable){
+	// building the server list
 	$ipbyname = ($tssettings['Custom servers']) ? '<option value="0">{TEXT_CUSTOM}</option>' : NULL;
 	if ( defined('NO_DATABASE') ){
 		uasort ( $servers, "SORT_SERVERS");
@@ -51,14 +56,7 @@ if ($Servertable){
 	reset($servers);
 	foreach($servers as $server){
 		$ipbyname .= '<option value="'.$server['res_id'].'"';
-		if (isset($_REQUEST['ipbyname']) && $_REQUEST['ipbyname'] == $server['res_id']){
-			$ipbyname .= ' selected';
-			$pice = explode(':',$server['res_data']);
-			if (isset($pice[2])) $ts['queryport'] = $pice[2];
-			$res_type = $server['res_type'];
-			$ts['id'] = $server['res_id'];
-		}
-		elseif ($tssettings['Default server'] == $server['res_id'] && !isset($_REQUEST['ipbyname'])){
+		if ((isset($_REQUEST['ipbyname']) && $_REQUEST['ipbyname'] == $server['res_id']) || (!isset($_REQUEST['ipbyname']) && $tssettings['Default server'] == $server['res_id'] && !isset($_REQUEST['ipbyname']))){
 			$ipbyname .= ' selected';
 			$pice = explode(':',$server['res_data']);
 			if (isset($pice[2])) $ts['queryport'] = $pice[2];
@@ -67,8 +65,10 @@ if ($Servertable){
 		}
 		$ipbyname .= '>'.$server['res_name'].'</option>';
 	}
+	// insert the serverlist into the template
 	$index->insert_content('{IPBYNAME_OPTIONS}', $ipbyname);
 
+	// whether or to enable the custom server option
 	$index->insert_display('{CUSTOM_SERVER}', $tssettings['Custom servers']);
 	if ($tssettings['Custom servers']){
 		$typeopt = '
@@ -79,6 +79,7 @@ if ($Servertable){
 	}
 }
 else{
+	//incase the server list table was disabled we still need to fill the variables below
 	reset($servers);
 	$server = current($servers);
 	$pice = explode(':',$server['res_data']);
@@ -87,6 +88,7 @@ else{
 	$ts['id'] = $server['res_id'];
 }
 
+// incase of the custom server we need to check whether the format is acceptable
 if(isset($_POST['ipport']) && $_POST['ipbyname'] == 0 && $tssettings['Custom servers']){
 	$pice = explode(':',$_POST['ipport']);
 	if (empty($pice[0]) || empty($pice[1])){
@@ -98,6 +100,7 @@ if(isset($_POST['ipport']) && $_POST['ipbyname'] == 0 && $tssettings['Custom ser
 $ts['ip'] = (isset($pice[0])) ? $pice[0] : NULL;
 $ts['port'] = (isset($pice[1])) ? $pice[1] : NULL;
 
+// checking whether cached server data is available
 if(isset($ts['id']) && !isset($cache)){
 	$cached = $db->execquery('getcached','
 SELECT
@@ -122,6 +125,7 @@ LIMIT 0,1');
 		if ($cache['timestamp'] < $refreshtime) $usecached = false;
 		else{
 			$usecached = true;
+			// register a cache hit if the cache hits setting is enabled
 			if ($tssettings['Cache hits']){
 				$db->execquery('updatecachehits','UPDATE `'.$table['cache'].'`
 SET
@@ -141,12 +145,14 @@ LIMIT 1');
 }
 else $usecached = false;
 
+//process the template
 $index->load_language('lng_index');
 $index->load_template('tpl_index');
 $index->process();
 $index->output();
 unset($index);
 
+// start the process of retrieving server data for either TeamSpeak or Ventrilo
 if ((isset($res_type) && $res_type == 'TeamSpeak') || (isset($_POST['type']) && $_POST['type'] == 'TeamSpeak' && $_POST['ipbyname'] == 0)){
 	if (!isset($ts['queryport'])) $ts['queryport'] = $tssettings['Default queryport'];
 	include('includes/teamspeak.inc.php');
