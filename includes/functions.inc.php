@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.21 2005/09/10 14:39:29 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.22 2005/09/20 22:33:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -126,7 +126,7 @@ function formattime($seconds){
 
 function linewrap($str, $maxlength){
 	if (strlen($str) > $maxlength){
-		$str = substr($str, 0, ($maxlength-2)).'...';
+		$str = trim(substr($str, 0, ($maxlength-2))).'...';
 	}
 	return($str);
 }

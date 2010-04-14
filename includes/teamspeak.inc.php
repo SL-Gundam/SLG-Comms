@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.26 2005/09/12 23:13:45 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.27 2005/09/20 22:33:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -43,7 +43,7 @@ pl
 si
 gi
 quit\n";
-	$connection = @fsockopen ($ts['ip'], $ts['queryport'], $errno, $errstr, 1);
+	$connection = @fsockopen ($ts['ip'], $ts['queryport'], $errno, $errstr, 2);
 }
 else $connection = true;
 if (!$connection){
@@ -197,31 +197,29 @@ if (!$connection){
 
 	$teamspeak->insert_display('{SERVER_INFO}', $tssettings['Show server information']);
 
-	$teamspeak->insert_text('{SERVER_NAME}', htmlspecialchars($vserver['server_name']));
-	$teamspeak->insert_text('{PLATFORM}', $vserver['server_platform']);
-	$teamspeak->insert_text('{VERSION}', $gserver['total_server_version']);
-	$teamspeak->insert_text('{WELCOME}', htmlentities($vserver['server_welcomemessage']));
-	$teamspeak->insert_text('{MAXCLIENTS}', $vserver['server_maxusers']);
-	$teamspeak->insert_text('{CLIENTS_CON}', $vserver['server_currentusers']);
-	$teamspeak->insert_text('{CHANNEL_COUNT}', $vserver['server_currentchannels']);
-	$teamspeak->insert_text('{UDPPORT}', $vserver['server_udpport']);
-
 	$uptime = formattime($vserver['server_uptime']);
-	$teamspeak->insert_content('{UPTIME}', $uptime);
-
 	$password_prot = (($vserver['server_password']) ? '{TEXT_YES}' : '{TEXT_NO}');
-	$teamspeak->insert_content('{PASSWORD_PROT}', $password_prot);
-
 	$clanserver = (($vserver['server_clan_server']) ? '{TEXT_YES}' : '{TEXT_NO}');
-	$teamspeak->insert_content('{CLANSERVER}', $clanserver);
-
 	$datasent = formatbytes($vserver['server_bytessend']);
-	$teamspeak->insert_content('{DATASENT}', $datasent);
-
 	$datareceived = formatbytes($vserver['server_bytesreceived']);
-	$teamspeak->insert_content('{DATARECEIVED}', $datareceived);
 
-	$teamspeak->insert_display('{PROVIDER}', (isset($gserver['isp_ispname']) || isset($vserver['isp_ispname'])));
+	if ($tssettings['Show server information']){
+		$teamspeak->insert_text('{SERVER_NAME}', htmlspecialchars($vserver['server_name']));
+		$teamspeak->insert_text('{PLATFORM}', $vserver['server_platform']);
+		$teamspeak->insert_text('{VERSION}', $gserver['total_server_version']);
+		$teamspeak->insert_text('{WELCOME}', htmlentities($vserver['server_welcomemessage']));
+		$teamspeak->insert_text('{MAXCLIENTS}', $vserver['server_maxusers']);
+		$teamspeak->insert_text('{CLIENTS_CON}', $vserver['server_currentusers']);
+		$teamspeak->insert_text('{CHANNEL_COUNT}', $vserver['server_currentchannels']);
+		$teamspeak->insert_text('{UDPPORT}', $vserver['server_udpport']);
+		$teamspeak->insert_content('{UPTIME}', $uptime);
+		$teamspeak->insert_content('{PASSWORD_PROT}', $password_prot);
+		$teamspeak->insert_content('{CLANSERVER}', $clanserver);
+		$teamspeak->insert_content('{DATASENT}', $datasent);
+		$teamspeak->insert_content('{DATARECEIVED}', $datareceived);
+		$teamspeak->insert_display('{PROVIDER}', (isset($gserver['isp_ispname']) || isset($vserver['isp_ispname'])));
+	}
+
 	if (isset($gserver['isp_ispname']) || isset($vserver['isp_ispname'])){
 		$isp_name = ((isset($vserver['isp_ispname'])) ? $vserver['isp_ispname'] : $gserver['isp_ispname']);
 
@@ -239,9 +237,11 @@ if (!$connection){
 			$isp_adminemail2 = '<a href="mailto:'.$isp_adminemail1.'">'.$isp_adminemail1.'</a>';
 		}
 
-		$teamspeak->insert_text('{PROVIDER}', ((isset($isp_name)) ? htmlspecialchars($isp_name) : NULL ));
-		$teamspeak->insert_text('{PROVIDER_WEBSITE}', ((isset($isp_linkurl2)) ? $isp_linkurl2 : NULL ));
-		$teamspeak->insert_text('{PROVIDER_EMAIL}', ((isset($isp_adminemail2)) ? $isp_adminemail2 : NULL ));
+		if ($tssettings['Show server information']){
+			$teamspeak->insert_text('{PROVIDER}', ((isset($isp_name)) ? htmlspecialchars($isp_name) : NULL ));
+			$teamspeak->insert_text('{PROVIDER_WEBSITE}', ((isset($isp_linkurl2)) ? $isp_linkurl2 : NULL ));
+			$teamspeak->insert_text('{PROVIDER_EMAIL}', ((isset($isp_adminemail2)) ? $isp_adminemail2 : NULL ));
+		}
 	}
 
 #############
@@ -250,26 +250,28 @@ if (!$connection){
 
 	uasort($channels, "SORT_CHANNELS");
 	reset($channels);
-	$div_content = '{TEXT_SERVER_NAME}: '.$vserver['server_name'].'
-{TEXT_PLATFORM}: '.$vserver['server_platform'].'
-{TEXT_VERSION}: '.$gserver['total_server_version'].'
-{TEXT_UPTIME}: '.$uptime.'
-{TEXT_PASSWORD_PROT}: '.$password_prot.'
-{TEXT_CLANSERVER}: '.$clanserver.'
-{TEXT_UDPPORT}: '.$vserver['server_udpport'].'
-{TEXT_DATASENT}: '.$datasent.'
-{TEXT_DATARECEIVED}: '.$datareceived.'
-{TEXT_MAXCLIENTS}: '.$vserver['server_maxusers'].'
-{TEXT_CLIENTS_CON}: '.$vserver['server_currentusers'].'
-{TEXT_CHANNEL_COUNT}: '.$vserver['server_currentchannels'].'
-'.((isset($gserver['isp_ispname']) || isset($vserver['isp_ispname'])) ? '
-{TEXT_PROVIDER}: '.((isset($isp_name)) ? htmlspecialchars($isp_name) : NULL ).'
-{TEXT_PROVIDER_WEBSITE}: '.((isset($isp_linkurl1)) ? $isp_linkurl1 : NULL ).'
-{TEXT_PROVIDER_EMAIL}: '.((isset($isp_adminemail1)) ? $isp_adminemail1 : NULL ).'
-' : NULL ).'
-{TEXT_WELCOME}: '.$vserver['server_welcomemessage'];
+	$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_SERVER_NAME}:&amp;nbsp;</td><td>'.prep_tooltip($vserver['server_name']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PLATFORM}:&amp;nbsp;</td><td>'.prep_tooltip($vserver['server_platform']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_VERSION}:&amp;nbsp;</td><td>'.prep_tooltip($gserver['total_server_version']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_UPTIME}:&amp;nbsp;</td><td>'.prep_tooltip($uptime).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PASSWORD_PROT}:&amp;nbsp;</td><td>'.$password_prot.'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CLANSERVER}:&amp;nbsp;</td><td>'.$clanserver.'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_UDPPORT}:&amp;nbsp;</td><td>'.$vserver['server_udpport'].'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_DATASENT}:&amp;nbsp;</td><td>'.prep_tooltip($datasent).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_DATARECEIVED}:&amp;nbsp;</td><td>'.prep_tooltip($datareceived).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_MAXCLIENTS}:&amp;nbsp;</td><td>'.$vserver['server_maxusers'].'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CLIENTS_CON}:&amp;nbsp;</td><td>'.$vserver['server_currentusers'].'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CHANNEL_COUNT}:&amp;nbsp;</td><td>'.$vserver['server_currentchannels'].'</td></tr>'.((isset($gserver['isp_ispname']) || isset($vserver['isp_ispname'])) ? '
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PROVIDER}:&amp;nbsp;</td><td>'.((isset($isp_name)) ? prep_tooltip($isp_name).'</td></tr>' : NULL ).'
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PROVIDER_WEBSITE}:&amp;nbsp;</td><td>'.((isset($isp_linkurl1)) ? prep_tooltip($isp_linkurl1).'</td></tr>' : NULL ).'
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PROVIDER_EMAIL}:&amp;nbsp;</td><td>'.((isset($isp_adminemail1)) ? prep_tooltip($isp_adminemail1).'</td></tr>' : NULL ) : NULL ).((!empty($vserver['server_welcomemessage'])) ? '
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_WELCOME}:&amp;nbsp;</td><td>'.prep_tooltip($vserver['server_welcomemessage']).'</td></tr>' : NULL ).'</table>';
 
-	$div_content = prep_tooltip($div_content);
+//	$div_content = prep_tooltip($div_content);
+	$div_content = str_replace("\n", '', $div_content);
 
 	$server_content = '
     <tr class="server_row">
@@ -283,20 +285,23 @@ if (!$connection){
 	foreach($channels as $channel){
 		//Information echo'en...
 		$chflags = ch_flags($channel['flags']);
-		$div_content = '{TEXT_CHANNEL}: '. $channel['name'] .'
-{TEXT_TOPIC}: '.$channel['topic'].'
-{TEXT_PASSWORD_PROT}: '.(($channel['password']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
-{TEXT_CODEC}: '.formatcodec($channel['codec']).'
-{TEXT_MAXCLIENTS}: '.$channel['maxusers'].'
-
-{TEXT_EXPLAIN_TSFLAGS_CHANNEL}: '.$chflags;
+		$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CHANNEL}:&amp;nbsp;</td><td>'.prep_tooltip($channel['name']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_TOPIC}:&amp;nbsp;</td><td>'.prep_tooltip($channel['topic']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PASSWORD_PROT}:&amp;nbsp;</td><td>'.(($channel['password']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CODEC}:&amp;nbsp;</td><td>'.prep_tooltip(formatcodec($channel['codec'])).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_MAXCLIENTS}:&amp;nbsp;</td><td>'.$channel['maxusers'].'</td></tr>
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_EXPLAIN_TSFLAGS_CHANNEL}:&amp;nbsp;</td><td>'.$chflags.'</td></tr>';
 		$exp_flags = str_split($chflags, 1);
 		foreach ($exp_flags as $flag){
 			$div_content .= '
-'.$flag.': {TEXT_EXPLAIN_TSFLAG_'.$flag.'}';
+<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.prep_tooltip($flag).'}</td></tr>';
 		}
+		$div_content .= '</table>';
 
-		$div_content = prep_tooltip($div_content);
+//		$div_content = prep_tooltip($div_content);
+		$div_content = str_replace("\n", '', $div_content);
 
 		$server_content .= '    <tr class="channel_row">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
@@ -313,13 +318,15 @@ if (!$connection){
 
 			foreach($subchannels[$channel['id']] as $subchannel){
 				//Sub-Channel Informatie echo'en...
-				$div_content = '{TEXT_SUBCHANNEL}: '. $subchannel['name'] .'
-{TEXT_TOPIC}: '.$subchannel['topic'].'
-{TEXT_PASSWORD_PROT}: '.(($subchannel['password']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
-{TEXT_CODEC}: '.formatcodec($subchannel['codec']).'
-{TEXT_MAXCLIENTS}: '.$subchannel['maxusers'];
+				$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_SUBCHANNEL}:&amp;nbsp;</td><td>'. prep_tooltip($subchannel['name']) .'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_TOPIC}:&amp;nbsp;</td><td>'.prep_tooltip($subchannel['topic']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PASSWORD_PROT}:&amp;nbsp;</td><td>'.(($subchannel['password']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CODEC}:&amp;nbsp;</td><td>'.prep_tooltip(formatcodec($subchannel['codec'])).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_MAXCLIENTS}:&amp;nbsp;</td><td>'.$subchannel['maxusers'].'</td></tr></table>';
 
-				$div_content = prep_tooltip($div_content);
+//				$div_content = prep_tooltip($div_content);
+				$div_content = str_replace("\n", '', $div_content);
 
 				$server_content .= '    <tr class="channel_row">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
@@ -337,18 +344,21 @@ if (!$connection){
 					foreach($players[$subchannel['id']] as $player){
 						//Informatie echo'en...
 						$plflags = pl_flags($player['pprivs'],$player['cprivs']);
-						$div_content = '{TEXT_NAME}: '.$player['nick'].'
-{TEXT_LOGGEDINFOR}: '.formattime($player['logintime']).'
-{TEXT_IDLEFOR}: '.formattime($player['idletime']).'
-
-{TEXT_EXPLAIN_TSFLAGS_PLAYER}: '.$plflags;
+						$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_NAME}:&amp;nbsp;</td><td>'.prep_tooltip($player['nick']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_LOGGEDINFOR}:&amp;nbsp;</td><td>'.prep_tooltip(formattime($player['logintime'])).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_IDLEFOR}:&amp;nbsp;</td><td>'.prep_tooltip(formattime($player['idletime'])).'</td></tr>
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_EXPLAIN_TSFLAGS_PLAYER}:&amp;nbsp;</td><td>'.$plflags.'</td></tr>';
 						$exp_flags = explode(' ', $plflags);
 						foreach ($exp_flags as $flag){
 							$div_content .= '
-'.$flag.': {TEXT_EXPLAIN_TSFLAG_'.$flag.'}';
-						};
+<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.prep_tooltip($flag).'}</td></tr>';
+						}
+						$div_content .= '</table>';
 
-						$div_content = prep_tooltip($div_content);
+//						$div_content = prep_tooltip($div_content);
+						$div_content = str_replace("\n", '', $div_content);
 
 						$server_content .= '    <tr class="client_row">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
@@ -370,18 +380,21 @@ if (!$connection){
 			foreach($players[$channel['id']] as $player){ 
 				//Informatie echo'en...
 				$plflags = pl_flags($player['pprivs'],$player['cprivs']);
-				$div_content = '{TEXT_NAME}: '.$player['nick'].'
-{TEXT_LOGGEDINFOR}: '.formattime($player['logintime']).'
-{TEXT_IDLEFOR}: '.formattime($player['idletime']).'
-
-{TEXT_EXPLAIN_TSFLAGS_PLAYER}: '.$plflags;
+				$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_NAME}:&amp;nbsp;</td><td>'.prep_tooltip($player['nick']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_LOGGEDINFOR}:&amp;nbsp;</td><td>'.prep_tooltip(formattime($player['logintime'])).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_IDLEFOR}:&amp;nbsp;</td><td>'.prep_tooltip(formattime($player['idletime'])).'</td></tr>
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_EXPLAIN_TSFLAGS_PLAYER}:&amp;nbsp;</td><td>'.$plflags.'</td></tr>';
 				$exp_flags = explode(' ', $plflags);
 				foreach ($exp_flags as $flag){
 					$div_content .= '
-'.$flag.': {TEXT_EXPLAIN_TSFLAG_'.$flag.'}';
-				};
+<tr><td>&amp;nbsp;</td><td>'.$flag.':&amp;nbsp;{TEXT_EXPLAIN_TSFLAG_'.prep_tooltip($flag).'}</td></tr>';
+				}
+				$div_content .= '</table>';
 
-				$div_content = prep_tooltip($div_content);
+//				$div_content = prep_tooltip($div_content);
+				$div_content = str_replace("\n", '', $div_content);
 
 				$server_content .= '    <tr class="client_row">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>

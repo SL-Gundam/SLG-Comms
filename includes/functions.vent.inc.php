@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.vent.inc.php,v 1.5 2005/09/12 23:13:45 SC Kruiper Exp $
+ *   $Id: functions.vent.inc.php,v 1.6 2005/09/20 22:33:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -55,13 +55,18 @@ function vent_channels(&$channels, &$clients, $cid=0, $level=0){
 	reset($channels[$cid]);
 	foreach($channels[$cid] as $channel){
 		//Information echo'en...
-		$div_content = '{TEXT_CHANNEL}: '. $channel['NAME'].'
-{TEXT_PASSWORD_PROT}: '.(($channel['PROT']) ? '{TEXT_YES}' : '{TEXT_NO}' );
-		$div_content = prep_tooltip($div_content);
+		$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CHANNEL}:&amp;nbsp;</td><td>'.prep_tooltip($channel['NAME']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PASSWORD_PROT}:&amp;nbsp;</td><td>'.(($channel['PROT']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'</td></tr>'.((!empty($channel['COMM'])) ? '
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_COMMENT}:&amp;nbsp;</td><td>'.prep_tooltip($channel['COMM']).'</td></tr>' : NULL ).'</table>';
+
+//		$div_content = prep_tooltip($div_content);
+		$div_content = str_replace("\n", '', $div_content);
 
 		$server_content .= '    <tr class="channel_row">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
-'.str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', $level).'<img width="16" height="16" src="images/vent/'. (($channel['PROT']) ? 'p' : 'n' ) .'channel.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($channel['NAME']).'
+'.str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', $level).'<img width="16" height="16" src="images/vent/'. (($channel['PROT']) ? 'p' : 'n' ) .'channel.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($channel['NAME']) .((!empty($channel['COMM'])) ? '&nbsp;&nbsp;&nbsp;(<span class="ventcomment">'.htmlentities(linewrap($channel['COMM'], 30)).'</span>)' : NULL ).'
       </p></td>
 	  <td nowrap><p>&nbsp;</p></td>
 	</tr>
@@ -74,17 +79,20 @@ function vent_channels(&$channels, &$clients, $cid=0, $level=0){
 
 			foreach($clients[$channel['CID']] as $player){ 
 				//Informatie echo'en...
-				$div_content = '{TEXT_NAME}: '.$player['NAME'].'
-{TEXT_ADMIN}: '.(($player['ADMIN']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
-{TEXT_LOGGEDINFOR}: '.formattime($player['SEC']).'
+				$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_NAME}:&amp;nbsp;</td><td>'.prep_tooltip($player['NAME']).'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_ADMIN}:&amp;nbsp;</td><td>'.(($player['ADMIN']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'</td></tr>'.((isset($player['PHAN'])) ? '
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_PHANTOM}:&amp;nbsp;</td><td>'.(($player['PHAN']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'</td></tr>' : NULL ).'
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_LOGGEDINFOR}:&amp;nbsp;</td><td>'.prep_tooltip(formattime($player['SEC'])).'</td></tr>'.((!empty($player['COMM'])) ? '
+<tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_COMMENT}:&amp;nbsp;</td><td>'.prep_tooltip($player['COMM']).'</td></tr>' : NULL ).'</table>';
 
-{TEXT_COMMENT}: '.$player['COMM'];
+//				$div_content = prep_tooltip($div_content);
+				$div_content = str_replace("\n", '', $div_content);
 
-				$div_content = prep_tooltip($div_content);
-
-				$server_content .= '    <tr class="client_row">
+				$server_content .= '    <tr class="'.((isset($player['PHAN']) && $player['PHAN']) ? 'ventclient_phantom_row' : 'client_row').'">
 	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', $level).'<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', $level).'<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? '&nbsp;&nbsp;&nbsp;(<span class="ventcomment">'.linewrap(htmlentities($player['COMM']), 30).'</span>)' : NULL ).'
       </p></td>
 	  <td nowrap><p>'.$player['PING'].'ms</p></td>
 	</tr>
@@ -100,7 +108,8 @@ function vent_channels(&$channels, &$clients, $cid=0, $level=0){
 }
 
 function strdecode( $str ){
-	for ($start = 0; $pos = strpos ($str, "%", $start); $start = $pos+1){
+	for ($start = 0; strpos ($str, "%", $start) !== false; $start = $pos+1){
+		$pos = strpos ($str, "%", $start);
 		$decode[substr( $str, $pos, 3 )] = sprintf( "%c", intval( substr( $str, $pos + 1, 2 ), 16 ) );
 	}
 	if (isset($decode)){

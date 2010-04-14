@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index_sub.php,v 1.9 2005/09/10 14:39:31 SC Kruiper Exp $
+ *   $Id: lng_index_sub.php,v 1.10 2005/09/20 22:33:48 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -49,6 +49,8 @@ $this->text += array(
 '{TEXT_MAXCLIENTS}' => 'Maximum clients',
 '{TEXT_CLIENTS_CON}' => 'Clients connected',
 '{TEXT_CHANNEL_COUNT}' => 'Channel count',
+'{TEXT_VOICECODEC}' => 'Voice codec',
+'{TEXT_VOICEFORMAT}' => 'Voice codec format',
 '{TEXT_YES}' => 'Yes',
 '{TEXT_NO}' => 'No',
 '{TEXT_PING}' => 'Ping',
@@ -57,7 +59,8 @@ $this->text += array(
 '{TEXT_CODEC}' => 'Codec',
 '{TEXT_SUBCHANNEL}' => 'Subchannel',
 '{TEXT_NAME}' => 'Name',
-'{TEXT_ADMIN}' => 'Admin',
+'{TEXT_ADMIN}' => 'Administrator?',
+'{TEXT_PHANTOM}' => 'Phantom?',
 '{TEXT_LOGGEDINFOR}' => 'Logged in for',
 '{TEXT_IDLEFOR}' => 'Idle for',
 '{TEXT_SERVER_PHONETIC}' => 'Server phonetic',
@@ -80,17 +83,17 @@ $this->text += array(
 '{TEXT_EXPLAIN_TSFLAG_U}' => 'Unregistered',
 '{TEXT_EXPLAIN_TSFLAG_R}' => 'Registered',
 '{TEXT_EXPLAIN_TSFLAG_M}' => 'Moderated',
-'{TEXT_EXPLAIN_TSFLAG_P}' => 'Password protected',
+'{TEXT_EXPLAIN_TSFLAG_P}' => 'Password Protected',
 '{TEXT_EXPLAIN_TSFLAG_S}' => 'Sub-channels enabled',
 '{TEXT_EXPLAIN_TSFLAG_D}' => 'Default channel',
-'{TEXT_EXPLAIN_TSFLAG_SA}' => 'Server administrator',
-'{TEXT_EXPLAIN_TSFLAG_CA}' => 'Channel administrator',
-'{TEXT_EXPLAIN_TSFLAG_AO}' => 'Auto-op',
-'{TEXT_EXPLAIN_TSFLAG_AV}' => 'Auto-voice',
+'{TEXT_EXPLAIN_TSFLAG_SA}' => 'Server Administrator',
+'{TEXT_EXPLAIN_TSFLAG_CA}' => 'Channel Administrator',
+'{TEXT_EXPLAIN_TSFLAG_AO}' => 'Auto-Op',
+'{TEXT_EXPLAIN_TSFLAG_AV}' => 'Auto-Voice',
 '{TEXT_EXPLAIN_TSFLAG_O}' => 'Op',
 '{TEXT_EXPLAIN_TSFLAG_V}' => 'Voice',
 '{TEXT_EXPLAIN_TSFLAGS_CHANNEL}' => 'Channel settings',
-'{TEXT_EXPLAIN_TSFLAGS_PLAYER}' => 'Player rights'
+'{TEXT_EXPLAIN_TSFLAGS_PLAYER}' => 'Client rights'
 );
 
 $this->text_adv += array(

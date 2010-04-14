@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.47 2005/09/12 23:13:44 SC Kruiper Exp $
+ *   $Id: install.php,v 1.48 2005/09/20 22:33:46 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -57,7 +57,7 @@ if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 if (isset($tssettings['SLG version'])){
 	$old_version = $tssettings['SLG version'];
 }
-$tssettings['SLG version'] = 'v2.1.7';
+$tssettings['SLG version'] = 'v2.1.8';
 $tssettings['Page title'] = 'SLG Comms '.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
 
 //If a language has been selected lets switch to that language instead of the default
@@ -343,7 +343,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 			case 'Forum type': 
 				$configrows .= '<select name="variable['.htmlspecialchars($row['variable']).']" class="textline"'.(($_POST['variable']['Database'] == 0) ? ' disabled' : NULL).'>
 <option value="ipb131">Invision Power Board 1.3.1</option>
-<option value="ipb204">Invision Power Board 2.0.3-2.0.4</option>
+<option value="ipb204">Invision Power Board 2.0.3-2.1.0</option>
 <option value="phpbb2015">PhpBB 2.0.9-2.0.17</option>
 <option value="smf103">SMF (Simple Machines Forum) 1.0.3-1.0.5</option>
 <option value="smf110">SMF (Simple Machines Forum) 1.1 beta 3</option>

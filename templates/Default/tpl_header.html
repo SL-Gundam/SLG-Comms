@@ -13,7 +13,7 @@
 <!--
 {REFRESHSCRIPT_BEGIN}
 /* BEGIN page refresh time javascript - Code copied from Emule 0.46c web interface template. */
-var timeoutID;
+var timeoutID=null;
 var timeout = {REFRESH_SECS}000;
 
 function RefreshPage()
@@ -56,28 +56,25 @@ else
 var ns4 = document.layers;
 var ns6 = document.getElementById && !document.all;
 
+var timer_hidetoolTip="";
+
 userAgent = navigator.userAgent;
 if (userAgent.indexOf('MSIE') != -1 && userAgent.indexOf('Opera') == -1) var ie4 = document.all;
 
 offsetX = 10;
 offsetY = 10;
-var toolTipmain="";
-var toolTipIEfix="";
+var toolTipmain=null;
+var toolTipIEfix=null;
 var reswidth=0;
 var resheight=0;
-var width="";
-var height="";
+var width=null;
+var height=null;
 var scrollX=0;
 var scrollY=0;
 function initToolTips()
 {
 //	if(ns4||ns6||ie4)
 	{
-/*		if(ns4) toolTipSTYLE = document.toolTipLayer;
-		else if(ns6) toolTipSTYLE = document.getElementById("toolTipLayer").style;
-		else if(ie4) toolTipSTYLE = document.all.toolTipLayer.style;*/
-
-//		toolTipSTYLE = document.getElementById("toolTipLayer").style;
 		toolTipmain = document.getElementById("toolTipLayer");
 		if (ie4) toolTipIEfix = document.getElementById("toolTipIEfix");
 
@@ -96,26 +93,36 @@ function initToolTips()
 		get_window_parameters();
 	}
 }
+function hidetoolTip()
+{
+	reswidth=0;
+	resheight=0;
+/*	toolTipSTYLE.height="";*/
+	toolTipmain.style.width="";
+	if(ns4) toolTipmain.style.visibility = "hidden";
+	else{
+		toolTipmain.style.display = "none";
+		if (ie4) toolTipIEfix.style.display = "none";
+	}
+	clearTimeout(timer_hidetoolTip);
+	timer_hidetoolTip = null;
+}
 function toolTip(msg, nwidth/*, nheight*/)
 {
 	if(toolTip.arguments.length < 1) // hide
 	{
-		reswidth=0;
-		resheight=0;
-/*		toolTipSTYLE.height="";*/
-		toolTipmain.style.width="";
-		if(ns4) toolTipmain.style.visibility = "hidden";
-		else{
-			toolTipmain.style.display = "none";
-			if (ie4) toolTipIEfix.style.display = "none";
-		}
+		timer_hidetoolTip = setTimeout("hidetoolTip()", 1);
 	}
 	else // show
 	{
+		if (timer_hidetoolTip){
+			hidetoolTip();
+		}
+
 		toolTipmain.style.left = 0;
 		toolTipmain.style.top = 0;
 
-		var content = msg;
+		var content = '<table id="sizecheck_table" border="0" cellspacing="0" cellpadding="0" class="tooltip"><tr><td>' + msg + '</td></tr></table>';
 		if(ns4)
 		{
 			toolTipmain.style.document.write(content);
@@ -135,6 +142,8 @@ function toolTip(msg, nwidth/*, nheight*/)
 			toolTipSTYLE.display='block'
 		}*/
 
+		toolTipsizefix = document.getElementById("sizecheck_table");
+
 		get_window_parameters();
 
 /*		if (nheight) toolTipSTYLE.height = nheight;*/
@@ -148,6 +157,11 @@ function toolTip(msg, nwidth/*, nheight*/)
 		if (width < nwidth) nwidth="";
 
 		toolTipmain.style.width = nwidth;
+
+		if (toolTipmain.offsetWidth < toolTipsizefix.offsetWidth){
+			toolTipmain.style.width = toolTipsizefix.offsetWidth;
+		}
+
 		if (ie4){
 			toolTipIEfix.style.width = toolTipmain.offsetWidth;
 			toolTipIEfix.style.height = toolTipmain.offsetHeight;
@@ -260,15 +274,7 @@ function get_window_parameters()
 <table align="center" class="addniceborder">
 	<tr>
 		<td class="tdpadding" nowrap><p class="head1">{PAGE_TITLE}</p></td>
-		<td class="tdpadding" nowrap><p class="para" align="right">{LINK_ADMIN_INDEX} {REFRESHSCRIPT_BEGIN}<a href="javascript:ToggleTimer();" onMouseOver="toolTip('{TEXT_SHOW_HELPTEXT_TIMER}')" onMouseOut="toolTip()">
-			<script language = "javascript">
-	<!--
-		if (timeoutID && timeout != 0)
-	        document.write('<img align="absmiddle" border="0" id="ImgToggleTimer" align="middle" alt="{TEXT_SHOW_HELPTEXT_TIMER}" src="images/l_timer.gif">');
-		else
-	        document.write('<img align="absmiddle" border="0" id="ImgToggleTimer" align="middle" alt="{TEXT_SHOW_HELPTEXT_TIMER}" src="images/l_timer_off.gif">');
-	//-->
-</script></a>{REFRESHSCRIPT_END}</p></td>
+		<td class="tdpadding" nowrap><p class="para" align="right">{LINK_ADMIN_INDEX} {REFRESHSCRIPT_BEGIN}<a href="#" onMouseOver="toolTip('{TEXT_SHOW_HELPTEXT_TIMER}')" onMouseOut="toolTip()" onClick="javascript:ToggleTimer();"><img align="absmiddle" border="0" id="ImgToggleTimer" alt="{TEXT_SHOW_HELPTEXT_TIMER}" src="images/l_timer.gif"></a>{REFRESHSCRIPT_END}</p></td>
 	</tr>
 </table>
 <p></p>

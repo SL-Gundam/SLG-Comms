@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: resman.inc.php,v 1.8 2005/09/12 23:13:45 SC Kruiper Exp $
+ *   $Id: resman.inc.php,v 1.9 2005/09/20 22:33:46 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -59,8 +59,8 @@ while ($rowres = $db->getrow($querygetres)){
 	$rowres['res_data_new'] = htmlspecialchars($rowres['res_data']);
 	$resman_content .= '
   <tr>
-    <td nowrap><p class="para" title="'.$rowres['res_name_new'].'" onMouseOver="toolTip(\''.prep_tooltip($rowres['res_name']).'\')" onMouseOut="toolTip()">'.htmlspecialchars(linewrap($rowres['res_name'], 20)).'</p></td>
-    <td nowrap><p class="para" title="'.$rowres['res_data_new'].'" onMouseOver="toolTip(\''.prep_tooltip($rowres['res_data']).'\')" onMouseOut="toolTip()">'.htmlspecialchars(linewrap($rowres['res_data'], 30)).'</p></td>
+    <td nowrap><p class="para" title="'.$rowres['res_name_new'].'">'.htmlspecialchars(linewrap($rowres['res_name'], 20)).'</p></td>
+    <td nowrap><p class="para" title="'.$rowres['res_data_new'].'">'.htmlspecialchars(linewrap($rowres['res_data'], 30)).'</p></td>
     <td nowrap><p class="para">'.$rowres['res_type'].'</p></td>
     <td nowrap><p class="para"><a href="admin.php?page=resources&resources=resman&edit='.$rowres['res_id'].'">{TEXT_EDIT}</a></p></td>
     <td nowrap><p class="para"><a href="admin.php?page=resources&resources=resman&delete='.$rowres['res_id'].'">{TEXT_DELETE}</a></p></td>

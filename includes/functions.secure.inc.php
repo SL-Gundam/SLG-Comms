@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.4 2005/07/01 15:34:55 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.5 2005/09/20 22:33:47 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -53,6 +53,7 @@ function retrieve_forumsettings(&$tssettings, $action_login=false){
 			processincomingdata($_POST);
 		}
 		switch ($tssettings['Forum type']){
+/* START - IPB131 */
 			case 'ipb131':
 				include($tssettings['Forum relative path'].'conf_global.php');
 
@@ -96,6 +97,7 @@ WHERE
 limit 0,1';
 				}
 				break;
+/* START - IPB204 */
 			case 'ipb204':
 				include($tssettings['Forum relative path'].'conf_global.php');
 
@@ -139,11 +141,12 @@ WHERE
   MEM.`id` = CON.`converge_id` AND
   MEM.`name` = "'.$_POST['fusername'].'" AND
   CON.`converge_pass_hash` = md5(CONCAT(md5(CON.`converge_pass_salt`), "'.md5($_POST['fpasswd']).'")) AND
-  ((MEM.`mgroup` = '.$tssettings['Forum group'].') OR 
-  ('.$tssettings['Forum group'].' IN (MEM.`mgroup_others`)))
+  ((TRIM(BOTH "," FROM MEM.`mgroup`) = '.$tssettings['Forum group'].') OR 
+  ('.$tssettings['Forum group'].' IN (TRIM(BOTH "," FROM MEM.`mgroup_others`))))
 limit 0,1';
 				}
 				break;
+/* START - PHPBB2015 */
 			case 'phpbb2015':
 				include($tssettings['Forum relative path'].'config.php');
 
@@ -191,6 +194,7 @@ WHERE
   MEM.`user_password` = "'.md5($_POST['fpasswd']).'"';
 				}
 				break;
+/* START - SMF103 */
 			case 'smf103':
 				include($tssettings['Forum relative path'].'Settings.php');
 
@@ -239,6 +243,7 @@ WHERE
 limit 0,1';
 				}
 				break;
+/* START - SMF110 */
 			case 'smf110':
 				include($tssettings['Forum relative path'].'Settings.php');
 
@@ -287,6 +292,7 @@ WHERE
 limit 0,1';
 				}
 				break;
+/* START - VB307 */
 			case 'vb307':
 				include($tssettings['Forum relative path'].'includes/config.php');
 

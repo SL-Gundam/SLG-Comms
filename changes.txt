@@ -1,3 +1,25 @@
+v2.1.8
+- Changed the Teamspeak server connection timeout from 1 second to 2 seconds.
+- Improved the layout of the Ventrilo server connection errors a tiny bit.
+- Added support for IPB2.1.
+- Added voicecodec and voiceformat info for ventrilo server.
+- Improved ventrilo server data parser.
+- Improved displayal of channel and clients detail information.
+- Fixed a problem with the strdecode function applied to the ventrilo server data.
+- Ventrilo Channel and Server comments are now displayed the same way Ventrilo client comments are displayed.
+- Improved the linewrap function.
+
+v2.1.8 template changes
+- Added the CSS class ".ventclient_phantom_row".
+- Added tooltip CSS class for table html tags used within the tooltips called: "table.tooltip".
+- Added a underline for hyperlinks within the CSS class ".para".
+- Added a mozilla browser fix to prevent overflow of the div overlay in "tpl_header.html".
+- Added a hide tooltip timer of 1 second in "tpl_header.html" to avoid flashing of the tooltip when hovering from text to table cell but still within the same tooltip.
+- Removed some obsolete javascript code for the refresh page timer from "tpl_header.html"
+- Removed duplicate align tag within the html img tag used for displaying the refresh page timer image.
+- Added the neccasary voicecodec and voiceformat table rows to "tpl_ventrilo.html".
+- Added the neccasary voicecodec and voiceformat language variables to "lng_index_sub.php" + adjusted some texts in the same file.
+
 v2.1.7
 - Fixed problem with html tag chars in server / resource names.
 - Added style tags for hiding the tooltips incase you've got an older version of the stylesheet.
