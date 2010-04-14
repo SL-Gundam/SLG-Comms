@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.9 2005/11/18 13:38:29 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.10 2005/12/25 20:18:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -48,7 +48,7 @@ function md5_hmac($data, $key)
 }
 
 function forum_existence_check($forumtype, $forumpath){
-	return((($forumtype === 'ipb131' || $forumtype === 'ipb204') && file_exists($forumpath.'conf_global.php')) || ($forumtype === 'phpbb2015' && file_exists($forumpath.'config.php')) || (($forumtype === 'smf103' || $forumtype === 'smf110') && file_exists($forumpath.'Settings.php')) || ($forumtype === 'vb307' && file_exists($forumpath.'includes/config.php')));
+	return((($forumtype === 'ipb131' || $forumtype === 'ipb204') && file_exists($forumpath.'conf_global.php')) || ($forumtype === 'phpbb2015' && file_exists($forumpath.'config.php')) || (($forumtype === 'smf103' || $forumtype === 'smf110') && file_exists($forumpath.'Settings.php')) || (($forumtype === 'vb307' || $forumtype === 'vb350') && file_exists($forumpath.'includes/config.php')));
 }
 
 function retrieve_forumsettings(&$tssettings, $action_login=false){
@@ -58,6 +58,10 @@ function retrieve_forumsettings(&$tssettings, $action_login=false){
 /* START - IPB131 */
 			case 'ipb131':
 				include($tssettings['Forum relative path'].'conf_global.php');
+
+				if (!isset($INFO['sql_tbl_prefix'], $INFO['sql_database'], $INFO['sql_host'], $INFO['sql_port'], $INFO['sql_user'], $INFO['sql_pass'])){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
 
 				$table['groups'] = $INFO['sql_tbl_prefix'].'groups';
 
@@ -102,6 +106,10 @@ limit 0,1';
 /* START - IPB204 */
 			case 'ipb204':
 				include($tssettings['Forum relative path'].'conf_global.php');
+
+				if (!isset($INFO['sql_tbl_prefix'], $INFO['sql_database'], $INFO['sql_host'], $INFO['sql_user'], $INFO['sql_pass'])){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
 
 				$table['groups'] = $INFO['sql_tbl_prefix'].'groups';
 
@@ -152,6 +160,10 @@ limit 0,1';
 			case 'phpbb2015':
 				include($tssettings['Forum relative path'].'config.php');
 
+				if (!isset($table_prefix, $dbhost, $dbname, $dbuser, $dbpasswd)){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
+
 				$table['groups'] = $table_prefix.'groups';
 
 				if ($dbname != $tssettings['db_name']){
@@ -199,6 +211,10 @@ WHERE
 /* START - SMF103 */
 			case 'smf103':
 				include($tssettings['Forum relative path'].'Settings.php');
+
+				if (!isset($db_prefix, $db_server, $db_name, $db_user, $db_passwd)){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
 
 				$table['groups'] = $db_prefix.'membergroups';
 
@@ -249,6 +265,10 @@ limit 0,1';
 			case 'smf110':
 				include($tssettings['Forum relative path'].'Settings.php');
 
+				if (!isset($db_prefix, $db_server, $db_name, $db_user, $db_passwd)){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
+
 				$table['groups'] = $db_prefix.'membergroups';
 
 				if ($db_name != $tssettings['db_name']){
@@ -298,6 +318,10 @@ limit 0,1';
 			case 'vb307':
 				include($tssettings['Forum relative path'].'includes/config.php');
 
+				if (!isset($tableprefix, $servername, $dbname, $dbusername, $dbpassword)){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
+
 				$table['groups'] = $tableprefix.'usergroup';
 
 				if ($dbname != $tssettings['db_name']){
@@ -324,6 +348,58 @@ ORDER BY
 
 				if ($action_login){
 					$table['members'] = $tableprefix.'user';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  `userid` AS userid,
+  `username` AS username,
+  `username` AS realname,
+  `usergroupid` AS groupid,
+  `membergroupids` AS additionalgroups
+FROM
+  `'.$table['members'].'` 
+WHERE
+  `username` = "'.$db->escape_string($_POST['fusername']).'" AND
+  `password` = md5(CONCAT("'.md5($_POST['fpasswd']).'", `salt`)) AND
+  ((usergroupid = '.$tssettings['Forum group'].') OR 
+  ('.$tssettings['Forum group'].' IN (membergroupids)))
+limit 0,1';
+				}
+				break;
+/* START - VB350 */
+			case 'vb350':
+				include($tssettings['Forum relative path'].'includes/config.php');
+
+				if (!isset($config['Database']['tableprefix'], $config['MasterServer']['servername'], $config['MasterServer']['port'], $config['Database']['dbname'], $config['MasterServer']['username'], $config['MasterServer']['password'])){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
+
+				$table['groups'] = $config['Database']['tableprefix'].'usergroup';
+
+				if ($config['Database']['dbname'] != $tssettings['db_name']){
+					$forumsettings['otherdatabase'] = true;
+					$forumsettings['alt_db_host'] = $config['MasterServer']['servername'].':'.$config['MasterServer']['port'];
+					$forumsettings['alt_db_name'] = $config['Database']['dbname'];
+					$forumsettings['alt_db_user'] = $config['MasterServer']['username'];
+					$forumsettings['alt_db_passwd'] = $config['MasterServer']['password'];
+				}
+				else{
+					$forumsettings['otherdatabase'] = false;
+				}
+
+				$forumsettings['groups_sql'] = '
+SELECT
+  usergroupid AS groupid,
+  usertitle AS groupname
+FROM
+  '.$table['groups'].'
+WHERE
+  usertitle != ""
+ORDER BY
+  groupname';
+
+				if ($action_login){
+					$table['members'] = $config['Database']['tableprefix'].'user';
 
 					$forumsettings['authchecksql'] = '
 SELECT

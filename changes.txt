@@ -1,3 +1,11 @@
+v2.2.3
+- New language item {TEXT_INVALID_CONF_FILE}
+- Added extra checks whether needed variables for forum support are available.
+- Added support for vBulletin 3.5.0
+- Fixed a bug in the db mysqli class (mysql41.inc.php) when a port is given to connect to.
+- Fixed a problem with a getting a blank html page when MySQL extension isn't loaded. An appropriate error will be displayed now.
+- Fixed a fatal error message when notusing the apache webserver.
+
 v2.2.2
 - Fixed a glitch in install.php when selecting the wrong installation type when you're upgrading an existing installation of SLG Comms.
 - Added a extra check whether the queryport for TeamSpeak is actually a port number.

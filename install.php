@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.52 2005/11/06 23:09:58 SC Kruiper Exp $
+ *   $Id: install.php,v 1.53 2005/12/25 20:18:11 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 define("IN_SLG", 10);
-$new_version = 'v2.2.2';
+$new_version = 'v2.2.3';
 include('includes/config.inc.php');
 
 // if step doesn't exist step must be 1
@@ -365,6 +365,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 <option value="smf103">SMF (Simple Machines Forum) 1.0.3-1.0.5</option>
 <option value="smf110">SMF (Simple Machines Forum) 1.1 rc1</option>
 <option value="vb307">vBulletin v3.0.7</option>
+<option value="vb350">vBulletin v3.5.0</option>
 </select>';
 				break;
 			case 'GZIP Compression': $configrows .= '<input id="'.$row['variable'].'_enable" name="variable['.$row['variable'].']" type="radio" value="1"><label for="'.$row['variable'].'_enable">{TEXT_ENABLE}</label>

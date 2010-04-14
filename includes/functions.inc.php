@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.26 2005/11/18 13:38:29 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.27 2005/12/25 20:18:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -175,8 +175,8 @@ function check_ip_port($ip, $port, $queryport=NULL){
 		$ip = gethostbyname($ip);
 		$testip = ip2long($ip);
 	}
-	$ipv4_parts = count(explode('.', $ip));
-	return( ( $port > 0 && $port < 65535 && is_numeric($port) ) && ( $testip !== -1 && $testip !== FALSE && $ipv4_parts === 4 ) && ( is_null($queryport) || ( $queryport > 0 && $queryport < 65535 && is_numeric($queryport) ) ) );
+	$ipv4_parts = substr_count($ip, '.');
+	return( ( $port > 0 && $port < 65535 && is_numeric($port) ) && ( $testip !== -1 && $testip !== FALSE && $ipv4_parts === 3 ) && ( is_null($queryport) || ( $queryport > 0 && $queryport < 65535 && is_numeric($queryport) ) ) );
 }
 
 if(!function_exists('file_get_contents')){

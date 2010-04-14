@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.14 2005/10/21 14:29:27 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.15 2005/12/25 20:18:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -63,7 +63,7 @@ if (checkfilelock('admin.php')){
 					$_SESSION['user_id'] = $authrow['userid'];
 					$_SESSION['username'] = $authrow['username'];
 					$_SESSION['realname'] = $authrow['realname'];
-					if ($tssettings['Forum type'] === 'smf103' || $tssettings['Forum type'] === 'ipb204' || $tssettings['Forum type'] === 'vb307' || $tssettings['Forum type'] === 'smf110'){
+					if ($tssettings['Forum type'] === 'smf103' || $tssettings['Forum type'] === 'ipb204' || $tssettings['Forum type'] === 'vb307' || $tssettings['Forum type'] === 'smf110' || $tssettings['Forum type'] === 'vb350'){
 						$group_id = trim($authrow['groupid'], ',');
 						if (!empty($authrow['additionalgroups'])){
 							$group_id .= ','.trim($authrow['additionalgroups'], ',');

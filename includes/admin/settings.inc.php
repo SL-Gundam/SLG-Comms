@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: settings.inc.php,v 1.13 2005/10/21 14:29:26 SC Kruiper Exp $
+ *   $Id: settings.inc.php,v 1.14 2005/12/25 20:18:11 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -28,7 +28,8 @@ if (!defined("IN_SLG") || !checkaccess($tssettings['Forum group'])){
 // this file manages the settings pages
 if (isset($_POST['updsetting'])) {
 	if (forum_existence_check($_POST['variable']['Forum type'], $_POST['variable']['Forum relative path'])){
-		$new_forum_ok = true;
+		$_POST['variable'] += array('db_name' => $tssettings['db_name']);
+		$tmp_forumsettings = retrieve_forumsettings($_POST['variable']);
 	}
 	else{
 		early_error('{TEXT_FORUM_NOT_FOUND_ERROR}');
@@ -47,7 +48,7 @@ WHERE
 SET
   `cachehits` = 0');
 				}
-				if ($variable === 'Ventrilo status program' && !file_exists($_POST['variable']['Ventrilo status program'])){
+				elseif ($variable === 'Ventrilo status program' && !file_exists($_POST['variable']['Ventrilo status program'])){
 					$admin->displaymessage('{TEXT_VENTRILO_STAT_PROG_CHECK}');
 				}
 				$admin->displaymessage('{TEXT_SETTINGUPDATE_SUCCESS;'.$variable.';}');
@@ -67,7 +68,13 @@ while ($row = $db->getrow($getconfig)) {
 }
 $db->freeresult('getconfig',$getconfig);
 
-$forumsettings = retrieve_forumsettings($tssettings);
+if (isset($tmp_forumsettings)){
+	$forumsettings = $tmp_forumsettings;
+	unset($tmp_forumsettings);
+}
+else{
+	$forumsettings = retrieve_forumsettings($tssettings);
+}
 
 $getservers = $db->execquery('getservers','
 SELECT res_id, res_name
@@ -159,6 +166,7 @@ foreach ($tssettings as $row['variable'] => $row['value']){
 <option value="smf103"'.(($row['value'] === 'smf103') ? ' selected' : '').'>SMF (Simple Machines Forum) 1.0.3-1.0.5</option>
 <option value="smf110"'.(($row['value'] === 'smf110') ? ' selected' : '').'>SMF (Simple Machines Forum) 1.1 rc1</option>
 <option value="vb307"'.(($row['value'] === 'vb307') ? ' selected' : '').'>vBulletin v3.0.7</option>
+<option value="vb350"'.(($row['value'] === 'vb350') ? ' selected' : '').'>vBulletin v3.5.0</option>
 </select>';
 			break;
 		case 'GZIP Compression': $configrows .= '<input id="'.$row['variable'].'_enable" name="variable['.$row['variable'].']" type="radio" value="1"'.(($row['value']) ? ' checked' : '').'><label for="'.$row['variable'].'_enable">{TEXT_ENABLE}</label>

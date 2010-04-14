@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: mysql.inc.php,v 1.14 2005/10/21 14:29:27 SC Kruiper Exp $
+ *   $Id: mysql.inc.php,v 1.15 2005/12/25 20:18:11 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -34,6 +34,10 @@ class db {
    
 	function __construct(){
 		$this->sqltime = new timecount;
+
+		if (!extension_loaded('mysql')){
+			early_error('{TEXT_MYSQLEXTNOTLOAD}');
+		}
 	}
 
 	function db(){

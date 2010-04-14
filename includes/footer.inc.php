@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: footer.inc.php,v 1.18 2005/10/21 14:29:26 SC Kruiper Exp $
+ *   $Id: footer.inc.php,v 1.19 2005/12/25 20:18:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -34,7 +34,7 @@ if (isset($db)){
 }
 
 //it seems php 5.0.0 or higher has a bug with windows versions of apache 1.3 and the function apache_get_modules(). It says the function exists but hangs the connection when the function is called. This behaviour has only been tested with Apache for windows. It probably works fine for Linux / Unix but i'm not sure.
-$gzipheaders = apache_response_headers();
+$gzipheaders = ((function_exists('apache_response_headers')) ? apache_response_headers() : array() );
 if (function_exists('apache_get_modules') && (version_compare(phpversion(), '5.0.0', '<'))){
 	$gzipmod = apache_get_modules();
 }

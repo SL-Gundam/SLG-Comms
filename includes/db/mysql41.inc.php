@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: mysql41.inc.php,v 1.14 2005/10/21 14:29:27 SC Kruiper Exp $
+ *   $Id: mysql41.inc.php,v 1.15 2005/12/25 20:18:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -47,7 +47,9 @@ class db {
 	function connect($serverid, $db_server, $db_user, $db_passwd, $db_name){
 		$this->sqltime->starttimecount();
 		
-		$this->sqlconnectid = @mysqli_connect($db_server, $db_user, $db_passwd, $db_name) OR early_error('{TEXT_DB_CONNECT_ERROR;'.$serverid.';}', '{TEXT_DB_CONNECT_FAILED}', $this->getconnecterror());
+		$db_server = explode(':', $db_server, 2);
+		
+		$this->sqlconnectid = @mysqli_connect($db_server[0], $db_user, $db_passwd, $db_name, ((isset($db_server[1])) ? $db_server[1] : NULL )) OR early_error('{TEXT_DB_CONNECT_ERROR;'.$serverid.';}', '{TEXT_DB_CONNECT_FAILED}', $this->getconnecterror());
 
 		$this->sqltime->endtimecount();
 		

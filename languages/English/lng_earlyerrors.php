@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_earlyerrors.php,v 1.15 2005/10/24 14:08:13 SC Kruiper Exp $
+ *   $Id: lng_earlyerrors.php,v 1.16 2005/12/25 20:18:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -50,10 +50,12 @@ Please go back and fill in the correct information.',
 '{TEXT_NOVENTRILO}' => 'You havn\'t defined a Ventrilo status program yet. Because of that support for ventrilo is not yet available.',
 '{TEXT_OLDVERSION_UNAVAILABLE}' => 'SLG Comms tried to perform a update of an earlier version of SLG Comms but couldn\'t find the old version number. It\'s highly probable that you do not have a earlier version installed yet.',
 '{TEXT_NOTTEAMSPEAK}' => 'Corrupt and / or invalid TeamSpeak server data encountered.',
+'{TEXT_MYSQLEXTNOTLOAD}' => 'MySQL extension not loaded. Please make sure your PHP has the MySQL extension loaded.',
 '{TEXT_MYSQLIEXTNOTLOAD}' => 'MySQLi extension not loaded. Please make sure your PHP has the MySQLi extension loaded.',
 '{TEXT_NOGROUP}' => 'It seems the forum you selected doesn\'t have any groups. Please create one containing the user accounts which are allowed to access the administrator section of SLG Comms.',
 '{TEXT_TSINVALIDID_ERROR}' => 'This error means that you entered a port number which doesn\'t exist for this TeamSpeak server.',
-'{TEXT_RETURNED_ERROR}' => 'RETURNED ERROR'
+'{TEXT_RETURNED_ERROR}' => 'RETURNED ERROR',
+'{TEXT_INVALID_CONF_FILE}' => 'Invalid forum configuration file.'
 );
 
 $this->text_adv += array(

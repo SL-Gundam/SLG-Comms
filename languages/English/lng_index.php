@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index.php,v 1.8 2005/10/21 14:29:28 SC Kruiper Exp $
+ *   $Id: lng_index.php,v 1.9 2005/12/25 20:18:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -31,7 +31,7 @@ $this->text += array(
 '{TEXT_CUSTOM_SERVER}' => 'Custom server',
 '{TEXT_IP_PORT}' => 'IP:PORT',
 '{TEXT_SUBMIT_SERVERFORM}' => 'Submit',
-'{TEXT_IP_PORT_COMB_ERROR}' => 'You havn\'t filled in a correct ip port combination.',
+'{TEXT_IP_PORT_COMB_ERROR}' => 'The filled in ip port combination is invalid.',
 '{TEXT_CUSTOM}' => 'Custom server'
 );
 
