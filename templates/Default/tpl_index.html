@@ -1,0 +1,40 @@
+{SELECT_SERVER_BEGIN}
+<form action="index.php" method="POST" name="selectipform" id="selectipform">
+	<table class="addniceborder" align="center">
+		<tr>
+			<td class="tdpadding"><table width="100%">
+					<tr>
+						<th width="30%" class="para" nowrap><p align="left">{TEXT_SERVER}:</p></th>
+						<td width="70%"><p class="para">
+								<select name="ipbyname" class="textline">
+									{IPBYNAME_OPTIONS}
+								</select>
+							</p></td>
+					</tr>
+					{CUSTOM_SERVER_BEGIN}
+					<tr>
+						<th class="para" nowrap><p align="left">{TEXT_CUSTOM_SERVER_TYPE}:</p></th>
+						<td><p class="para">
+								<select name="type" class="textline">
+									{TYPE_OPTIONS}
+								</select>
+							</p></td>
+					</tr>
+					<tr>
+						<th class="para" nowrap><p align="left">{TEXT_CUSTOM_SERVER} [<a href="javascript:MM_popupMsg('{TEXT_HELPTEXT_POPUP}')" onMouseOver="MM_displayStatusMsg('{TEXT_SHOW_HELPTEXT_IP_PORT}');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg('');return document.MM_returnValue">{TEXT_IP_PORT}</a>]:</p></th>
+						<td><p class="para">
+								<input name="ipport" type="text" id="ipport" value="{IPPORT_VALUE}" size="20" maxlength="21" class="textline">
+							</p></td>
+					</tr>
+					{CUSTOM_SERVER_END}
+					<tr>
+						<td colspan="2"><p align="center" class="para">
+								<input name="sendipport" type="submit" id="sendipport" value="{TEXT_SUBMIT_SERVERFORM}">
+							</p></td>
+					</tr>
+				</table></td>
+		</tr>
+	</table>
+</form>
+<p></p>
+{SELECT_SERVER_END} {ERROR}

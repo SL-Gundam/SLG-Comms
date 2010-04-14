@@ -1,0 +1,37 @@
+<table width="0" border="0" align="center">
+	<tr>
+		<td nowrap align="center">{MENU;HORIZONTAL;}</td>
+	</tr>
+</table>
+<p></p>
+{ERROR}
+<table class="addniceborder" align="center">
+	<tr>
+		<td class="tdpadding"><p class="para" align="justify">{TEXT_RESCACHE_NOTE}</p></td>
+	</tr>
+</table>
+<p></p>
+<form name="form_cachesettings" method="post" action="admin.php?page=resources&resources=rescache">
+	<table class="addniceborder" align="center">
+		<caption>
+		{TEXT_CACHE_RESOURCES}
+		</caption>
+		<tr>
+			<td class="tdpadding"><table width="100%">
+					<tr>
+						<th nowrap scope="col">{TEXT_RESOURCE_NAME}</th>
+						<th nowrap scope="col">{TEXT_RESOURCE_CACHEHITS}</th>
+						<th nowrap scope="col">{TEXT_RESOURCE_LASTUPDATE}</th>
+						<th scope="col"></th>
+					</tr>
+					{RESCACHE_CONTENT}
+					<tr>
+						<td colspan="4" nowrap><p class="para" align="center">
+								<input name="updsetting" type="submit" id="updsetting" value="{TEXT_UPDATE_CACHESETTINGS}">
+							</p></td>
+					</tr>
+				</table></td>
+		</tr>
+	</table>
+</form>
+<p></p>

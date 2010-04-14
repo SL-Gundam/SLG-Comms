@@ -1,0 +1,29 @@
+{ERROR} {REQUIREMENTS_BEGIN}
+<table align="center" class="addniceborder">
+	<caption>
+	{TEXT_REQUIREMENTS}
+	</caption>
+	<tr>
+		<td class="tdpadding"><p class="para" align="justify">{SHOW_REQUIREMENTS}</p></td>
+	</tr>
+</table>
+<p></p>
+{REQUIREMENTS_END}
+<form name="settingform" method="post" action="install.php?step={NEXTSTEP}">
+	<table width="100%" class="addniceborder" align="center">
+		<caption>
+		{TEXT_INSTALLATIONSTEP}
+		</caption>
+		<tr>
+			<td class="tdpadding"><table width="100%">
+					{SETTINGS}
+					<tr>
+						<td colspan="2" nowrap><p class="para" align="center"><br />
+								<input name="updsetting" type="submit" id="updsetting" value="{TEXT_NEXT_STEP}">
+							</p></td>
+					</tr>
+				</table></td>
+		</tr>
+	</table>
+</form>
+<p></p>

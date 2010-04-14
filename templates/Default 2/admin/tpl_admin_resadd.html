@@ -1,0 +1,48 @@
+<table border="0" align="center">
+	<tr>
+		<td nowrap valign="top"><table width="100" border="0" class="menu">
+				<tr>
+					<td nowrap>{MENU;VERTICAL;}</td>
+				</tr>
+			</table></td>
+		<td nowrap>{ERROR}
+			<form action="admin.php?page=resources&resources={FORM_ACTION_TYPE}" method="post" name="addres" id="addres">
+				<table width="100%" align="center" class="addniceborder">
+					<caption>
+					{ACTION_TYPE}
+					</caption>
+					<tr>
+						<td class="tdpadding"><table width="100%">
+								<tr>
+									<th width="35%" nowrap><p align="left" class="para">{TEXT_RESOURCE_NAME}:</p></th>
+									<td width="65%"><p class="para">
+											<input name="resname" type="text" id="resname" size="30" maxlength="50"  class="textline" value="{VALUE_RESNAME}">
+										</p></td>
+								</tr>
+								<tr>
+									<th nowrap><p align="left" class="para">{TEXT_RESOURCE_DATA} (<a href="javascript:MM_popupMsg('{TEXT_HELPTEXT_POPUP}')" onMouseOver="MM_displayStatusMsg('{TEXT_SHOW_HELP_FIELD}: {TEXT_RESOURCE_DATA}');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg('');return document.MM_returnValue">{TEXT_HELP}</a>):</p></th>
+									<td><p class="para">
+											<input name="resdata" type="text" id="resdata" size="30" maxlength="100"  class="textline" value="{VALUE_RESDATA}">
+										</p></td>
+								</tr>
+								<tr>
+									<th nowrap><p align="left" class="para">{TEXT_RESOURCE_TYPE}:</p>
+									<td><p class="para">
+											<select name="restype" id="restype" class="textline">
+												{TYPE_OPTIONS}
+											</select>
+										</p></td>
+								</tr>
+								<tr>
+									<td colspan="2"><p class="para" align="center">
+											<input name="{FORM_SUBMIT_TYPE}" type="submit" id="baddres" value="{SUBMIT_TYPE}">
+										</p></td>
+								</tr>
+							</table>
+					</tr>
+				</table>
+			</form>
+			<p></p></td>
+	</tr>
+</table>
+<p></p>
