@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_settings.php,v 1.2 2005/06/30 19:40:05 SC Kruiper Exp $
+ *   $Id: lng_admin_settings.php,v 1.3 2005/09/10 14:39:30 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -32,7 +32,7 @@ $this->text += array(
 '{TEXT_SETTINGS_NOTE_L3}' => 'Change "Forum group".',
 '{TEXT_SETTINGS_NOTE_L4}' => 'Logout and login again.',
 '{TEXT_SETTINGS_NOTE_P2}' => 'Note: Make sure you do this in one login session (Meaning don\'t logout under any surcumstance except for the last step.). You might not be able to login again if you do logout. The only way to correct the situation if you can\'t login again is to do the following.',
-'{TEXT_SETTINGS_NOTE_P3}' => 'Start install.php. It\'s possible you have to upload install.php again if you deleted it. Fill in all the information correctly just like it was a new installation. In "Installation step 2" it will ask for the database information. Just fill everything and select the following as "Installation type": "Rescue attempt". You should be back up and running soon enough.',
+'{TEXT_SETTINGS_NOTE_P3}' => 'Start install.php. It\'s possible you have to upload install.php again if you deleted it.  Select the following as "Installation type": "Rescue attempt". Fill everything with the correct information when asked for it. You should be back up and running soon enough.',
 '{TEXT_UPDATE_SETTINGS}' => 'Update settings'
 );
 

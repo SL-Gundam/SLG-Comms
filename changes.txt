@@ -1,3 +1,19 @@
+v2.1.6
+- Fixed notice error displayed in custom server teamspeak requests
+- Fixed problem with the third part of the custom ip string which wasn't passed on properly
+- Improved code for the processing of data retrieved from ventrilo servers
+- Fixed a typo in the english language file "lng_common.php"
+- Changed the way channel and client information is displayed. Should be more browser friendly.
+- Fixed some grammar flaws in the language files.
+
+v2.1.6 template changes
+- Changed to max length value from 21 to 50 of the Custom server ip field in the form used at the top of index page.
+- Changed the track color of the scroll bar from light grey to white to match the backgound color of the website.
+- Added new item to the Stylesheet: div.tooltip
+- Removed and added javascripts to the tpl_header.html template file.
+- Added an onload tag to the html body tag in tpl_header.html for the new javascripts.
+- Added hidden div layer and iframe for the new javascripts in tpl_header.html.
+
 v2.1.5
 - Improved error reporting for ventrilo servers a tiny bit.
 - Fixed Subchannels problem with subchannels within subchannels

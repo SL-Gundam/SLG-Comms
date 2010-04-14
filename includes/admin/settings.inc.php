@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: settings.inc.php,v 1.9 2005/07/30 00:10:43 SC Kruiper Exp $
+ *   $Id: settings.inc.php,v 1.10 2005/09/10 14:39:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -96,11 +96,11 @@ else{
 
 $configrows = NULL;
 foreach ($configlist as $row){
-	$row['helptext_normal'] = '{TEXT_HELP_'.strtoupper(removechars($row['variable'], ' ')).'_NORMAL}';
-	$row['helptext_popup'] = '{TEXT_HELP_'.strtoupper(removechars($row['variable'], ' ')).'_POPUP}';
+		$row['helptext'] = '{TEXT_HELP_'.strtoupper(removechars($row['variable'], ' ')).'}';
+		$row['text'] = '{TEXT_'.strtoupper(removechars($row['variable'], ' ')).'}';
 	$configrows .= '
   <tr>
-    <td width="40%" nowrap><p class="para" title="'.$row['helptext_normal'].'"><a href="javascript:MM_popupMsg(\''.$row['helptext_popup'].'\')" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELP_FIELD}: '.$row['variable'].'\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">{TEXT_'.strtoupper(removechars($row['variable'], ' ')).'}</a>:</p></td>
+    <td width="40%" nowrap onMouseOver="toolTip(\''.$row['helptext'].'\')" onMouseOut="toolTip()"><p class="para">'.$row['text'].':</p></td>
     <td width="60%" nowrap><p class="para">';
 	switch ($row['variable']){
 		case 'Cache hits': $configrows .= '<input id="'.htmlspecialchars($row['variable']).'_enable" name="variable['.htmlspecialchars($row['variable']).']" type="radio" value="1"'.(($row['value']) ? ' checked' : '').'><label for="'.htmlspecialchars($row['variable']).'_enable">{TEXT_ENABLE}</label>

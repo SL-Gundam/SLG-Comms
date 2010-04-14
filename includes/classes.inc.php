@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: classes.inc.php,v 1.18 2005/07/30 00:10:43 SC Kruiper Exp $
+ *   $Id: classes.inc.php,v 1.19 2005/09/10 14:39:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -48,7 +48,7 @@ class template{
 	var $template = NULL;
 	var $text = array();
 	var $text_adv = array();
-	var $popup = array();
+	var $tooltips = array();
 	var $text_search = array('{ERROR}' => NULL);
 	var $display_search = array();
 	var $display_replace = array();
@@ -58,11 +58,6 @@ class template{
 			function file_get_contents($filename){
 				$file = file($filename);
 				return(implode('', $file));
-
-		/*		$handle = fopen($filename, "r");
-				$contents = fread($handle, filesize($filename));
-				fclose($handle);
-				return($contents);*/
 			}
 		}
 
@@ -207,17 +202,13 @@ Query: '.wordwrap($sql, 100).'
 			$this->text_adv = array();
 		}
 
-		if (!empty($this->popup)){
-			foreach ($this->popup as $key => $value){
-				$key = rtrim($key, '}');
-				$value = htmlentities(wordwrap($value, 50, "\n"));
-				$popup_keys[] = $key.'_POPUP}';
-				$popups[] = convert_jspoptext($value);
-				$popup_keys[] = $key.'_NORMAL}';
-				$popups[] = $value;
+		if (!empty($this->tooltips)){
+			foreach ($this->tooltips as $key => $value){
+				$tooltip_keys[] = $key;
+				$tooltips[] = prep_tooltip($value);
 			}
-			$this->template = str_replace($popup_keys, $popups, $this->template);
-			$this->popup = array();
+			$this->template = str_replace($tooltip_keys, $tooltips, $this->template);
+			$this->tooltips = array();
 		}
 
 		foreach ($this->text as $key => $value){

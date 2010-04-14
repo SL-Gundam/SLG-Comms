@@ -8,61 +8,260 @@
 <meta http-equiv="Content-Type" content="text/html; charset={CHARSET}">
 <link href="templates/Default/main.css" rel="stylesheet" type="text/css">
 <link rel="Copyright" href="Powered by SLG Comms © 2005 - http://slg.sourceforge.net/">
+
 <script language="JavaScript" type="text/JavaScript">
 <!--
-function MM_popupMsg(msg) {
-  alert(msg);
-}
-function MM_displayStatusMsg(msgStr) {
-  status=msgStr;
-  document.MM_returnValue = true;
-}
 {REFRESHSCRIPT_BEGIN}
+/* BEGIN page refresh time javascript - Code copied from Emule 0.46c web interface template. */
 var timeoutID;
-var timeout = {REFRESH_SECS}000; 
+var timeout = {REFRESH_SECS}000;
 
 function RefreshPage()
 {
-    location.href = "{REFRESH_URI}";
+	location.href = "{REFRESH_URI}";
 }
 
 function ToggleTimer()
 {
-    if (timeoutID)
-    {
-        clearTimeout(timeoutID);
-        timeoutID = null;
-        document.images['ImgToggleTimer'].src = 'images/l_timer_off.gif';
-    }
-    else
-    {
-        SetTimer();
-        if (timeoutID)
-	        document.images['ImgToggleTimer'].src = 'images/l_timer.gif';
+	if (timeoutID)
+	{
+		clearTimeout(timeoutID);
+		timeoutID = null;
+		document.images['ImgToggleTimer'].src = 'images/l_timer_off.gif';
+	}
+	else
+	{
+		SetTimer();
+		if (timeoutID)
+			document.images['ImgToggleTimer'].src = 'images/l_timer.gif';
 		else
-	        document.images['ImgToggleTimer'].src = 'images/l_timer_off.gif';
-    }
+			document.images['ImgToggleTimer'].src = 'images/l_timer_off.gif';
+	}
 }
 
 function SetTimer()
 {
-    if (timeout != 0)
-        timeoutID = setTimeout("RefreshPage()", timeout);
+	if (timeout != 0)
+		timeoutID = setTimeout("RefreshPage()", timeout);
 }
 
 if (document.all||document.getElementById)
-    SetTimer();
+	SetTimer();
 else
-    window.onload=SetTimer;
+	window.onload=SetTimer;
+/* END page refresh time javascript - Code copied from Emule 0.46c web interface template. */
 {REFRESHSCRIPT_END}
+
+/* BEGIN tooltips javascript */
+var ns4 = document.layers;
+var ns6 = document.getElementById && !document.all;
+
+userAgent = navigator.userAgent;
+if (userAgent.indexOf('MSIE') != -1 && userAgent.indexOf('Opera') == -1) var ie4 = document.all;
+
+offsetX = 10;
+offsetY = 10;
+var toolTipmain="";
+var toolTipIEfix="";
+var reswidth=0;
+var resheight=0;
+var width="";
+var height="";
+var scrollX=0;
+var scrollY=0;
+function initToolTips()
+{
+//	if(ns4||ns6||ie4)
+	{
+/*		if(ns4) toolTipSTYLE = document.toolTipLayer;
+		else if(ns6) toolTipSTYLE = document.getElementById("toolTipLayer").style;
+		else if(ie4) toolTipSTYLE = document.all.toolTipLayer.style;*/
+
+//		toolTipSTYLE = document.getElementById("toolTipLayer").style;
+		toolTipmain = document.getElementById("toolTipLayer");
+		if (ie4) toolTipIEfix = document.getElementById("toolTipIEfix");
+
+		if(ns4) document.captureEvents(Event.MOUSEMOVE);
+		else
+		{
+			toolTipmain.style.visibility = "visible";
+			toolTipmain.style.display = "none";
+			if (ie4){
+				toolTipIEfix.style.visibility = "visible";
+				toolTipIEfix.style.display = "none";
+			}
+		}
+		document.onmousemove = moveToMouseLoc;
+
+		get_window_parameters();
+	}
+}
+function toolTip(msg, nwidth/*, nheight*/)
+{
+	if(toolTip.arguments.length < 1) // hide
+	{
+		reswidth=0;
+		resheight=0;
+/*		toolTipSTYLE.height="";*/
+		toolTipmain.style.width="";
+		if(ns4) toolTipmain.style.visibility = "hidden";
+		else{
+			toolTipmain.style.display = "none";
+			if (ie4) toolTipIEfix.style.display = "none";
+		}
+	}
+	else // show
+	{
+		toolTipmain.style.left = 0;
+		toolTipmain.style.top = 0;
+
+		var content = msg;
+		if(ns4)
+		{
+			toolTipmain.style.document.write(content);
+			toolTipmain.style.document.close();
+			toolTipmain.style.visibility = "visible";
+		}
+//		if(ns6)
+		else
+		{
+			toolTipmain.innerHTML = content;
+			toolTipmain.style.display='block'
+			if (ie4) toolTipIEfix.style.display='block'
+		}
+/*		if(ie4)
+		{
+			document.all("toolTipLayer").innerHTML=content;
+			toolTipSTYLE.display='block'
+		}*/
+
+		get_window_parameters();
+
+/*		if (nheight) toolTipSTYLE.height = nheight;*/
+
+		if (nwidth) nwidth = nwidth;
+		else nwidth = 400;
+
+		if (nwidth < toolTipmain.offsetWidth) nwidth = nwidth;
+		else nwidth = toolTipmain.offsetWidth;
+		
+		if (width < nwidth) nwidth="";
+
+		toolTipmain.style.width = nwidth;
+		if (ie4){
+			toolTipIEfix.style.width = toolTipmain.offsetWidth;
+			toolTipIEfix.style.height = toolTipmain.offsetHeight;
+		}
+
+		reswidth = toolTipmain.offsetWidth;
+		resheight = toolTipmain.offsetHeight;
+		
+		moveToMouseLoc();
+	}
+}
+function moveToMouseLoc(e)
+{
+	if(ns4||ns6)
+	{
+		x = e.pageX;
+		y = e.pageY;
+	}
+	else
+	{
+		x = event.x + document.body.scrollLeft;
+		y = event.y + document.body.scrollTop;
+	}
+
+	if(x + offsetX + reswidth > width + scrollX){
+		if (x - offsetX - reswidth - scrollX < 0){
+			if (y != 0){
+				x = 0 + scrollX;
+			}
+			else{
+				x = x + offsetX;
+			}
+		}
+		else{
+			x = x - offsetX - reswidth;
+		}
+	}
+	else{
+		x = x + offsetX;
+	}
+	if(y + offsetY + resheight > height + scrollY){
+		if (y - offsetY - resheight - scrollY < 0){
+			if (x != 0){
+				y = 0 + scrollY;
+			}
+			else{
+				y = y + offsetY;
+			}
+		}
+		else{
+			y = y - offsetY - resheight;
+		}
+	}
+	else{
+		y = y + offsetY;
+	}
+
+	toolTipmain.style.left = x;
+	toolTipmain.style.top = y;
+	if (ie4){
+		toolTipIEfix.style.left = x;
+		toolTipIEfix.style.top = y;
+	}
+	return true;
+}
+
+function get_window_parameters()
+{
+	width = 0;
+	if (window.innerWidth) width = window.innerWidth - 18;
+	else if (document.documentElement && document.documentElement.clientWidth) 
+		width = document.documentElement.clientWidth;
+	else if (document.body && document.body.clientWidth) 
+		width = document.body.clientWidth;
+	width = width - 1;
+
+	scrollX = 0;
+	if (typeof window.pageXOffset == "number") scrollX = window.pageXOffset;
+	else if (document.documentElement && document.documentElement.scrollLeft)
+		scrollX = document.documentElement.scrollLeft;
+	else if (document.body && document.body.scrollLeft) 
+		scrollX = document.body.scrollLeft; 
+	else if (window.scrollX) scrollX = window.scrollX;
+
+
+	height = 0;
+	if (window.innerHeight) height = window.innerHeight - 18;
+	else if (document.documentElement && document.documentElement.clientHeight) 
+		height = document.documentElement.clientHeight;
+	else if (document.body && document.body.clientHeight) 
+		height = document.body.clientHeight;
+	height = height - 1;
+
+	scrollY = 0;    
+	if (typeof window.pageYOffset == "number") scrollY = window.pageYOffset;
+	else if (document.documentElement && document.documentElement.scrollTop)
+		scrollY = document.documentElement.scrollTop;
+	else if (document.body && document.body.scrollTop) 
+		scrollY = document.body.scrollTop; 
+	else if (window.scrollY) scrollY = window.scrollY;
+}
+/* END tooltips javascript */
+
 //-->
 </script>
 </head>
-<body>
+<body onLoad="initToolTips()">
+<div id="toolTipLayer" class="tooltip"></div>
+<iframe id="toolTipIEfix" class="tooltip" frameborder=0 scrolling=no marginwidth=0 src="" marginheight=0></iframe>
 <table align="center" class="addniceborder">
 	<tr>
 		<td class="tdpadding" nowrap><p class="head1">{PAGE_TITLE}</p></td>
-		<td class="tdpadding" nowrap><p class="para" align="right">{LINK_ADMIN_INDEX} {REFRESHSCRIPT_BEGIN}<a title="{TEXT_SHOW_HELPTEXT_TIMER}" href="javascript:ToggleTimer();" onMouseOver="MM_displayStatusMsg('{TEXT_SHOW_HELPTEXT_TIMER}');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg('');return document.MM_returnValue"><script language = "javascript">
+		<td class="tdpadding" nowrap><p class="para" align="right">{LINK_ADMIN_INDEX} {REFRESHSCRIPT_BEGIN}<a href="javascript:ToggleTimer();" onMouseOver="toolTip('{TEXT_SHOW_HELPTEXT_TIMER}')" onMouseOut="toolTip()">
+			<script language = "javascript">
 	<!--
 		if (timeoutID && timeout != 0)
 	        document.write('<img align="absmiddle" border="0" id="ImgToggleTimer" align="middle" alt="{TEXT_SHOW_HELPTEXT_TIMER}" src="images/l_timer.gif">');

@@ -21,9 +21,9 @@
 							</p></td>
 					</tr>
 					<tr>
-						<th class="para" nowrap><p align="left">{TEXT_CUSTOM_SERVER} [<a href="javascript:MM_popupMsg('{TEXT_HELPTEXT_POPUP}')" onMouseOver="MM_displayStatusMsg('{TEXT_SHOW_HELPTEXT_IP_PORT}');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg('');return document.MM_returnValue">{TEXT_IP_PORT}</a>]:</p></th>
+						<th class="para" nowrap onMouseOver="toolTip('{TEXT_HELPTEXT}', 500)" onMouseOut="toolTip()"><p align="left">{TEXT_CUSTOM_SERVER} [{TEXT_IP_PORT}]:</p></th>
 						<td><p class="para">
-								<input name="ipport" type="text" id="ipport" value="{IPPORT_VALUE}" size="20" maxlength="21" class="textline">
+								<input name="ipport" type="text" id="ipport" value="{IPPORT_VALUE}" size="20" maxlength="50" class="textline">
 							</p></td>
 					</tr>
 					{CUSTOM_SERVER_END}

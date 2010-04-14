@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.24 2005/07/01 18:35:38 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.25 2005/09/10 14:39:30 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -68,7 +68,9 @@ if (!$connection){
 		$cachedata = explode("\n", $cache['data']);
 		reset($cachedata);
 	}
-	unset($cache['data']);
+	if (isset($cache['data'])){
+		unset($cache['data']);
+	}
 	$type = array('select','channels','players','vserver','gserver');
 	reset($type);
 	$counter = 0;
@@ -248,7 +250,7 @@ if (!$connection){
 
 	uasort($channels, "SORT_CHANNELS");
 	reset($channels);
-	$alt_title_content = '{TEXT_SERVER_NAME}: {SERVER_NAME}
+	$div_content = '{TEXT_SERVER_NAME}: {SERVER_NAME}
 {TEXT_PLATFORM}: {PLATFORM}
 {TEXT_VERSION}: {VERSION}
 {TEXT_UPTIME}: '.$uptime.'
@@ -265,14 +267,14 @@ if (!$connection){
 {TEXT_PROVIDER_WEBSITE}: '.((isset($isp_linkurl1)) ? $isp_linkurl1 : NULL ).'
 {TEXT_PROVIDER_EMAIL}: '.((isset($isp_adminemail1)) ? $isp_adminemail1 : NULL ).'
 ' : NULL ).'
-'.wordwrap('{TEXT_WELCOME}: '.$vserver['server_welcomemessage'], 50, "\n");
+{TEXT_WELCOME}: '.$vserver['server_welcomemessage'];
 
-	$alt_title_content = htmlentities($alt_title_content);
+	$div_content = prep_tooltip($div_content);
 
 	$server_content = '
     <tr class="server_row">
-	  <td width="90%" nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="server_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_S}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="16" height="16" src="images/ts/bullet_server.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($vserver['server_name']) .'</a>
+	  <td width="90%" nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
+<img width="16" height="16" src="images/ts/bullet_server.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($vserver['server_name']) .'
       </p></td>
 	  <td width="10%" nowrap><p>{TEXT_PING}</p></td>
 	</tr>
@@ -281,7 +283,7 @@ if (!$connection){
 	foreach($channels as $channel){
 		//Information echo'en...
 		$chflags = ch_flags($channel['flags']);
-		$alt_title_content = '{TEXT_CHANNEL}: '. $channel['name'] .'
+		$div_content = '{TEXT_CHANNEL}: '. $channel['name'] .'
 {TEXT_TOPIC}: '.$channel['topic'].'
 {TEXT_PASSWORD_PROT}: '.(($channel['password']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
 {TEXT_CODEC}: '.formatcodec($channel['codec']).'
@@ -290,15 +292,15 @@ if (!$connection){
 {TEXT_EXPLAIN_TSFLAGS_CHANNEL}: '.$chflags;
 		$exp_flags = str_split($chflags, 1);
 		foreach ($exp_flags as $flag){
-			$alt_title_content .= '
+			$div_content .= '
 '.$flag.': {TEXT_EXPLAIN_TSFLAG_'.$flag.'}';
 		}
 
-		$alt_title_content = htmlentities($alt_title_content);
+		$div_content = prep_tooltip($div_content);
 
 		$server_content .= '    <tr class="channel_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="channel_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_CH}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="32" height="16" src="images/ts/bullet_channel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($channel['name']).'&nbsp;&nbsp;&nbsp;('.$chflags.')</a>
+	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
+<img width="32" height="16" src="images/ts/bullet_channel.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($channel['name']).'&nbsp;&nbsp;&nbsp;('.$chflags.')
       </p></td>
 	  <td nowrap><p>&nbsp;</p></td>
 	</tr>
@@ -311,17 +313,17 @@ if (!$connection){
 
 			foreach($subchannels[$channel['id']] as $subchannel){
 				//Sub-Channel Informatie echo'en...
-				$alt_title_content = '{TEXT_SUBCHANNEL}: '. $subchannel['name'] .'
+				$div_content = '{TEXT_SUBCHANNEL}: '. $subchannel['name'] .'
 {TEXT_TOPIC}: '.$subchannel['topic'].'
 {TEXT_PASSWORD_PROT}: '.(($subchannel['password']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
 {TEXT_CODEC}: '.formatcodec($subchannel['codec']).'
 {TEXT_MAXCLIENTS}: '.$subchannel['maxusers'];
 
-				$alt_title_content = htmlentities($alt_title_content);
+				$div_content = prep_tooltip($div_content);
 
 				$server_content .= '    <tr class="channel_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="channel_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_CH}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="32" height="16" src="images/ts/bullet_channel.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($subchannel['name']) .'</a>
+	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="32" height="16" src="images/ts/bullet_channel.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($subchannel['name']) .'
       </p></td>
 	  <td nowrap><p>&nbsp;</p></td>
 	</tr>
@@ -335,22 +337,22 @@ if (!$connection){
 					foreach($players[$subchannel['id']] as $player){
 						//Informatie echo'en...
 						$plflags = pl_flags($player['pprivs'],$player['cprivs']);
-						$alt_title_content = '{TEXT_NAME}: '.$player['nick'].'
+						$div_content = '{TEXT_NAME}: '.$player['nick'].'
 {TEXT_LOGGEDINFOR}: '.formattime($player['logintime']).'
 {TEXT_IDLEFOR}: '.formattime($player['idletime']).'
 
 {TEXT_EXPLAIN_TSFLAGS_PLAYER}: '.$plflags;
 						$exp_flags = explode(' ', $plflags);
 						foreach ($exp_flags as $flag){
-							$alt_title_content .= '
+							$div_content .= '
 '.$flag.': {TEXT_EXPLAIN_TSFLAG_'.$flag.'}';
 						};
 
-						$alt_title_content = htmlentities($alt_title_content);
+						$div_content = prep_tooltip($div_content);
 
 						$server_content .= '    <tr class="client_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')</a>
+	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')
       </p></td>
 	  <td nowrap><p>'.$player['ping'].'ms</p></td>
 	</tr>
@@ -368,22 +370,22 @@ if (!$connection){
 			foreach($players[$channel['id']] as $player){ 
 				//Informatie echo'en...
 				$plflags = pl_flags($player['pprivs'],$player['cprivs']);
-				$alt_title_content = '{TEXT_NAME}: '.$player['nick'].'
+				$div_content = '{TEXT_NAME}: '.$player['nick'].'
 {TEXT_LOGGEDINFOR}: '.formattime($player['logintime']).'
 {TEXT_IDLEFOR}: '.formattime($player['idletime']).'
 
 {TEXT_EXPLAIN_TSFLAGS_PLAYER}: '.$plflags;
 				$exp_flags = explode(' ', $plflags);
 				foreach ($exp_flags as $flag){
-					$alt_title_content .= '
+					$div_content .= '
 '.$flag.': {TEXT_EXPLAIN_TSFLAG_'.$flag.'}';
 				};
 
-				$alt_title_content = htmlentities($alt_title_content);
+				$div_content = prep_tooltip($div_content);
 
 				$server_content .= '    <tr class="client_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')</a>
+	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
+<img width="48" height="16" src="images/ts/bullet_'. pl_img($player['pflags']) .'.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['nick']) .'&nbsp;&nbsp;('. $plflags .')
       </p></td>
 	  <td nowrap><p>'.$player['ping'].'ms</p></td>
 	</tr>

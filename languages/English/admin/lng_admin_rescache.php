@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_admin_rescache.php,v 1.3 2005/06/30 19:40:05 SC Kruiper Exp $
+ *   $Id: lng_admin_rescache.php,v 1.4 2005/09/10 14:39:30 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -29,7 +29,7 @@ $this->text += array(
 '{TEXT_RESCACHE_NOTE}' => 'Here you define the amount of seconds a server should be cached before it refreshes its data. If you set the amount of seconds to zero, caching will be disabled for that specific server.',
 '{TEXT_RESOURCE_NAME}' => 'Resource name',
 '{TEXT_RESOURCE_CACHEHITS}' => 'Cache hits',
-'{TEXT_RESOURCE_LASTUPDATE}' => 'Last refresh',
+'{TEXT_RESOURCE_LASTUPDATE}' => 'Cache age',
 '{TEXT_DATA_CACHING_DISABLED}' => 'Data caching is disabled.',
 '{TEXT_DAY}' => 'Day',
 '{TEXT_DAYS}' => 'Days',

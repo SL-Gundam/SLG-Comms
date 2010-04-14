@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: index.php,v 1.17 2005/06/30 19:04:42 SC Kruiper Exp $
+ *   $Id: index.php,v 1.18 2005/09/10 14:39:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -59,7 +59,9 @@ if ($Servertable){
 		if ((isset($_REQUEST['ipbyname']) && $_REQUEST['ipbyname'] == $server['res_id']) || (!isset($_REQUEST['ipbyname']) && $tssettings['Default server'] == $server['res_id'] && !isset($_REQUEST['ipbyname']))){
 			$ipbyname .= ' selected';
 			$pice = explode(':',$server['res_data']);
-			if (isset($pice[2])) $ts['queryport'] = $pice[2];
+			if (isset($pice[2])){
+				$ts['queryport'] = $pice[2];
+			}
 			$res_type = $server['res_type'];
 			$ts['id'] = $server['res_id'];
 		}
@@ -83,10 +85,13 @@ else{
 	reset($servers);
 	$server = current($servers);
 	$pice = explode(':',$server['res_data']);
-	if (isset($pice[2])) $ts['queryport'] = $pice[2];
+	if (isset($pice[2])){
+		$ts['queryport'] = $pice[2];
+	}
 	$res_type = $server['res_type'];
 	$ts['id'] = $server['res_id'];
 }
+unset($servers);
 
 // incase of the custom server we need to check whether the format is acceptable
 if(isset($_POST['ipport']) && $_POST['ipbyname'] == 0 && $tssettings['Custom servers']){
@@ -99,6 +104,7 @@ if(isset($_POST['ipport']) && $_POST['ipbyname'] == 0 && $tssettings['Custom ser
 }
 $ts['ip'] = (isset($pice[0])) ? $pice[0] : NULL;
 $ts['port'] = (isset($pice[1])) ? $pice[1] : NULL;
+$ts['queryport'] = (isset($pice[2])) ? $pice[2] : NULL;
 
 // checking whether cached server data is available
 if(isset($ts['id']) && !isset($cache)){

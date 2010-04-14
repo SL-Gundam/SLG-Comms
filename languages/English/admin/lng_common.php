@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_common.php,v 1.9 2005/07/01 18:35:39 SC Kruiper Exp $
+ *   $Id: lng_common.php,v 1.10 2005/09/10 14:39:30 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -45,14 +45,13 @@ $this->text += array(
 '{TEXT_LANGUAGE}' => 'Language',
 '{TEXT_DEFAULTSERVER}' => 'Default server',
 '{TEXT_SLGVERSION}' => 'SLG version',
-'{TEXT_SHOW_HELP_FIELD}' => 'Show help on the format of the following field',
 '{TEXT_FORUM_GROUPS_ERROR}' => 'The forum groups couldn\'t be retrieved. Please inform the webmaster.',
 '{TEXT_MISSING_GROUP_QUERY_ERROR}' => 'SLG couldn\'t find a required query. Please inform the webmaster.',
 '{TEXT_PAGEREFRESHTIMER}' => 'Page refresh timer',
 '{TEXT_GZIPCOMPRESSION}' => 'GZIP Compression'
 );
 
-$this->popup += array(
+$this->tooltips += array(
 '{TEXT_HELP_CACHEHITS}' => 'This enables or disables the ability to count the number of times cached data was retrieved instead of the live data.',
 '{TEXT_HELP_CUSTOMSERVERS}' => 'This enables or disables the ability to retrieve data from custom servers provided by the client.',
 
@@ -101,7 +100,7 @@ This setting is case sensitive.',
 
 '{TEXT_HELP_FORUMGROUP}' => 'This is the forum group that has access to the administrator section of SLG.',
 '{TEXT_HELP_LANGUAGE}' => 'Here you can select what language you would like to use with SLG.',
-'{TEXT_HELP_TEMPLATE}' => 'Here you can select what template you would like to use with SLG. The 2 templates delivered with this release, "Default" and "Default 2" are allmost exactly the same except for the menu in the admi pages. So select the version with the menu you like best.',
+'{TEXT_HELP_TEMPLATE}' => 'Here you can select which template you would like to use with SLG. The 2 templates delivered with this release, "Default" and "Default 2" are allmost exactly the same except for the menu in the admin pages. So select the version with the menu you like best.',
 '{TEXT_HELP_DEFAULTSERVER}' => 'The default server to be loaded if the client hasn\'t selected a server yet.',
 '{TEXT_HELP_SLGVERSION}' => 'This is the current version of SLG. This setting can not be changed.',
 '{TEXT_HELP_PAGEREFRESHTIMER}' => 'Here you can define a amount of seconds after which the index page should be automatically refreshed. Set this setting to zero to disable this feature and hide the clock. if you enabled this feature, you can allways start and stop this timer while your viewing the page by clicking on the clock in the top right corner of the page.',
@@ -117,6 +116,6 @@ Configure PHP to automatically use GZIP compression through the "zlib.output_com
 
 If all of the above is out of the question enable this setting.
 
-The footer at the bottom of every page checks whether or not GZIP compression is working, not whether or not it is enabled. This means that even if you disabled this setting that it can tell say "GZIP enabled". This is because SLG might notice that one of the above mentioned alternate options is working.'
+The footer at the bottom of every page checks whether or not GZIP compression is working, not whether or not it is enabled. This means that even if you disabled this setting that it can say "GZIP enabled". This is because SLG might detect that one of the above mentioned alternate options is active.'
 );
 ?>

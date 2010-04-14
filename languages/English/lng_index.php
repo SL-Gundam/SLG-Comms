@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index.php,v 1.6 2005/06/20 15:25:41 SC Kruiper Exp $
+ *   $Id: lng_index.php,v 1.7 2005/09/10 14:39:31 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -30,23 +30,19 @@ $this->text += array(
 '{TEXT_CUSTOM_SERVER_TYPE}' => 'Custom server type',
 '{TEXT_CUSTOM_SERVER}' => 'Custom server',
 '{TEXT_IP_PORT}' => 'IP:PORT',
-'{TEXT_SHOW_HELPTEXT_IP_PORT}' => 'Show help on the format of IP:PORT.',
 '{TEXT_SUBMIT_SERVERFORM}' => 'Submit',
 '{TEXT_IP_PORT_COMB_ERROR}' => 'You havn\'t filled in a correct ip port combination.',
-'{TEXT_CUSTOM}' => 'Custom'
+'{TEXT_CUSTOM}' => 'Custom server'
 );
 
-$this->popup += array(
+$this->tooltips += array(
 '{TEXT_HELPTEXT}' => 'The format for the TeamSpeak and Ventrilo servers is quite simple.
 
-First you type in the ip number followed by ":" (without the quotes).
-Second you type in the port.
+First you type in the ip number followed by ":" (without the quotes), followed by the port number.
 
-The third value is optional but sometimes required to make sure the data is retrieved correctly or retrieved at all for that matter.
-If the value is required you should ofcourse first type ":" (without the quotes).
+The third value is optional but sometimes required to make sure the data is retrieved correctly or retrieved at all for that matter. If the value is required you should ofcourse first type ":" (without the quotes).
 
-In case of an Teamspeak connection we need the TCP queryport.
-The default is 51234 so this value is only required when it\'s different from the default value.
+In case of an Teamspeak connection we need the TCP queryport. The default is 51234 so this value is only required when it\'s different from the default value.
 
 For Ventrilo, if the status protocol is password protected you need to fill it in here. Keep in mind that this is not neccasarily the same password used to join the server.
 

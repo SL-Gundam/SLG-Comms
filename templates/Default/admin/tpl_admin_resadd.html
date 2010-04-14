@@ -19,7 +19,7 @@
 							</p></td>
 					</tr>
 					<tr>
-						<th nowrap><p align="left" class="para">{TEXT_RESOURCE_DATA} (<a href="javascript:MM_popupMsg('{TEXT_HELPTEXT_POPUP}')" onMouseOver="MM_displayStatusMsg('{TEXT_SHOW_HELP_FIELD}: {TEXT_RESOURCE_DATA}');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg('');return document.MM_returnValue">{TEXT_HELP}</a>):</p></th>
+						<th nowrap onMouseOver="toolTip('{TEXT_HELPTEXT}', 500)" onMouseOut="toolTip()"><p align="left" class="para">{TEXT_RESOURCE_DATA} ({TEXT_HELP}):</p></th>
 						<td><p class="para">
 								<input name="resdata" type="text" id="resdata" size="30" maxlength="100"  class="textline" value="{VALUE_RESDATA}">
 							</p></td>

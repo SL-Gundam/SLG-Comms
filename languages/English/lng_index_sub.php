@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index_sub.php,v 1.8 2005/06/20 15:25:41 SC Kruiper Exp $
+ *   $Id: lng_index_sub.php,v 1.9 2005/09/10 14:39:31 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -90,10 +90,7 @@ $this->text += array(
 '{TEXT_EXPLAIN_TSFLAG_O}' => 'Op',
 '{TEXT_EXPLAIN_TSFLAG_V}' => 'Voice',
 '{TEXT_EXPLAIN_TSFLAGS_CHANNEL}' => 'Channel settings',
-'{TEXT_EXPLAIN_TSFLAGS_PLAYER}' => 'Player rights',
-'{TEXT_SHOW_HELPTEXT_PL}' => 'Show information about this client',
-'{TEXT_SHOW_HELPTEXT_CH}' => 'Show information about this channel',
-'{TEXT_SHOW_HELPTEXT_S}' => 'Show information about this server'
+'{TEXT_EXPLAIN_TSFLAGS_PLAYER}' => 'Player rights'
 );
 
 $this->text_adv += array(

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_install.php,v 1.9 2005/06/30 19:40:05 SC Kruiper Exp $
+ *   $Id: lng_install.php,v 1.10 2005/09/10 14:39:30 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -75,7 +75,7 @@ Don\'t forget to remove install.php after you\'re done.',
 '{TEXT_NO_DATABASE_SERVERLIST}' => 'Because you don\'t want to use a database you\'re gonna have to manually alter "$1" to setup the server list.'
 );
 
-$this->popup += array(
+$this->tooltips += array(
 '{TEXT_HELP_DATABASE}' => 'Do you want to use a database with SLG? With a database SLG will be a lot more powerfull. The main reason why its possible to disable the use of a database was to support hosts where there wasn\'t a database available.',
 '{TEXT_HELP_DB_TYPE}' => 'The type of database you want to use. This can be either MySQL or MySQl 4.1.x. MySQL 4.1 support is only available when the MySQLi extension is included in your php installation.',
 '{TEXT_HELP_DB_HOST}' => 'The hostname, ip address or socket of the database server.

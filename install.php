@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.45 2005/07/30 00:12:20 SC Kruiper Exp $
+ *   $Id: install.php,v 1.46 2005/09/10 14:39:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -25,8 +25,9 @@ define("NO_DATABASE", 10);
 include('includes/config.inc.php');
 
 // if step doesn't exist step will be 1
-if (!isset($_GET['step'])){
+if (!isset($_GET['step']) || !isset($_POST['variable']['Database'])){
 	$_GET['step'] = 1;
+	$_POST = array();
 }
 
 // process $_POST data for addslashes depending upon the magic_gpc setting
@@ -56,7 +57,7 @@ if ($_GET['step'] == 8 && isset($_POST['updsetting'])){
 if (isset($tssettings['SLG version'])){
 	$old_version = $tssettings['SLG version'];
 }
-$tssettings['SLG version'] = 'v2.1.5';
+$tssettings['SLG version'] = 'v2.1.6';
 $tssettings['Page title'] = 'SLG Comms '.$tssettings['SLG version'].' - {TEXT_INSTALLATION}';
 
 //If a language has been selected lets switch to that language instead of the default
@@ -287,11 +288,11 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 	// parse the configlist array
 	$configrows = NULL;
 	foreach ($configlist as $row){
-		$row['helptext_normal'] = '{TEXT_HELP_'.strtoupper(removechars($row['variable'], ' ')).'_NORMAL}';
-		$row['helptext_popup'] = '{TEXT_HELP_'.strtoupper(removechars($row['variable'], ' ')).'_POPUP}';
+		$row['helptext'] = '{TEXT_HELP_'.strtoupper(removechars($row['variable'], ' ')).'}';
+		$row['text'] = '{TEXT_'.strtoupper(removechars($row['variable'], ' ')).'}';
 		$configrows .= '
   <tr>
-    <td width="40%" nowrap><p class="para" title="'.$row['helptext_normal'].'"><a href="javascript:MM_popupMsg(\''.$row['helptext_popup'].'\')" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELP_FIELD}: '.$row['variable'].'\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">{TEXT_'.strtoupper(removechars($row['variable'], ' ')).'}</a>:</p></td>
+    <td width="40%" nowrap onMouseOver="toolTip(\''.$row['helptext'].'\')" onMouseOut="toolTip()"><p class="para">'.$row['text'].':</p></td>
     <td width="60%" nowrap><p class="para">';
 		switch ($row['variable']){
 			case 'install_type':

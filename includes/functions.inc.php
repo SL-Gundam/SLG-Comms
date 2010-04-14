@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.20 2005/06/27 20:34:31 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.21 2005/09/10 14:39:29 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -69,10 +69,6 @@ function removechars($str, $char){
 	return(str_replace($char, "", $str));
 }
 
-function convert_jspoptext($str){
-	return(str_replace("\n", '\r\n', addslashes($str)));
-}
-
 function early_error($message, $sql=NULL, $sqlerror=NULL){
 	$error = new template;
 	$error->load_language('lng_earlyerrors');
@@ -133,6 +129,10 @@ function linewrap($str, $maxlength){
 		$str = substr($str, 0, ($maxlength-2)).'...';
 	}
 	return($str);
+}
+
+function prep_tooltip($msg){
+	return(str_replace("\n", '<br />', addslashes(str_replace('&', '&amp;', (htmlentities($msg))))));
 }
 
 function print_check_cache_lifetime(){

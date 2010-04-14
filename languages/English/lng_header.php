@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_header.php,v 1.7 2005/06/21 11:23:14 SC Kruiper Exp $
+ *   $Id: lng_header.php,v 1.8 2005/09/10 14:39:30 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -30,7 +30,10 @@ $this->text += array(
 '{TEXT_ADMIN}' => 'Administrator',
 '{TEXT_INDEX}' => 'Frontpage',
 '{TEXT_UNKNOWN_TITLE}' => 'SLG - No page title present',
-'{TEXT_INSTALLATION}' => 'Installation',
-'{TEXT_SHOW_HELPTEXT_TIMER}' => 'Click to enable or disable the page refresh timer.'
+'{TEXT_INSTALLATION}' => 'Installation'
+);
+
+$this->tooltips += array(
+'{TEXT_SHOW_HELPTEXT_TIMER}' => 'Click to enable or disable the automatic page refresh timer.'
 );
 ?>

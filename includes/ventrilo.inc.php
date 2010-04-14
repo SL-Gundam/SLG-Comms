@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.30 2005/07/30 00:35:49 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.31 2005/09/10 14:39:30 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -68,34 +68,29 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 		foreach($routput as $line1){
 			$diffisor1 = strpos($line1,":");
 			$start1 = substr($line1, 0 , $diffisor1);
-			$end1 = substr($line1, $diffisor1+2);
+			$end1 = substr($line1, ($diffisor1+2));
 			if (trim($start1) == 'CHANNELFIELDS'){
 				$ventchannelindex = explode(",",$end1);
 			}
 
-			elseif (trim($start1) == 'CHANNEL'){
+			elseif (trim($start1) == 'CHANNEL' || trim($start1) == 'CLIENT'){
 				$loutput = explode(",",$end1);
 				foreach($loutput as $line2){
 					$diffisor2 = strpos($line2,"=");
 					$start2 = substr($line2, 0 , $diffisor2);
-					$end2 = substr($line2, $diffisor2+1);
-					$ventchannel[$start2] = $end2;
+					$end2 = substr($line2, ($diffisor2+1));
+					$ventdata[$start2] = $end2;
 				}
-				$ventchannels[$ventchannel['PID']][$ventchannel['CID']] = $ventchannel;
+				if (trim($start1) == 'CLIENT'){
+					$ventclients[$ventdata['CID']][] = $ventdata;
+				}
+				elseif (trim($start1) == 'CHANNEL'){
+					$ventchannels[$ventdata['PID']][$ventdata['CID']] = $ventdata;
+				}
 			}
 
 			elseif (trim($start1) == 'CLIENTFIELDS'){
 				$ventclientindex = explode(",",$end1);
-			}
-			elseif (trim($start1) == 'CLIENT'){
-				$loutput = explode(",",$end1);
-				foreach($loutput as $line2){
-					$diffisor2 = strpos($line2,"=");
-					$start2 = substr($line2, 0 , $diffisor2);
-					$end2 = substr($line2, $diffisor2+1);
-					$ventclient[$start2] = $end2;
-				}
-				$ventclients[$ventclient['CID']][] = $ventclient;
 			}
 			else{
 				$ventserver[$start1] = $end1;
@@ -143,7 +138,7 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 ## DISPLAY ##
 #############
 
-		$alt_title_content = '{TEXT_SERVER_NAME}: {SERVER_NAME}
+		$div_content = '{TEXT_SERVER_NAME}: {SERVER_NAME}
 {TEXT_SERVER_PHONETIC}: {SERVER_PHONETIC}
 {TEXT_PLATFORM}: {PLATFORM}
 {TEXT_VERSION}: {VERSION}
@@ -154,14 +149,14 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 {TEXT_CLIENTS_CON}: {CLIENTS_CON}
 {TEXT_CHANNEL_COUNT}: {CHANNEL_COUNT}
 
-'.wordwrap('{TEXT_COMMENT}: '.$ventserver['COMMENT'], 50, "\n");
+{TEXT_COMMENT}: '.$ventserver['COMMENT'];
 
-		$alt_title_content = htmlentities($alt_title_content);
+		$div_content = prep_tooltip($div_content);
 
 		$server_content = '
     <tr class="server_row">
-	  <td width="90%" nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="server_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_S}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="16" height="16" src="images/vent/server.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($ventserver['NAME']) .'</a>
+	  <td width="90%" nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
+<img width="16" height="16" src="images/vent/server.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($ventserver['NAME']) .'
       </p></td>
 	  <td width="10%" nowrap><p>{TEXT_PING}</p></td>
 	</tr>
@@ -173,17 +168,17 @@ if (!isset($execcmd) || $execcmd == 0 || $execcmd == 3){ // 0 = everything went 
 
 			foreach($ventclients[0] as $player){ 
 		//Informatie echo'en...
-				$alt_title_content = '{TEXT_NAME}: '.$player['NAME'].'
+				$div_content = '{TEXT_NAME}: '.$player['NAME'].'
 {TEXT_ADMIN}: '.(($player['ADMIN']) ? '{TEXT_YES}' : '{TEXT_NO}' ).'
 {TEXT_LOGGEDINFOR}: '.formattime($player['SEC']).'
 
-'.wordwrap('{TEXT_COMMENT}: '.$player['COMM'], 50, "\n");
+{TEXT_COMMENT}: '.$player['COMM'];
 
-				$alt_title_content = htmlentities($alt_title_content);
+				$div_content = prep_tooltip($div_content);
 
 				$server_content .= '    <tr class="client_row">
-	  <td nowrap><p title="'.$alt_title_content.'"><a href="javascript:MM_popupMsg(\''.convert_jspoptext($alt_title_content).'\')" class="client_row" onMouseOver="MM_displayStatusMsg(\'{TEXT_SHOW_HELPTEXT_PL}\');return document.MM_returnValue" onMouseOut="MM_displayStatusMsg(\'\');return document.MM_returnValue">
-<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="'.$alt_title_content.'" title="'.$alt_title_content.'" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.htmlentities(linewrap($player['COMM'], 30)).'</span>)' : NULL ).'</a>
+	  <td nowrap onMouseOver="toolTip(\''.$div_content.'\')" onMouseOut="toolTip()"><p>
+<img width="16" height="16" src="images/vent/client.gif" align="absmiddle" alt="" border="0">&nbsp;'. htmlspecialchars($player['NAME']) .((!empty($player['COMM'])) ? ' (<span class="ventcomment">'.htmlentities(linewrap($player['COMM'], 30)).'</span>)' : NULL ).'
       </p></td>
 	  <td nowrap><p>'.$player['PING'].'ms</p></td>
 	</tr>
