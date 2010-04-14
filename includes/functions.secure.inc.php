@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.10 2005/12/25 20:18:12 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.11 2006/03/14 01:17:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -48,7 +48,7 @@ function md5_hmac($data, $key)
 }
 
 function forum_existence_check($forumtype, $forumpath){
-	return((($forumtype === 'ipb131' || $forumtype === 'ipb204') && file_exists($forumpath.'conf_global.php')) || ($forumtype === 'phpbb2015' && file_exists($forumpath.'config.php')) || (($forumtype === 'smf103' || $forumtype === 'smf110') && file_exists($forumpath.'Settings.php')) || (($forumtype === 'vb307' || $forumtype === 'vb350') && file_exists($forumpath.'includes/config.php')));
+	return((($forumtype === 'ipb131' || $forumtype === 'ipb204') && file_exists($forumpath.'conf_global.php')) || ($forumtype === 'phpbb2015' && file_exists($forumpath.'config.php')) || (($forumtype === 'smf103' || $forumtype === 'smf110') && file_exists($forumpath.'Settings.php')) || (($forumtype === 'vb307' || $forumtype === 'vb350') && file_exists($forumpath.'includes/config.php')) || ($forumtype === 'xoops_cbb' && file_exists($forumpath.'mainfile.php')));
 }
 
 function retrieve_forumsettings(&$tssettings, $action_login=false){
@@ -416,6 +416,58 @@ WHERE
   ((usergroupid = '.$tssettings['Forum group'].') OR 
   ('.$tssettings['Forum group'].' IN (membergroupids)))
 limit 0,1';
+				}
+				break;
+/* START - xoops_cbb */
+			case 'xoops_cbb':
+				$xoopsOption['nocommon'] = true;
+				include($tssettings['Forum relative path'].'mainfile.php');
+
+				if (!defined('XOOPS_DB_PREFIX') || !defined('XOOPS_DB_HOST') || !defined('XOOPS_DB_NAME') || !defined('XOOPS_DB_USER') || !defined('XOOPS_DB_PASS')){
+					early_error('{TEXT_INVALID_CONF_FILE}');
+				}
+
+				$table['groups'] = XOOPS_DB_PREFIX.'_groups';
+
+				if (XOOPS_DB_NAME != $tssettings['db_name']){
+					$forumsettings['otherdatabase'] = true;
+					$forumsettings['alt_db_host'] = XOOPS_DB_HOST;
+					$forumsettings['alt_db_name'] = XOOPS_DB_NAME;
+					$forumsettings['alt_db_user'] = XOOPS_DB_USER;
+					$forumsettings['alt_db_passwd'] = XOOPS_DB_PASS;
+				}
+				else{
+					$forumsettings['otherdatabase'] = false;
+				}
+
+				$forumsettings['groups_sql'] = '
+SELECT
+  groupid AS groupid,
+  name AS groupname
+FROM
+  '.$table['groups'].'
+WHERE
+  group_type != "Anonymous"
+ORDER BY
+  name';
+
+				if ($action_login){
+					$table['members'] = XOOPS_DB_PREFIX.'_users';
+					$table['groupsmembers'] = XOOPS_DB_PREFIX.'_groups_users_link';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  MEM.`uid` AS userid,
+  MEM.`loginname` AS username,
+  MEM.`uname` AS realname,
+  GRM.`groupid` AS groupid
+FROM
+  `'.$table['members'].'` MEM,
+  `'.$table['groupsmembers'].'` GRM
+WHERE
+  MEM.`uid` = GRM.`uid` AND
+  MEM.`loginname` = "'.$db->escape_string($_POST['fusername']).'" AND
+  MEM.`pass` = "'.md5($_POST['fpasswd']).'"';
 				}
 				break;
 			default: 

@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: install.php,v 1.53 2005/12/25 20:18:11 SC Kruiper Exp $
+ *   $Id: install.php,v 1.55 2006/03/14 01:17:11 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -21,11 +21,11 @@
  ***************************************************************************/
 
 define("IN_SLG", 10);
-$new_version = 'v2.2.3';
+$new_version = 'v2.2.4';
 include('includes/config.inc.php');
 
 // if step doesn't exist step must be 1
-if (!isset($_GET['step']) || !is_numeric($_GET['step']) || !isset($_POST['variable']['install_type']) || ($_POST['variable']['install_type'] !== 'upgrade' && $_POST['variable']['install_type'] !== 'rescue' && !isset($_POST['variable']['Database']))){
+if (!isset($_GET['step']) || !is_numeric($_GET['step']) || ($_GET['step'] != 8 && !isset($_POST['variable']['install_type'])) || ($_GET['step'] != 8 && $_POST['variable']['install_type'] !== 'upgrade' && $_POST['variable']['install_type'] !== 'rescue' && !isset($_POST['variable']['Database']))){
 	$_GET['step'] = 1;
 	$_POST = array();
 }
@@ -366,6 +366,7 @@ if ($_GET['step'] == 1 || (($_GET['step'] == 2 || $_GET['step'] == 3 || $_GET['s
 <option value="smf110">SMF (Simple Machines Forum) 1.1 rc1</option>
 <option value="vb307">vBulletin v3.0.7</option>
 <option value="vb350">vBulletin v3.5.0</option>
+<option value="xoops_cbb">XOOPS 2.2.3 Final + CBB 2.32</option>
 </select>';
 				break;
 			case 'GZIP Compression': $configrows .= '<input id="'.$row['variable'].'_enable" name="variable['.$row['variable'].']" type="radio" value="1"><label for="'.$row['variable'].'_enable">{TEXT_ENABLE}</label>
@@ -494,7 +495,7 @@ if ($_GET['step'] == 5 && isset($_POST['updsetting'])){
 		$sql = 'CREATE TABLE `'.$table['cache'].'` (
   `cache_id` tinyint(3) unsigned NOT NULL default "0",
   `data` text,
-  `timestamp` varchar(15) NOT NULL default "0",
+  `timestamp` int(11) NOT NULL default "0",
   `refreshcache` smallint(5) unsigned NOT NULL default "0",
   `cachehits` mediumint(8) unsigned NOT NULL default "0",
   PRIMARY KEY  (`cache_id`),

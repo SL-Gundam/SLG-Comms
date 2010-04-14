@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: settings.inc.php,v 1.14 2005/12/25 20:18:11 SC Kruiper Exp $
+ *   $Id: settings.inc.php,v 1.15 2006/03/14 01:17:11 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -167,6 +167,7 @@ foreach ($tssettings as $row['variable'] => $row['value']){
 <option value="smf110"'.(($row['value'] === 'smf110') ? ' selected' : '').'>SMF (Simple Machines Forum) 1.1 rc1</option>
 <option value="vb307"'.(($row['value'] === 'vb307') ? ' selected' : '').'>vBulletin v3.0.7</option>
 <option value="vb350"'.(($row['value'] === 'vb350') ? ' selected' : '').'>vBulletin v3.5.0</option>
+<option value="xoops_cbb"'.(($row['value'] === 'xoops_cbb') ? ' selected' : '').'>XOOPS 2.2.3 Final + CBB 2.32</option>
 </select>';
 			break;
 		case 'GZIP Compression': $configrows .= '<input id="'.$row['variable'].'_enable" name="variable['.$row['variable'].']" type="radio" value="1"'.(($row['value']) ? ' checked' : '').'><label for="'.$row['variable'].'_enable">{TEXT_ENABLE}</label>

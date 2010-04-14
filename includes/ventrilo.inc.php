@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: ventrilo.inc.php,v 1.37 2005/11/06 23:09:59 SC Kruiper Exp $
+ *   $Id: ventrilo.inc.php,v 1.40 2006/03/15 22:23:00 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -69,10 +69,8 @@ else{
 //print_r($routput);
 
 if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything went ok OR no response from server. 3 = unable to resolve hostname error.
-	$venterror = false;
 	if (isset($routput[0]) && strncasecmp($routput[0], "ERROR", 5) === 0){
 		$pre_error = implode(" ", $routput).' ('.$execcmd.')';
-		$venterror = true;
 		if (!empty($cache['data'])){
 			$usecached = true;
 			$routput = explode("\r\n", $cache['data']);
@@ -91,8 +89,10 @@ if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything wen
 		unset($cache['data']);
 	}
 
-	/*if ($usecached || !isset($venterror))*/{
+	/*if ($usecached || !isset($pre_error))*/{
 		$calc_values['ADMIN'] = 0;
+		$calc_values['TOT_CLIENTS'] = 0;
+		$calc_values['TOT_CHANNELS'] = 0;
 		foreach($routput as $line1){
 			$ext_line1 = explode(':', $line1, 2);
 			$ext_line1[0] = trim($ext_line1[0]);
@@ -106,14 +106,21 @@ if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything wen
 					$ext_line2[1] = rawurldecode(trim($ext_line2[1]));
 					$ventdata[$ext_line2[0]] = $ext_line2[1];
 				}
-				if (trim($ext_line1[0]) === 'CLIENT'){
+				if (trim($ext_line1[0]) === 'CHANNEL'){
+					$ventchannels[$ventdata['PID']][$ventdata['CID']] = $ventdata;
+					$calc_values['TOT_CHANNELS']++;
+				}
+				elseif (trim($ext_line1[0]) === 'CLIENT'){
 					if ($ventdata['ADMIN']){
 						$calc_values['ADMIN']++;
 					}
-					$ventclients[$ventdata['CID']][$ventdata['UID']] = $ventdata;
-				}
-				elseif (trim($ext_line1[0]) === 'CHANNEL'){
-					$ventchannels[$ventdata['PID']][$ventdata['CID']] = $ventdata;
+					if (isset($ventserver['CHANNELCOUNT']) && $ventserver['CHANNELCOUNT'] !== 0){
+						$ventclients[$ventdata['CID']][$ventdata['UID']] = $ventdata;
+					}
+					else{
+						$ventclients[0][$ventdata['UID']] = $ventdata;
+					}
+					$calc_values['TOT_CLIENTS']++;
 				}
 			}
 
@@ -137,9 +144,10 @@ if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything wen
 //		print_r($ventclientindex);
 //		print_r($calc_values);
 
+		$tssettings['Retrieved data status'] = $tssettings['Retrieved data status'] || isset($pre_error);
 		$ventrilo->insert_display('{DATA_STATUS}', $tssettings['Retrieved data status']);
 		if ($tssettings['Retrieved data status']){
-			$cachelive = print_check_cache_lifetime($usecached, $cache, ((isset($tuntilrefresh)) ? $tuntilrefresh : NULL ), $venterror);
+			$cachelive = print_check_cache_lifetime($usecached, $cache, ((isset($tuntilrefresh)) ? $tuntilrefresh : NULL ), isset($pre_error));
 			$ventrilo->insert_content('{DATA_STATUS}', $cachelive);
 		}
 
@@ -155,12 +163,12 @@ if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything wen
 			$ventrilo->insert_text('{SERVER_PHONETIC}', htmlspecialchars($ventserver['PHONETIC']));
 			$ventrilo->insert_text('{PLATFORM}', $ventserver['PLATFORM']);
 			$ventrilo->insert_text('{VERSION}', $ventserver['VERSION']);
-			$ventrilo->insert_text('{COMMENT}', htmlentities($ventserver['COMMENT']));
+			$ventrilo->insert_text('{COMMENT}', ((isset($ventserver['COMMENT'])) ? htmlentities($ventserver['COMMENT']) : NULL ) );
 			$ventrilo->insert_text('{UDPPORT}', $ts['port']);
 			$ventrilo->insert_text('{MAXCLIENTS}', $ventserver['MAXCLIENTS']);
-			$ventrilo->insert_text('{CLIENTS_CON}', $ventserver['CLIENTCOUNT']);
+			$ventrilo->insert_text('{CLIENTS_CON}', ((isset($ventserver['CLIENTCOUNT'])) ? $ventserver['CLIENTCOUNT'] : '{TEXT_UNKNOWN}' ) );
 			$ventrilo->insert_text('{ADMINS_CON}', $calc_values['ADMIN']);
-			$ventrilo->insert_text('{CHANNEL_COUNT}', $ventserver['CHANNELCOUNT']);
+			$ventrilo->insert_text('{CHANNEL_COUNT}', ((isset($ventserver['CHANNELCOUNT'])) ? $ventserver['CHANNELCOUNT'] : '{TEXT_UNKNOWN}' ) );
 			$ventrilo->insert_text('{VOICECODEC}', $ventserver['VOICECODEC'][1]);
 			$ventrilo->insert_text('{VOICEFORMAT}', $ventserver['VOICEFORMAT'][1]);
 			$ventrilo->insert_content('{UPTIME}', $uptime);
@@ -171,6 +179,20 @@ if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything wen
 ## DISPLAY ##
 #############
 
+		$check['channel'] = (!isset($ventserver['CHANNELCOUNT']) || $ventserver['CHANNELCOUNT'] != $calc_values['TOT_CHANNELS']);
+		$check['client'] = (!isset($ventserver['CLIENTCOUNT']) || $ventserver['CLIENTCOUNT'] != $calc_values['TOT_CLIENTS']);
+		$ventrilo->insert_display('{SERVER_NOTICE}', ($check['channel'] || $check['client']));
+		$notice = NULL;
+		if ($check['channel']){
+			$notice .= '<p class="error">{TEXT_CHANNELDATA_DISABLED}</p>';
+		}
+		if ($check['client']){
+			$notice .= '<p class="error">{TEXT_CLIENTDATA_DISABLED}</p>';
+		}
+		if ($check['channel'] || $check['client']){
+			$ventrilo->insert_content('{NOTICE}', $notice);
+		}
+
 		$div_content = '<table border=\\\'0\\\' class=\\\'tooltip\\\' cellspacing=\\\'1\\\' cellpadding=\\\'0\\\'>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_SERVER_NAME}:&amp;nbsp;</td><td>'.prep_tooltip($ventserver['NAME']).'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_SERVER_PHONETIC}:&amp;nbsp;</td><td>'.prep_tooltip($ventserver['PHONETIC']).'</td></tr>
@@ -180,9 +202,9 @@ if (!isset($execcmd) || $execcmd === 0 || $execcmd === 3){ // 0 = everything wen
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_PASSWORD_PROT}:&amp;nbsp;</td><td>'.$password_prot.'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_UDPPORT}:&amp;nbsp;</td><td>'.prep_tooltip($ts['port']).'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_MAXCLIENTS}:&amp;nbsp;</td><td>'.$ventserver['MAXCLIENTS'].'</td></tr>
-<tr><td nowrap valign=\\\'top\\\'>{TEXT_CLIENTS_CON}:&amp;nbsp;</td><td>'.$ventserver['CLIENTCOUNT'].'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CLIENTS_CON}:&amp;nbsp;</td><td>'.((isset($ventserver['CLIENTCOUNT'])) ? $ventserver['CLIENTCOUNT'] : '{TEXT_UNKNOWN}' ).'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_ADMINS_CON}:&amp;nbsp;</td><td>'.$calc_values['ADMIN'].'</td></tr>
-<tr><td nowrap valign=\\\'top\\\'>{TEXT_CHANNEL_COUNT}:&amp;nbsp;</td><td>'.$ventserver['CHANNELCOUNT'].'</td></tr>
+<tr><td nowrap valign=\\\'top\\\'>{TEXT_CHANNEL_COUNT}:&amp;nbsp;</td><td>'.((isset($ventserver['CHANNELCOUNT'])) ? $ventserver['CHANNELCOUNT'] : '{TEXT_UNKNOWN}' ).'</td></tr>
 <tr><td>&amp;nbsp;</td><td>&amp;nbsp;</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_VOICECODEC}:&amp;nbsp;</td><td>'.prep_tooltip($ventserver['VOICECODEC'][1]).'</td></tr>
 <tr><td nowrap valign=\\\'top\\\'>{TEXT_VOICEFORMAT}:&amp;nbsp;</td><td>'.prep_tooltip($ventserver['VOICEFORMAT'][1]).'</td></tr>'.((!empty($ventserver['COMMENT'])) ? '

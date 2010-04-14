@@ -1,10 +1,21 @@
+v2.2.4
+- Added XOOPS 2.2.3 Final + CBB 2.32 support. You are required to place SLG Comms in a sub directory of xoops, the name doesn't matter so you can even create a new directory. This is because XOOPS has a protection against scripts outside of the XOOPS root directory.
+- Fixed a problem with the configuration file downloading during installation.
+- Fixed a problem when certain information is missing from the ventrilo server data. (v2.3.0 of the ventrilo server allows the hiding of selective data). A message will be displayed if channel and / or client data is missing (Comment data excluded).
+- Added {TEXT_CHANNELDATA_DISABLED}, {TEXT_CLIENTDATA_DISABLED} and {TEXT_UNKNOWN} language items in lng_index_vent.php
+- If an error is encountered during data retrieval and cached data is being displayed the Cached data status will allways be displayed. This is so visitors know how old that data is.
+
+v2.2.4 template changes
+- Added extra table (table within {SERVER_NOTICE_BEGIN} and {SERVER_NOTICE_END}) in tpl_ventrilo.html
+- Added a CSS stylesheet item called "server_notice".
+
 v2.2.3
 - New language item {TEXT_INVALID_CONF_FILE}
 - Added extra checks whether needed variables for forum support are available.
 - Added support for vBulletin 3.5.0
 - Fixed a bug in the db mysqli class (mysql41.inc.php) when a port is given to connect to.
 - Fixed a problem with a getting a blank html page when MySQL extension isn't loaded. An appropriate error will be displayed now.
-- Fixed a fatal error message when notusing the apache webserver.
+- Fixed a fatal error message when not using the apache webserver.
 
 v2.2.2
 - Fixed a glitch in install.php when selecting the wrong installation type when you're upgrading an existing installation of SLG Comms.

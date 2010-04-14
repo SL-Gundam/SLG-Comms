@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: teamspeak.inc.php,v 1.31 2005/11/06 23:09:59 SC Kruiper Exp $
+ *   $Id: teamspeak.inc.php,v 1.32 2006/03/15 22:23:00 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -207,6 +207,7 @@ if (!$connection){
 //print_r($cache['data']);
 //print_r($calc_values);
 
+	$tssettings['Retrieved data status'] = $tssettings['Retrieved data status'] || isset($pre_error);
 	$teamspeak->insert_display('{DATA_STATUS}', $tssettings['Retrieved data status']);
 	if ($tssettings['Retrieved data status']){
 		$cachelive = print_check_cache_lifetime($usecached, $cache, ((isset($tuntilrefresh)) ? $tuntilrefresh : NULL ), !$connection);

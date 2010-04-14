@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: secure.inc.php,v 1.15 2005/12/25 20:18:12 SC Kruiper Exp $
+ *   $Id: secure.inc.php,v 1.17 2006/03/15 22:23:00 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -50,7 +50,7 @@ if (checkfilelock('admin.php')){
 
 		if ($$forumdatabase->numrows($authresult) > 0){
 			while ($authrow = $$forumdatabase->getrow($authresult)){
-				if ($tssettings['Forum type'] !== 'phpbb2015' || ($tssettings['Forum type'] === 'phpbb2015' && $authrow['groupid'] == $tssettings['Forum group'])){
+				if ((($tssettings['Forum type'] !== 'phpbb2015' && $tssettings['Forum type'] !== 'xoops_cbb' || (($tssettings['Forum type'] === 'phpbb2015' || $tssettings['Forum type'] === 'xoops_cbb') && $authrow['groupid'] == $tssettings['Forum group'])))){
 					$sql = 'DELETE FROM '.$table['sessions'].' WHERE `session_user_id` = '.$authrow['userid'];
 					$logincleanquery = $db->execquery('logincleanquery',$sql);
 
@@ -74,7 +74,7 @@ if (checkfilelock('admin.php')){
 						$_SESSION['group_id'] = array($authrow['groupid']);
 					}
 				}
-				if ($tssettings['Forum type'] === 'phpbb2015'){
+				if ($tssettings['Forum type'] === 'phpbb2015' || $tssettings['Forum type'] === 'xoops_cbb'){
 					$_SESSION['group_id'][] = $authrow['groupid'];
 				}
 			}

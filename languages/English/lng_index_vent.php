@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: lng_index_vent.php,v 1.1 2005/10/21 14:29:28 SC Kruiper Exp $
+ *   $Id: lng_index_vent.php,v 1.2 2006/03/14 01:17:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -31,6 +31,9 @@ $this->text += array(
 '{TEXT_SERVER_PHONETIC}' => 'Server phonetic',
 '{TEXT_COMMENT}' => 'Comment',
 '{TEXT_ADMINS_CON}' => 'Administrators present',
+'{TEXT_CHANNELDATA_DISABLED}' => 'Channel information disabled by Ventrilo server administrator.',
+'{TEXT_CLIENTDATA_DISABLED}' => 'Client information disabled by Ventrilo server administrator.',
+'{TEXT_UNKNOWN}' => 'Unknown',
 );
 
 $this->tooltips += array(
