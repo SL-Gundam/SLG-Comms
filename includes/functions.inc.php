@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.inc.php,v 1.56 2008/08/12 22:59:41 SC Kruiper Exp $
+ *   $Id: functions.inc.php,v 1.57 2009/10/01 13:58:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -248,6 +248,7 @@ function linewrap( $str, $maxlength )
 
 // This function prepares a tooltip so that it doesn't cause problems with the javascripts
 // expects htmlentities() to be performed on $msg
+// nl2br can not be used because it leaves \r and \n behind which is a problem here
 function prep_tooltip( $msg )
 {
 	return( str_replace( array( "\r\n", "\r", "\n" ), '<br />', addslashes( str_replace( '&', '&amp;', $msg ) ) ) );

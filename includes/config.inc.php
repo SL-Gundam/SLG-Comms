@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: config.inc.php,v 1.41 2008/08/12 22:59:41 SC Kruiper Exp $
+ *   $Id: config.inc.php,v 1.42 2009/10/01 13:58:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -87,7 +87,7 @@ FROM
 }
 
 // checks whether file and installed version differ
-$new_version = 'v3.2.0';
+$new_version = 'v3.2.1';
 if ( !checkfilelock('install.php') )
 {
 	if ( !isset($tssettings['SLG_version']) || $new_version !== $tssettings['SLG_version'] )

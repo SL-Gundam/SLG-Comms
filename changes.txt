@@ -1,3 +1,9 @@
+v3.2.1
+- Added support for Invision Power Board 3.0.1 
+- Added support for PhpBB 3.0.5
+- Added support for SMF (Simple Machines Forum) 1.1.10
+- Added support for SMF (Simple Machines Forum) 2.0.0 RC1.2
+
 v3.2.0
 - New language placeholder in lng_earlyerrrors.php called: {TEXT_UNKNOWN_EXEC_ERROR}
 - Added proper error message incase safe mode is activated and if thats causing problems for SLG Comms.

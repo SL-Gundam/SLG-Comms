@@ -6,7 +6,7 @@
  *   copyright            : (C) 2005 Soul--Reaver
  *   email                : slgundam@gmail.com
  *
- *   $Id: functions.secure.inc.php,v 1.51 2008/08/12 22:59:41 SC Kruiper Exp $
+ *   $Id: functions.secure.inc.php,v 1.52 2009/10/01 13:58:12 SC Kruiper Exp $
  *
  *
  ***************************************************************************/
@@ -61,6 +61,7 @@ function forum_existence_check( $forumtype, $forumpath )
 
 		case 'ipb131':
 		case 'ipb204':
+		case 'ipb300':
 			$conf_file .= 'conf_global.php';
 			break;
 
@@ -72,6 +73,7 @@ function forum_existence_check( $forumtype, $forumpath )
 
 		case 'smf103':
 		case 'smf110':
+		case 'smf200':
 			$conf_file .= 'Settings.php';
 			break;
 
@@ -394,6 +396,61 @@ LIMIT 0,1';
 				}
 				break;
 
+/* START - IPB300 */
+			case 'ipb300':
+				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'conf_global.php' );
+
+				if ( !isset($INFO['sql_tbl_prefix'], $INFO['sql_database'], $INFO['sql_host'], $INFO['sql_user'], $INFO['sql_pass']) )
+				{
+					early_error( '{TEXT_INVALID_CONF_FILE}' );
+				}
+
+				$forumsettings['alt_db_host'] = $INFO['sql_host'];
+				$forumsettings['alt_db_name'] = $INFO['sql_database'];
+				$forumsettings['alt_db_user'] = $INFO['sql_user'];
+				$forumsettings['alt_db_passwd'] = $INFO['sql_pass'];
+
+				if ( $action_login === false )
+				{
+					$table['groups'] = $INFO['sql_tbl_prefix'] . 'groups';
+
+					$forumsettings['groups_sql'] = '
+SELECT
+  `g_id` AS groupid,
+  `g_title` AS groupname
+FROM
+  `%1$s`
+ORDER BY
+  `groupname`';
+
+					$forumsettings['groups_sql_params'] = $table['groups'];
+				}
+				else
+				{
+					$table['members'] = $INFO['sql_tbl_prefix'] . 'members';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  `member_id` AS userid,
+  `name` AS username,
+  `members_display_name` AS realname,
+  `members_pass_hash` AS password1,
+  `members_pass_salt` AS password1_salt,
+  `member_group_id` AS groupid,
+  `mgroup_others` AS additionalgroups
+FROM
+  `%1$s`
+WHERE
+  `name` = "%2$s"
+LIMIT 0,1';
+
+					$forumsettings['authchecksql_params'] = array(
+						$table['members'],
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
+					);
+				}
+				break;
+
 /* START - PHPBB2015 */
 			case 'phpbb2015':
 				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'config.php' );
@@ -684,6 +741,63 @@ LIMIT 0,1';
 				}
 				break;
 
+/* START - SMF200 */
+			case 'smf200':
+				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'Settings.php' );
+
+				if ( !isset($db_prefix, $db_server, $db_name, $db_user, $db_passwd) )
+				{
+					early_error( '{TEXT_INVALID_CONF_FILE}' );
+				}
+
+				$forumsettings['alt_db_host'] = $db_server;
+				$forumsettings['alt_db_name'] = $db_name;
+				$forumsettings['alt_db_user'] = $db_user;
+				$forumsettings['alt_db_passwd'] = $db_passwd;
+
+				if ( $action_login === false )
+				{
+					$table['groups'] = $db_prefix . 'membergroups';
+
+					$forumsettings['groups_sql'] = '
+SELECT
+  `id_group` AS groupid,
+  `group_name` AS groupname
+FROM
+  `%1$s`
+WHERE
+  `min_posts` = -1
+ORDER BY
+  `groupname`';
+
+					$forumsettings['groups_sql_params'] = $table['groups'];
+				}
+				else
+				{
+					$table['members'] = $db_prefix . 'members';
+
+					$forumsettings['authchecksql'] = '
+SELECT
+  `id_member` AS userid,
+  `member_name` AS username,
+  `real_name` AS realname,
+  `passwd` AS password1,
+  `id_group` AS groupid,
+  `additional_groups` AS additionalgroups
+FROM
+  `%1$s` 
+WHERE
+  `member_name` = "%2$s" AND
+  `is_activated` = 1
+LIMIT 0,1';
+
+					$forumsettings['authchecksql_params'] = array(
+						$table['members'],
+						$GLOBALS['db']->escape_string( $action_login['fusername'] )
+					);
+				}
+				break;
+
 /* START - VB307 */
 			case 'vb307':
 				require( $GLOBALS['tssettings']['Root_path'] . $settings['Forum_relative_path'] . 'includes/config.php' );
@@ -899,6 +1013,7 @@ function check_password( $login_information, $database_information )
 			break;
 
 		case 'ipb204':
+		case 'ipb300':
 			if ( $database_information['password1'] === md5( md5( $database_information['password1_salt'] ) . md5( $login_information['fpasswd'] ) ) )
 				$login_result = TRUE;
 
@@ -919,6 +1034,7 @@ function check_password( $login_information, $database_information )
 			break;
 
 		case 'smf110':
+		case 'smf200':
 			if ( $database_information['password1'] === sha1( strtolower( $login_information['fusername'] ) . $login_information['fpasswd'] ) )
 				$login_result = TRUE;
 
@@ -1200,11 +1316,13 @@ ORDER BY `res_name`';
 <option value="bboardlite200"' . ( ( $setting['value'] === 'bboardlite200' ) ? ' selected' : NULL ) . '>Burning Board 3.0.0-3.0.7 / Lite 2.0.0</option>
 <option value="ipb131"' . ( ( $setting['value'] === 'ipb131' ) ? ' selected' : NULL ) . '>Invision Power Board 1.3.1</option>
 <option value="ipb204"' . ( ( $setting['value'] === 'ipb204' ) ? ' selected' : NULL ) . '>Invision Power Board 2.0.3-2.3.5</option>
+<option value="ipb300"' . ( ( $setting['value'] === 'ipb300' ) ? ' selected' : NULL ) . '>Invision Power Board 3.0.1</option>
 <option value="phpbb2015"' . ( ( $setting['value'] === 'phpbb2015' ) ? ' selected' : NULL ) . '>PhpBB 2.0.9-2.0.23</option>
-<option value="phpbb3"' . ( ( $setting['value'] === 'phpbb3' ) ? ' selected' : NULL ) . '>PhpBB 3.0.2</option>
+<option value="phpbb3"' . ( ( $setting['value'] === 'phpbb3' ) ? ' selected' : NULL ) . '>PhpBB 3.0.2-3.0.5</option>
 <option value="phpnuke78_phpbb207"' . ( ( $setting['value'] === 'phpnuke78_phpbb207' ) ? ' selected' : NULL ) . '>PHP-Nuke 7.8-8.0 + PhpBB port 2.0.7</option>
 <option value="smf103"' . ( ( $setting['value'] === 'smf103' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.0.3-1.0.13</option>
-<option value="smf110"' . ( ( $setting['value'] === 'smf110' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.1.0-1.1.5</option>
+<option value="smf110"' . ( ( $setting['value'] === 'smf110' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 1.1.0-1.1.10</option>
+<option value="smf200"' . ( ( $setting['value'] === 'smf200' ) ? ' selected' : NULL ) . '>SMF (Simple Machines Forum) 2.0.0 RC1.2</option>
 <option value="vb307"' . ( ( $setting['value'] === 'vb307' ) ? ' selected' : NULL ) . '>vBulletin v3.0.7</option>
 <option value="vb350"' . ( ( $setting['value'] === 'vb350' ) ? ' selected' : NULL ) . '>vBulletin v3.5.0-3.7.2</option>
 <option value="xoops_cbb"' . ( ( $setting['value'] === 'xoops_cbb' ) ? ' selected' : NULL ) . '>XOOPS 2.2.3a-2.2.5 RC2 + CBB 2.32-3.07</option>
