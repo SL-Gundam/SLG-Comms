@@ -727,6 +727,14 @@ class ts_commsdata extends commsdata
 	// this function manages TeamSpeak live server data retrieval (has Ventrilo counterpart with the same name)
 	function get_livedata()
 	{
+/*		$cmd = "use port=" . $this->server['res_data']['port'] . "
+channellist
+clientlist
+hostinfo
+serverinfo
+quit
+";*/
+
 		$cmd = "sel " . $this->server['res_data']['port'] . "
 cl
 pl

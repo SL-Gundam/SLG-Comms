@@ -87,7 +87,7 @@ FROM
 }
 
 // checks whether file and installed version differ
-$new_version = 'v3.2.1';
+$new_version = 'v3.3.0-DEV';
 if ( !checkfilelock('install.php') )
 {
 	if ( !isset($tssettings['SLG_version']) || $new_version !== $tssettings['SLG_version'] )
