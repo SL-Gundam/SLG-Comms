@@ -24,16 +24,6 @@ env:
   - DB=mysql
 
 matrix:
-  include:
-    # Add a specific build for Documentation
-    - env: DOCBOOK=1
-      # Using Ruby as it's preinstalled and we don't need PHP to build docs
-      language: ruby
-      addons:
-        apt:
-          packages:
-            - publican
-
   allow_failures:
     - php: 7.2
 
